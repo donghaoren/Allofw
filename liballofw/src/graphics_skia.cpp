@@ -1,4 +1,5 @@
 #include <graphics.h>
+#include "opengl.h"
 
 // Use release mode skia, even in debug builds.
 #define SK_RELEASE
@@ -19,8 +20,6 @@
 #include <SkColorMatrixFilter.h>
 #include <vector>
 #include <iostream>
-
-#include "opengl.h"
 
 using namespace std;
 
