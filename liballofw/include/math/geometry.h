@@ -5,6 +5,13 @@
 
 ALLOFW_NS_BEGIN
 
+typedef Vector2_<int> Size2i;
+typedef Vector3_<int> Size3i;
+typedef Vector2_<float> Size2f;
+typedef Vector3_<float> Size3f;
+typedef Vector2_<double> Size2d;
+typedef Vector3_<double> Size3d;
+
 template<typename number_t>
 struct Rectangle2_ {
     Vector2_<number_t> position;
