@@ -1,4 +1,4 @@
-#include <stream.h>
+#include <allofw/stream.h>
 #include <cstdio>
 #include <cstring>
 

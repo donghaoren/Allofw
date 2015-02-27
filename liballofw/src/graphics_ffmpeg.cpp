@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "graphics.h"
+#include "allofw/graphics.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>

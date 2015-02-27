@@ -8,7 +8,7 @@
 
 namespace ALLOFW_NS {
     class Configuration;
-    typedef std::shared_ptr<Configuration> PConfiguration;
+    typedef shared_ptr<Configuration> PConfiguration;
 
     class Configuration {
     public:

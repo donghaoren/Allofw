@@ -77,6 +77,8 @@
     src/config.cpp
     src/opengl.cpp
     src/omnistereo.cpp
+
+    src/allofw.cpp
   )
 
   TARGET_LINK_LIBRARIES ( allofw
@@ -104,18 +106,9 @@
 #----------------------------------------------------------------------------------------------------------------------
 # Install
 
-  # Include files.
-  INSTALL (
-    FILES
-      include/common.h
-      include/graphics.h
-      include/stream.h
-    DESTINATION include
-  )
-
   INSTALL (
     DIRECTORY
-      include/math
+      include/allofw
     DESTINATION include
   )
 

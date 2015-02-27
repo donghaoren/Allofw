@@ -17,7 +17,7 @@
 namespace ALLOFW_NS {
 
     class OpenGLWindow;
-    typedef std::shared_ptr<OpenGLWindow> POpenGLWindow;
+    typedef shared_ptr<OpenGLWindow> POpenGLWindow;
 
     class OpenGLWindow {
     public:

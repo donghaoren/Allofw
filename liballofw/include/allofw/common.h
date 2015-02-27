@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <boost/shared_ptr.hpp>
 
 #define ALLOFW_NS allofw
 
@@ -10,6 +11,8 @@
 #define ALLOFW_NS_END }
 
 ALLOFW_NS_BEGIN
+
+using boost::shared_ptr;
 
 class exception {
 public:

@@ -1,5 +1,5 @@
-#include <graphics.h>
-#include "opengl.h"
+#include "allofw/graphics.h"
+#include "allofw/opengl.h"
 
 // Use release mode skia, even in debug builds.
 #define SK_RELEASE

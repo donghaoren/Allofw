@@ -1,4 +1,4 @@
-#include "opengl.h"
+#include "allofw/opengl.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
