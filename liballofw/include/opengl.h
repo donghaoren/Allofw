@@ -4,6 +4,12 @@
 #include "common.h"
 #include "math/geometry.h"
 
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#else
+#include <OpenGL/gl.h>
+#endif
+
 // OpenGL Window and Context Creation.
 
 namespace ALLOFW_NS {

@@ -3,30 +3,6 @@
 
 using namespace allofw;
 
-static void error_callback(int error, const char* description)
-{
-    fputs(description, stderr);
-}
-
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
-}
-
-void showMonitors() {
-    int count;
-    GLFWmonitor** monitors = glfwGetMonitors(&count);
-    for(int i = 0; i < count; i++) {
-        int x, y;
-        printf("Monitor %d\n", i);
-        printf("  name: %s\n", glfwGetMonitorName(monitors[i]));
-        glfwGetMonitorPos(monitors[i], &x, &y);
-        printf("  glfwGetMonitorPos: %d %d\n", x, y);
-        const GLFWvidmode* vm = glfwGetVideoMode(monitors[i]);
-        printf("  glfwGetVideoMode: %d %d\n", vm->width, vm->height);
-    }
-}
 POpenGLWindow w;
 
 class MyDelegate : public OpenGLWindow::Delegate {
@@ -44,6 +20,8 @@ public:
         glClearColor(0.1, 0.3, 0.5, 1);
         glClear(GL_COLOR_BUFFER_BIT);
         glFlush();
+        int val = GL_GEOMETRY_SHADER;
+        printf("%d\n", val);
         w->swapBuffers();
         printf("onRefresh\n");
     }
