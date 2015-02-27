@@ -97,6 +97,7 @@
   TARGET_LINK_LIBRARIES ( test_glfw
     allofw
     ${GLFW_LIBRARIES}
+    ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARIES}
   )
 
