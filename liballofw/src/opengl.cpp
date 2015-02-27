@@ -47,9 +47,6 @@ public:
             }
             glfw_initialized = true;
         }
-        #ifndef __APPLE__
-            glewInit();
-        #endif
         glfwDefaultWindowHints();
         // We use OpenGL 3.2 Forward Compat Context, Core Profile.
         // Note: On Mac OS X, deprecated features are no longer supported.
