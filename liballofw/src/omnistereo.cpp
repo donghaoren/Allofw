@@ -1,0 +1,1 @@
+#include "omnistereo.h"
