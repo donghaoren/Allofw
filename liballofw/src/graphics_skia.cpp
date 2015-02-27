@@ -20,12 +20,7 @@
 #include <vector>
 #include <iostream>
 
-#ifdef __APPLE__
-# include <OpenGL/gl.h>
-#else
-# include <GL/glew.h>
-# include <GL/gl.h>
-#endif
+#include "opengl.h"
 
 using namespace std;
 
@@ -334,8 +329,8 @@ namespace {
 
         virtual void uploadTexture() {
             bindTexture(0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
@@ -424,8 +419,8 @@ namespace {
 
             bindTexture(0);
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
@@ -660,9 +655,6 @@ namespace {
     class GraphicalBackend_Skia_Impl : public GraphicalBackend {
     public:
         GraphicalBackend_Skia_Impl() {
-        #ifndef __APPLE__
-            glewInit();
-        #endif
             SkForceLinking(false);
             SkGraphics::Init();
         }

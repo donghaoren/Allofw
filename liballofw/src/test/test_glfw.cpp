@@ -468,7 +468,6 @@ int main(void)
     OpenGLWindow::Hint hint;
     w = OpenGLWindow::Create(hint, "Hello World");
     w->makeContextCurrent();
-
     // OpenGL Version.
     Size2i sz = w->getFramebufferSize();
     printf("Framebuffer size: %d %d\n", sz.x, sz.y);
