@@ -3,7 +3,8 @@
     {
       "target_name": "allofw",
       "include_dirs": [
-        "native/include"
+        "native/include",
+         "<!(node -e \"require('nan')\")"
       ],
       "libraries": [
         "-L../native/lib", "-lallofw"
@@ -25,7 +26,9 @@
       "sources": [
         "src/allofw.cpp",
         "src/node_graphics.cpp",
-        "src/node_sharedmemory.cpp"
+        "src/node_sharedmemory.cpp",
+        "src/node_opengl.cpp",
+        "src/gl3binding/glbind.cpp"
       ]
     }
   ]
