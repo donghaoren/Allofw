@@ -22,14 +22,9 @@ namespace ALLOFW_NS {
 
         // mode = "r" / "w" / "a"
         static ByteStream* OpenFile(const char* path, const char* mode);
-        static ByteStream* OpenFile(const std::string& path, const std::string& mode) {
-            return OpenFile(path.c_str(), mode.c_str());
-        }
     };
 
     class io_error : public std::exception { };
-
-    std::string get_file_contents(const std::string& filename);
 
 }
 

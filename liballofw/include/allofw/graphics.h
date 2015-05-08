@@ -73,9 +73,6 @@ namespace ALLOFW_NS {
         virtual void drawPath(Path2D* path, Paint2D* paint) = 0;
         // Draw text.
         virtual void drawText(const char* text, double x, double y, Paint2D* paint) = 0;
-        void drawText(const std::string& text, double x, double y, Paint2D* paint) {
-            drawText(text.c_str(), x, y, paint);
-        }
         // Draw line.
         virtual void drawLine(double x1, double y1, double x2, double y2, Paint2D* paint) = 0;
         // Draw line.
@@ -158,13 +155,9 @@ namespace ALLOFW_NS {
         virtual void setTextSize(double value) = 0;
         virtual void setTextAlign(TextAlign align) = 0;
         virtual void setTypeface(const char* name, FontStyle style = FontStyle::NORMAL) = 0;
-        void setTypeface(const std::string& name, FontStyle style = FontStyle::NORMAL) {
-            setTypeface(name.c_str(), style);
-        }
 
         // Measure text width.
         virtual double measureText(const char* text) = 0;
-        double measureText(const std::string& text) { return measureText(text.c_str()); };
 
         // 5x4 matrix
         virtual void setColorMatrix(double matrix[20]) = 0;

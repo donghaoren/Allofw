@@ -159,7 +159,7 @@ public:
     GLFWwindow* window;
 };
 
-OpenGLWindow* OpenGLWindow::Create_(OpenGLWindow::Hint hint, const char* title) {
+OpenGLWindow* OpenGLWindow::Create(OpenGLWindow::Hint hint, const char* title) {
     return new OpenGLWindowImpl(hint, title);
 }
 

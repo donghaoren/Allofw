@@ -9,15 +9,19 @@ ALLOFW_NS_BEGIN
 class ConfigurationImpl : public Configuration {
 public:
 
-    virtual char* getString(const char* key, const char* fallback = "") {
-        std::string result = get<std::string>(key, fallback);
-        char* p = new char[result.size() + 1];
-        strcpy(p, result.c_str());
-        return p;
+    std::string getStringEx(const char* key, const char* fallback = "") {
+        return get<std::string>(key, fallback);
     }
-    virtual void getStringFree(char* s) {
-        delete [] s;
+
+    virtual void getString(const char* key, char* output, size_t output_capacity, const char* fallback) {
+        std::string r = getStringEx(key, fallback);
+        strcpy(output, r.c_str());
     }
+    virtual size_t getStringLength(const char* key, const char* fallback = "") {
+        std::string r = getStringEx(key, fallback);
+        return r.size();
+    }
+
     virtual int getInt32(const char* key, int fallback = 0) {
         return get<int>(key, fallback);
     }
@@ -69,31 +73,8 @@ public:
     std::vector<YAML::Node> entries;
 };
 
-Configuration* Configuration::Create_() {
+Configuration* Configuration::Create() {
     return new ConfigurationImpl();
-}
-
-template<> std::string Configuration::get<std::string>(const std::string& key, std::string fallback) {
-    char* p = getString(key.c_str(), fallback.c_str());
-    std::string r(p);
-    getStringFree(p);
-    return r;
-}
-
-template<> int Configuration::get<int>(const std::string& key, int fallback) {
-    return getInt32(key.c_str(), fallback);
-}
-
-template<> unsigned int Configuration::get<unsigned int>(const std::string& key, unsigned int fallback) {
-    return getUInt32(key.c_str(), fallback);
-}
-
-template<> float Configuration::get<float>(const std::string& key, float fallback) {
-    return getFloat(key.c_str(), fallback);
-}
-
-template<> double Configuration::get<double>(const std::string& key, double fallback) {
-    return getDouble(key.c_str(), fallback);
 }
 
 ALLOFW_NS_END

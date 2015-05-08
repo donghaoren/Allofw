@@ -6,7 +6,7 @@
 
 using namespace allofw;
 
-POpenGLWindow w;
+OpenGLWindow* w;
 
 // Data for drawing Axis
 float verticesAxis[] = {-20.0f, 0.0f, 0.0f, 1.0f,

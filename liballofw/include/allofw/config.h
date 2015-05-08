@@ -7,14 +7,12 @@
 #include "common.h"
 
 namespace ALLOFW_NS {
-    class Configuration;
-    typedef shared_ptr<Configuration> PConfiguration;
 
     class Configuration {
     public:
 
-        virtual char* getString(const char* key, const char* fallback = "") = 0;
-        virtual void getStringFree(char* s) = 0;
+        virtual void getString(const char* key, char* output, size_t output_capacity, const char* fallback = "") = 0;
+        virtual size_t getStringLength(const char* key, const char* fallback = "") = 0;
 
         virtual int getInt32(const char* key, int fallback = 0) = 0;
         virtual unsigned int getUInt32(const char* key, unsigned int fallback = 0) = 0;
@@ -26,21 +24,10 @@ namespace ALLOFW_NS {
 
         virtual ~Configuration() { }
 
-        // C++ convenient functions.
-        template <typename T> T get(const std::string& key, T fallback = T());
-        void parseFile(const std::string& path) { parseFile(path.c_str()); }
-        void parseFile(const std::string& path, const std::string& key) { parseFile(path.c_str(), key.c_str()); }
-
         // Constructor.
-        static Configuration* Create_();
-        static PConfiguration Create() { return PConfiguration(Create_()); }
+        static Configuration* Create();
     };
 
-    template<> std::string Configuration::get<std::string>(const std::string& key, std::string fallback);
-    template<> int Configuration::get<int>(const std::string& key, int fallback);
-    template<> unsigned int Configuration::get<unsigned int>(const std::string& key, unsigned int fallback);
-    template<> float Configuration::get<float>(const std::string& key, float fallback);
-    template<> double Configuration::get<double>(const std::string& key, double fallback);
 }
 
 #endif

@@ -129,9 +129,9 @@ NAN_METHOD(NODE_Surface2D::NODE_unbindTexture) {
 }
 
 NAN_METHOD(NODE_Surface2D::NODE_save) {
-    String::Utf8Value str(args[0]);
+    NanUtf8String str(args[0]);
     NODE_Surface2D* obj = ObjectWrap::Unwrap<NODE_Surface2D>(args.This());
-    allofw::ByteStream* stream = allofw::ByteStream::OpenFile(std::string(*str, *str + str.length()), "w");
+    allofw::ByteStream* stream = allofw::ByteStream::OpenFile(*str, "w");
     obj->surface->save(stream);
     delete stream;
     NanReturnUndefined();
@@ -305,12 +305,12 @@ NAN_METHOD(NODE_GraphicalContext2D::NODE_drawPath) {
 }
 
 NAN_METHOD(NODE_GraphicalContext2D::NODE_drawText) {
-    String::Utf8Value str(args[0]);
+    NanUtf8String str(args[0]);
     double x = args[1]->NumberValue();
     double y = args[2]->NumberValue();
     Paint2D* paint = ObjectWrap::Unwrap<NODE_Paint2D>(args[3]->ToObject())->paint;
     NODE_GraphicalContext2D* self = ObjectWrap::Unwrap<NODE_GraphicalContext2D>(args.This());
-    self->context->drawText(std::string(*str, *str + str.length()), x, y, paint);
+    self->context->drawText(*str, x, y, paint);
     NanReturnUndefined();
 }
 
@@ -671,21 +671,21 @@ NAN_METHOD(NODE_Paint2D::NODE_setTextAlign) {
 }
 
 NAN_METHOD(NODE_Paint2D::NODE_setTypeface) {
-    String::Utf8Value str(args[0]);
+    NanUtf8String str(args[0]);
     NODE_Paint2D* self = ObjectWrap::Unwrap<NODE_Paint2D>(args.This());
     FontStyle style = FontStyle::NORMAL;
     if(args.Length() >= 2) {
         style = (FontStyle)args[1]->IntegerValue();
     }
-    self->paint->setTypeface(std::string(*str, *str + str.length()), style);
+    self->paint->setTypeface(*str, style);
     NanReturnThis();
 }
 
 NAN_METHOD(NODE_Paint2D::NODE_measureText) {
     NanScope();
-    String::Utf8Value str(args[0]);
+    NanUtf8String str(args[0]);
     NODE_Paint2D* self = ObjectWrap::Unwrap<NODE_Paint2D>(args.This());
-    double width = self->paint->measureText(std::string(*str, *str + str.length()));
+    double width = self->paint->measureText(*str);
     NanReturnValue(NanNew<Number>(width));
 }
 

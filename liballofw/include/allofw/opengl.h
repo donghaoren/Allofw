@@ -16,9 +16,6 @@
 
 namespace ALLOFW_NS {
 
-    class OpenGLWindow;
-    typedef shared_ptr<OpenGLWindow> POpenGLWindow;
-
     class OpenGLWindow {
     public:
 
@@ -63,10 +60,7 @@ namespace ALLOFW_NS {
         virtual ~OpenGLWindow() { }
 
         // Static methods to create a window.
-        static OpenGLWindow* Create_(Hint hint, const char* title);
-        static POpenGLWindow Create(Hint hint, const std::string& title) {
-            return POpenGLWindow(Create_(hint, title.c_str()));
-        }
+        static OpenGLWindow* Create(Hint hint, const char* title);
     };
 }
 

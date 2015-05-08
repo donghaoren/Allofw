@@ -8,11 +8,6 @@
 
 using namespace v8;
 
-class OpenGLWindowWrapper {
-public:
-    allofw::POpenGLWindow window;
-};
-
 class NODE_OpenGLWindow : public node::ObjectWrap, public allofw::OpenGLWindow::Delegate {
 public:
     static void Init(v8::Handle<v8::Object> exports) {
@@ -92,7 +87,7 @@ public:
     }
 
 private:
-    explicit NODE_OpenGLWindow(allofw::POpenGLWindow window_) : window(window_) {
+    explicit NODE_OpenGLWindow(allofw::OpenGLWindow* window_) : window(window_) {
         window->setDelegate(this);
     }
     ~NODE_OpenGLWindow() {
@@ -103,9 +98,12 @@ private:
         NanDisposePersistent(pf_onFocus);
         NanDisposePersistent(pf_onIconify);
         NanDisposePersistent(pf_onFramebufferSize);
+        if(window) {
+            delete window;
+        }
     }
 
-    allofw::POpenGLWindow window;
+    allofw::OpenGLWindow* window;
 
     v8::Persistent<v8::Function> pf_onMove;
     v8::Persistent<v8::Function> pf_onResize;
@@ -140,8 +138,8 @@ NAN_METHOD(NODE_OpenGLWindow::New) {
     NanScope();
     if (args.IsConstructCall()) {
         allofw::OpenGLWindow::Hint hint;
-        std::string title;
-        allofw::POpenGLWindow window = allofw::OpenGLWindow::Create(hint, title);
+        std::string title("AllofwWindow");
+        allofw::OpenGLWindow* window = allofw::OpenGLWindow::Create(hint, title.c_str());
         NODE_OpenGLWindow* obj = new NODE_OpenGLWindow(window);
         obj->Wrap(args.This());
         NanReturnValue(args.This());

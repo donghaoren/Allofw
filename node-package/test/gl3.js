@@ -32,8 +32,8 @@ console.log(GetOpenGLCapabilities());
 
 var vertex_shader = [
 "#version 330",
-"in vec3 position;",
-"in vec3 colorIn;",
+"layout(location = 0) in vec3 position;",
+"layout(location = 1) in vec3 colorIn;",
 "out vec3 color;",
 "void main()",
 "{",
@@ -122,8 +122,8 @@ function setupBuffers() {
     GL.enableVertexAttribArray(0);
     GL.enableVertexAttribArray(1);
     GL.bindBuffer(GL.ARRAY_BUFFER, vertex_buffer);
-    GL.vertexAttribPointer(1, 3, GL.FLOAT, GL.FALSE, 24, 0);
-    GL.vertexAttribPointer(0, 3, GL.FLOAT, GL.FALSE, 24, 12);
+    GL.vertexAttribPointer(0, 3, GL.FLOAT, GL.FALSE, 24, 0);
+    GL.vertexAttribPointer(1, 3, GL.FLOAT, GL.FALSE, 24, 12);
     var err = GL.getError(); if(err != 0) throw new Error(err);
 }
 

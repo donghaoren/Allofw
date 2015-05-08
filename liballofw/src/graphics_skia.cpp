@@ -19,6 +19,7 @@
 #include <SkColorFilter.h>
 #include <SkColorMatrixFilter.h>
 #include <vector>
+#include <string>
 #include <iostream>
 
 using namespace std;
@@ -29,12 +30,6 @@ namespace {
 
     inline double to_degree(double rad) {
         return rad / PI * 180.0;
-    }
-    inline double to_degree_mod(double rad) {
-        double deg = rad / PI * 180.0;
-        deg = fmod(deg, 360.0);
-        if(deg < 0) deg += 360.0;
-        return deg;
     }
 
     SkColor convert_color(const Color& c) {
