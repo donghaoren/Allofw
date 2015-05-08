@@ -220,7 +220,7 @@ namespace ALLOFW_NS {
         virtual Surface2D* createSurface2D(int width, int height) = 0;
         // "Use" the pixels, not copy them.
         virtual Surface2D* createSurface2DWithPixels(int width, int height, void* pixels) = 0;
-        // Render to PDF!
+        // Render to PDF.
         virtual Surface2D* createPDFSurface2D(int width, int height) = 0;
 
         // Load image from stream or buffer.

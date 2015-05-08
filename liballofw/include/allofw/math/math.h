@@ -5,6 +5,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "quaternion.h"
+#include "pose.h"
 
 #include "geometry.h"
 

@@ -6,9 +6,9 @@
 ALLOFW_NS_BEGIN
 
 struct Color {
-    double r, g, b, a;
+    float r, g, b, a;
     Color() = default;
-    Color(double r_, double g_, double b_, double a_ = 1) : r(r_), g(g_), b(b_), a(a_) { }
+    Color(float r_, float g_, float b_, float a_ = 1) : r(r_), g(g_), b(b_), a(a_) { }
 };
 
 ALLOFW_NS_END

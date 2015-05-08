@@ -56,8 +56,8 @@ function getShaderInfoLog(shader) {
     var buffer = new Buffer(4);
     GL.getShaderiv(shader, GL.INFO_LOG_LENGTH, buffer);
     var length = buffer.readUInt32LE(0);
-    if(length > 0) {
-        var buf = new Buffer(length);
+    if(length > 1) {
+        var buf = new Buffer(length + 1);
         GL.getShaderInfoLog(shader, length, buffer, buf);
         return buf.toString("utf-8");
     } else {
@@ -69,8 +69,8 @@ function getProgramInfoLog(program) {
     var buffer = new Buffer(4);
     GL.getProgramiv(program, GL.INFO_LOG_LENGTH, buffer);
     var length = buffer.readUInt32LE(0);
-    if(length > 0) {
-        var buf = new Buffer(length);
+    if(length > 1) {
+        var buf = new Buffer(length + 1);
         GL.getProgramInfoLog(program, length, buffer, buf);
         return buf.toString("utf-8");
     } else {
@@ -148,7 +148,7 @@ render();
 w.onRefresh(render);
 
 var timer = setInterval(function() {
-    render();
+    //render();
     w.pollEvents();
 }, 1);
 
@@ -156,4 +156,4 @@ w.onClose(function() {
     clearInterval(timer);
 });
 
-
+console.log(w.__proto__)

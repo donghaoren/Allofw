@@ -25,6 +25,7 @@ struct Rectangle2_ {
       : position(x, y), size(w, h) { }
 };
 
+typedef Rectangle2_<int> Rectangle2i;
 typedef Rectangle2_<float> Rectangle2f;
 typedef Rectangle2_<double> Rectangle2d;
 typedef Rectangle2d Rectangle2;
@@ -42,6 +43,7 @@ struct Rectangle3_ {
       : position(x, y, z), size(w, h, d) { }
 };
 
+typedef Rectangle3_<int> Rectangle3i;
 typedef Rectangle3_<float> Rectangle3f;
 typedef Rectangle3_<double> Rectangle3d;
 typedef Rectangle3d Rectangle3;
