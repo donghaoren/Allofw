@@ -3,6 +3,7 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 #include <iostream>
+#include <string.h>
 
 ALLOFW_NS_BEGIN
 
