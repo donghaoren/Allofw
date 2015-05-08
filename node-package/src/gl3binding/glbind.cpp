@@ -34,7 +34,7 @@ public:
 private:
     explicit NODE_Sampler(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_Sampler() { glGenSamplers(1, &gl_handle); }
-    ~NODE_Sampler() { glDeleteSamplers(1, &gl_handle); printf("Release Sampler: %d\n", gl_handle); }
+    ~NODE_Sampler() { glDeleteSamplers(1, &gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -121,7 +121,7 @@ public:
 private:
     explicit NODE_Framebuffer(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_Framebuffer() { glGenFramebuffers(1, &gl_handle); }
-    ~NODE_Framebuffer() { glDeleteFramebuffers(1, &gl_handle); printf("Release Framebuffer: %d\n", gl_handle); }
+    ~NODE_Framebuffer() { glDeleteFramebuffers(1, &gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -208,7 +208,7 @@ public:
 private:
     explicit NODE_Shader(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_Shader() { gl_handle = 0; }
-    ~NODE_Shader() { glDeleteShader(gl_handle); printf("Release Shader: %d\n", gl_handle); }
+    ~NODE_Shader() { glDeleteShader(gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -295,7 +295,7 @@ public:
 private:
     explicit NODE_Texture(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_Texture() { glGenTextures(1, &gl_handle); }
-    ~NODE_Texture() { glDeleteTextures(1, &gl_handle); printf("Release Texture: %d\n", gl_handle); }
+    ~NODE_Texture() { glDeleteTextures(1, &gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -382,7 +382,7 @@ public:
 private:
     explicit NODE_ProgramPipeline(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_ProgramPipeline() { glGenProgramPipelines(1, &gl_handle); }
-    ~NODE_ProgramPipeline() { glDeleteProgramPipelines(1, &gl_handle); printf("Release ProgramPipeline: %d\n", gl_handle); }
+    ~NODE_ProgramPipeline() { glDeleteProgramPipelines(1, &gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -469,7 +469,7 @@ public:
 private:
     explicit NODE_Renderbuffer(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_Renderbuffer() { glGenRenderbuffers(1, &gl_handle); }
-    ~NODE_Renderbuffer() { glDeleteRenderbuffers(1, &gl_handle); printf("Release Renderbuffer: %d\n", gl_handle); }
+    ~NODE_Renderbuffer() { glDeleteRenderbuffers(1, &gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -556,7 +556,7 @@ public:
 private:
     explicit NODE_VertexArray(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_VertexArray() { glGenVertexArrays(1, &gl_handle); }
-    ~NODE_VertexArray() { glDeleteVertexArrays(1, &gl_handle); printf("Release VertexArray: %d\n", gl_handle); }
+    ~NODE_VertexArray() { glDeleteVertexArrays(1, &gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -643,7 +643,7 @@ public:
 private:
     explicit NODE_Query(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_Query() { glGenQueries(1, &gl_handle); }
-    ~NODE_Query() { glDeleteQueries(1, &gl_handle); printf("Release Query: %d\n", gl_handle); }
+    ~NODE_Query() { glDeleteQueries(1, &gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -730,7 +730,7 @@ public:
 private:
     explicit NODE_Buffer(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_Buffer() { glGenBuffers(1, &gl_handle); }
-    ~NODE_Buffer() { glDeleteBuffers(1, &gl_handle); printf("Release Buffer: %d\n", gl_handle); }
+    ~NODE_Buffer() { glDeleteBuffers(1, &gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -817,7 +817,7 @@ public:
 private:
     explicit NODE_Program(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_Program() { gl_handle = 0; }
-    ~NODE_Program() { glDeleteProgram(gl_handle); printf("Release Program: %d\n", gl_handle); }
+    ~NODE_Program() { glDeleteProgram(gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -904,7 +904,7 @@ public:
 private:
     explicit NODE_TransformFeedback(GLuint gl_handle_) { gl_handle = gl_handle_; }
     explicit NODE_TransformFeedback() { glGenTransformFeedbacks(1, &gl_handle); }
-    ~NODE_TransformFeedback() { glDeleteTransformFeedbacks(1, &gl_handle); printf("Release TransformFeedback: %d\n", gl_handle); }
+    ~NODE_TransformFeedback() { glDeleteTransformFeedbacks(1, &gl_handle); }
 
     static NAN_METHOD(New);
 
@@ -5128,7 +5128,7 @@ NAN_METHOD(EXPORT_getDoublev) {
 }
 NAN_METHOD(EXPORT_getError) {
     NanScope();
-    // <gltypes.Type instance at 0x108b07098>
+    // <gltypes.Type instance at 0x104edf7e8>
     GLenum result;
     result = glGetError();
     v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
@@ -5186,7 +5186,7 @@ NAN_METHOD(EXPORT_getIntegerv) {
 }
 NAN_METHOD(EXPORT_getString) {
     NanScope();
-    // <gltypes.UStringType instance at 0x108b07560>
+    // <gltypes.UStringType instance at 0x104edfcb0>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     const GLubyte* result;
@@ -5344,7 +5344,7 @@ NAN_METHOD(EXPORT_getTexLevelParameteriv) {
 }
 NAN_METHOD(EXPORT_isEnabled) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLboolean result;
@@ -5614,7 +5614,7 @@ NAN_METHOD(EXPORT_genTextures) {
 }
 NAN_METHOD(EXPORT_isTexture) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -6207,7 +6207,7 @@ NAN_METHOD(EXPORT_genQueries) {
 }
 NAN_METHOD(EXPORT_isQuery) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -6361,7 +6361,7 @@ NAN_METHOD(EXPORT_genBuffers) {
 }
 NAN_METHOD(EXPORT_isBuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -6462,7 +6462,7 @@ NAN_METHOD(EXPORT_getBufferSubData) {
 }
 NAN_METHOD(EXPORT_mapBuffer) {
     NanScope();
-    // <gltypes.PointerType instance at 0x108ec94d0>
+    // <gltypes.PointerType instance at 0x10535a710>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLenum arg1;
@@ -6474,7 +6474,7 @@ NAN_METHOD(EXPORT_mapBuffer) {
 }
 NAN_METHOD(EXPORT_unmapBuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLboolean result;
@@ -6631,7 +6631,7 @@ NAN_METHOD(EXPORT_compileShader) {
 }
 NAN_METHOD(EXPORT_createProgram) {
     NanScope();
-    // <gltypes.ClassType instance at 0x108b07680>
+    // <gltypes.ClassType instance at 0x104edfdd0>
     GLuint result;
     result = glCreateProgram();
     v8::Handle<v8::Value> result_js = NODE_Program::fromGLHandle(result);
@@ -6639,7 +6639,7 @@ NAN_METHOD(EXPORT_createProgram) {
 }
 NAN_METHOD(EXPORT_createShader) {
     NanScope();
-    // <gltypes.ClassType instance at 0x108b076c8>
+    // <gltypes.ClassType instance at 0x104edfe18>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint result;
@@ -6889,7 +6889,7 @@ NAN_METHOD(EXPORT_getAttachedShaders) {
 }
 NAN_METHOD(EXPORT_getAttribLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x108b07128>
+    // <gltypes.Type instance at 0x104edf878>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -7112,7 +7112,7 @@ NAN_METHOD(EXPORT_getShaderSource) {
 }
 NAN_METHOD(EXPORT_getUniformLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x108b07128>
+    // <gltypes.Type instance at 0x104edf878>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -7272,7 +7272,7 @@ NAN_METHOD(EXPORT_getVertexAttribiv) {
 }
 NAN_METHOD(EXPORT_isProgram) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -7286,7 +7286,7 @@ NAN_METHOD(EXPORT_isProgram) {
 }
 NAN_METHOD(EXPORT_isShader) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -8787,7 +8787,7 @@ NAN_METHOD(EXPORT_disablei) {
 }
 NAN_METHOD(EXPORT_isEnabledi) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
@@ -9484,7 +9484,7 @@ NAN_METHOD(EXPORT_bindFragDataLocation) {
 }
 NAN_METHOD(EXPORT_getFragDataLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x108b07128>
+    // <gltypes.Type instance at 0x104edf878>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -9864,7 +9864,7 @@ NAN_METHOD(EXPORT_clearBufferfi) {
 }
 NAN_METHOD(EXPORT_getStringi) {
     NanScope();
-    // <gltypes.UStringType instance at 0x108b07560>
+    // <gltypes.UStringType instance at 0x104edfcb0>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
@@ -10090,7 +10090,7 @@ NAN_METHOD(EXPORT_blendFuncSeparatei) {
 }
 NAN_METHOD(EXPORT_isRenderbuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10174,7 +10174,7 @@ NAN_METHOD(EXPORT_getRenderbufferParameteriv) {
 }
 NAN_METHOD(EXPORT_isFramebuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10217,7 +10217,7 @@ NAN_METHOD(EXPORT_genFramebuffers) {
 }
 NAN_METHOD(EXPORT_checkFramebufferStatus) {
     NanScope();
-    // <gltypes.Type instance at 0x108b07098>
+    // <gltypes.Type instance at 0x104edf7e8>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLenum result;
@@ -10406,7 +10406,7 @@ NAN_METHOD(EXPORT_framebufferTextureLayer) {
 }
 NAN_METHOD(EXPORT_mapBufferRange) {
     NanScope();
-    // <gltypes.PointerType instance at 0x108f46e18>
+    // <gltypes.PointerType instance at 0x1053d7e60>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLintptr arg1;
@@ -10461,7 +10461,7 @@ NAN_METHOD(EXPORT_genVertexArrays) {
 }
 NAN_METHOD(EXPORT_isVertexArray) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10575,7 +10575,7 @@ NAN_METHOD(EXPORT_getActiveUniformName) {
 }
 NAN_METHOD(EXPORT_getUniformBlockIndex) {
     NanScope();
-    // <gltypes.Type instance at 0x108b07248>
+    // <gltypes.Type instance at 0x104edf998>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10936,7 +10936,7 @@ NAN_METHOD(EXPORT_bindFragDataLocationIndexed) {
 }
 NAN_METHOD(EXPORT_getFragDataIndex) {
     NanScope();
-    // <gltypes.Type instance at 0x108b07128>
+    // <gltypes.Type instance at 0x104edf878>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10982,7 +10982,7 @@ NAN_METHOD(EXPORT_genSamplers) {
 }
 NAN_METHOD(EXPORT_isSampler) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -12026,7 +12026,7 @@ NAN_METHOD(EXPORT_getUniformdv) {
 }
 NAN_METHOD(EXPORT_getSubroutineUniformLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x108b07128>
+    // <gltypes.Type instance at 0x104edf878>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -12059,7 +12059,7 @@ NAN_METHOD(EXPORT_getSubroutineUniformLocation) {
 }
 NAN_METHOD(EXPORT_getSubroutineIndex) {
     NanScope();
-    // <gltypes.Type instance at 0x108b07248>
+    // <gltypes.Type instance at 0x104edf998>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -12382,7 +12382,7 @@ NAN_METHOD(EXPORT_genTransformFeedbacks) {
 }
 NAN_METHOD(EXPORT_isTransformFeedback) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -12767,7 +12767,7 @@ NAN_METHOD(EXPORT_genProgramPipelines) {
 }
 NAN_METHOD(EXPORT_isProgramPipeline) {
     NanScope();
-    // <gltypes.Type instance at 0x108af5f80>
+    // <gltypes.Type instance at 0x104edf710>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();

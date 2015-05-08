@@ -279,7 +279,7 @@ class ClassType:
         private:
             explicit NODE_{{classname}}(GLuint gl_handle_) { gl_handle = gl_handle_; }
             explicit NODE_{{classname}}() { {{construct_gl_object}} }
-            ~NODE_{{classname}}() { {{release_code}} printf("Release {{classname}}: %d\\n", gl_handle); }
+            ~NODE_{{classname}}() { {{release_code}} }
 
             static NAN_METHOD(New);
 
