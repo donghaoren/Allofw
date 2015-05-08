@@ -1,8 +1,12 @@
+#ifndef ALLOFW_OMNISTEREO_H
+#define ALLOFW_OMNISTEREO_H
+
 // Omnistereo Rendering.
 #include <memory>
 
 #include "common.h"
 #include "config.h"
+#include "math/math.h"
 
 namespace ALLOFW_NS {
     class OmniStereo;
@@ -31,3 +35,5 @@ namespace ALLOFW_NS {
         }
     };
 }
+
+#endif

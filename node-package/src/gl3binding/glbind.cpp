@@ -1,887 +1,981 @@
 #include "glbind.h"
 
 void do_nothing_release_callback(char*, void*) { }
+void* glbind_get_buffer_data(v8::Handle<v8::Value> value) {
+    if(value->IsArrayBufferView()) {
+        v8::ArrayBufferView* view = v8::ArrayBufferView::Cast(*value);
+        unsigned char* ptr = (unsigned char*)view->Buffer()->Externalize().Data();
+        ptr += view->ByteOffset();
+        // This is because ArrayBuffer::GetContents is not available yet (v8 version too low).
+        // Here, we use Externalize, by not deallocating the memory here, the client side is still able to access it.
+        // However, the GC won't collect this memory, so it's leaked.
+        // Use this: new Buffer(new Uint8Array(fa.buffer))
+        fprintf(stderr, "Warning: memory leak occurred. This problem is currently unsolvable, please avoid using ArrayBuffers with GL3 binding functions.\n");
+        return ptr;
+    } else if(node::Buffer::HasInstance(value)) {
+        return node::Buffer::Data(value);
+    } else {
+        return NULL;
+    }
+}
 
 
-        class NODE_Sampler : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
+class NODE_Sampler : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
 
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
 
-        private:
-            explicit NODE_Sampler(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_Sampler() { glGenSamplers(1, &gl_handle); }
-            ~NODE_Sampler() { glDeleteSamplers(1, &gl_handle); printf("Release Sampler: %d\n", gl_handle); }
+private:
+    explicit NODE_Sampler(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_Sampler() { glGenSamplers(1, &gl_handle); }
+    ~NODE_Sampler() { glDeleteSamplers(1, &gl_handle); printf("Release Sampler: %d\n", gl_handle); }
 
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
+    static NAN_METHOD(New);
 
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
 
-            static v8::Persistent<v8::Function> constructor;
-        };
+    static v8::Persistent<v8::Function> constructor;
+};
 
-        v8::Persistent<v8::Function> NODE_Sampler::constructor;
+v8::Persistent<v8::Function> NODE_Sampler::constructor;
 
-        void NODE_Sampler::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("Sampler"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
+void NODE_Sampler::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("Sampler"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
 
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
 
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("Sampler"), constructor);
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("Sampler"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_Sampler::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_Sampler* obj = new NODE_Sampler();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_Sampler* obj = new NODE_Sampler(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        v8::Handle<v8::Value> NODE_Sampler::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
+NAN_METHOD(NODE_Sampler::NODE_id) {
+    NODE_Sampler* obj = ObjectWrap::Unwrap<NODE_Sampler>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
 
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_Sampler* obj = new NODE_Sampler();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_Sampler* obj = new NODE_Sampler(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
+NAN_METHOD(NODE_Sampler::NODE_delete) {
+    NODE_Sampler* obj = ObjectWrap::Unwrap<NODE_Sampler>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteSamplers(1, &gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
+
+NAN_METHOD(NODE_Sampler::NODE_toString) {
+    NODE_Sampler* obj = ObjectWrap::Unwrap<NODE_Sampler>(args.This());
+    char buf[64];
+    sprintf(buf, "Sampler:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
+
+
+class NODE_Framebuffer : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
+
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
+
+private:
+    explicit NODE_Framebuffer(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_Framebuffer() { glGenFramebuffers(1, &gl_handle); }
+    ~NODE_Framebuffer() { glDeleteFramebuffers(1, &gl_handle); printf("Release Framebuffer: %d\n", gl_handle); }
+
+    static NAN_METHOD(New);
+
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
+
+    static v8::Persistent<v8::Function> constructor;
+};
+
+v8::Persistent<v8::Function> NODE_Framebuffer::constructor;
+
+void NODE_Framebuffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("Framebuffer"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("Framebuffer"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_Framebuffer::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_Framebuffer* obj = new NODE_Framebuffer();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_Framebuffer* obj = new NODE_Framebuffer(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        v8::Handle<v8::Value> NODE_Sampler::NODE_id(const v8::Arguments& args) {
-            NODE_Sampler* obj = ObjectWrap::Unwrap<NODE_Sampler>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
+NAN_METHOD(NODE_Framebuffer::NODE_id) {
+    NODE_Framebuffer* obj = ObjectWrap::Unwrap<NODE_Framebuffer>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
+
+NAN_METHOD(NODE_Framebuffer::NODE_delete) {
+    NODE_Framebuffer* obj = ObjectWrap::Unwrap<NODE_Framebuffer>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteFramebuffers(1, &gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
+
+NAN_METHOD(NODE_Framebuffer::NODE_toString) {
+    NODE_Framebuffer* obj = ObjectWrap::Unwrap<NODE_Framebuffer>(args.This());
+    char buf[64];
+    sprintf(buf, "Framebuffer:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
+
+
+class NODE_Shader : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
+
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
+
+private:
+    explicit NODE_Shader(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_Shader() { gl_handle = 0; }
+    ~NODE_Shader() { glDeleteShader(gl_handle); printf("Release Shader: %d\n", gl_handle); }
+
+    static NAN_METHOD(New);
+
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
+
+    static v8::Persistent<v8::Function> constructor;
+};
+
+v8::Persistent<v8::Function> NODE_Shader::constructor;
+
+void NODE_Shader::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("Shader"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("Shader"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_Shader::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_Shader* obj = new NODE_Shader();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_Shader* obj = new NODE_Shader(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        v8::Handle<v8::Value> NODE_Sampler::NODE_toString(const v8::Arguments& args) {
-            NODE_Sampler* obj = ObjectWrap::Unwrap<NODE_Sampler>(args.This());
-            char buf[64];
-            sprintf(buf, "Sampler:%d", obj->gl_handle);
-            return v8::String::New(buf);
+NAN_METHOD(NODE_Shader::NODE_id) {
+    NODE_Shader* obj = ObjectWrap::Unwrap<NODE_Shader>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
+
+NAN_METHOD(NODE_Shader::NODE_delete) {
+    NODE_Shader* obj = ObjectWrap::Unwrap<NODE_Shader>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteShader(gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
+
+NAN_METHOD(NODE_Shader::NODE_toString) {
+    NODE_Shader* obj = ObjectWrap::Unwrap<NODE_Shader>(args.This());
+    char buf[64];
+    sprintf(buf, "Shader:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
+
+
+class NODE_Texture : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
+
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
+
+private:
+    explicit NODE_Texture(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_Texture() { glGenTextures(1, &gl_handle); }
+    ~NODE_Texture() { glDeleteTextures(1, &gl_handle); printf("Release Texture: %d\n", gl_handle); }
+
+    static NAN_METHOD(New);
+
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
+
+    static v8::Persistent<v8::Function> constructor;
+};
+
+v8::Persistent<v8::Function> NODE_Texture::constructor;
+
+void NODE_Texture::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("Texture"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("Texture"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_Texture::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_Texture* obj = new NODE_Texture();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_Texture* obj = new NODE_Texture(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
-        
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        class NODE_Framebuffer : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
+NAN_METHOD(NODE_Texture::NODE_id) {
+    NODE_Texture* obj = ObjectWrap::Unwrap<NODE_Texture>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
 
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
+NAN_METHOD(NODE_Texture::NODE_delete) {
+    NODE_Texture* obj = ObjectWrap::Unwrap<NODE_Texture>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteTextures(1, &gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
 
-        private:
-            explicit NODE_Framebuffer(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_Framebuffer() { glGenFramebuffers(1, &gl_handle); }
-            ~NODE_Framebuffer() { glDeleteFramebuffers(1, &gl_handle); printf("Release Framebuffer: %d\n", gl_handle); }
+NAN_METHOD(NODE_Texture::NODE_toString) {
+    NODE_Texture* obj = ObjectWrap::Unwrap<NODE_Texture>(args.This());
+    char buf[64];
+    sprintf(buf, "Texture:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
 
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
 
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
+class NODE_ProgramPipeline : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
 
-            static v8::Persistent<v8::Function> constructor;
-        };
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
 
-        v8::Persistent<v8::Function> NODE_Framebuffer::constructor;
+private:
+    explicit NODE_ProgramPipeline(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_ProgramPipeline() { glGenProgramPipelines(1, &gl_handle); }
+    ~NODE_ProgramPipeline() { glDeleteProgramPipelines(1, &gl_handle); printf("Release ProgramPipeline: %d\n", gl_handle); }
 
-        void NODE_Framebuffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("Framebuffer"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
+    static NAN_METHOD(New);
 
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
 
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
+    static v8::Persistent<v8::Function> constructor;
+};
 
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("Framebuffer"), constructor);
+v8::Persistent<v8::Function> NODE_ProgramPipeline::constructor;
+
+void NODE_ProgramPipeline::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("ProgramPipeline"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("ProgramPipeline"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_ProgramPipeline::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_ProgramPipeline* obj = new NODE_ProgramPipeline();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_ProgramPipeline* obj = new NODE_ProgramPipeline(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        v8::Handle<v8::Value> NODE_Framebuffer::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
+NAN_METHOD(NODE_ProgramPipeline::NODE_id) {
+    NODE_ProgramPipeline* obj = ObjectWrap::Unwrap<NODE_ProgramPipeline>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
 
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_Framebuffer* obj = new NODE_Framebuffer();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_Framebuffer* obj = new NODE_Framebuffer(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
+NAN_METHOD(NODE_ProgramPipeline::NODE_delete) {
+    NODE_ProgramPipeline* obj = ObjectWrap::Unwrap<NODE_ProgramPipeline>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteProgramPipelines(1, &gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
+
+NAN_METHOD(NODE_ProgramPipeline::NODE_toString) {
+    NODE_ProgramPipeline* obj = ObjectWrap::Unwrap<NODE_ProgramPipeline>(args.This());
+    char buf[64];
+    sprintf(buf, "ProgramPipeline:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
+
+
+class NODE_Renderbuffer : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
+
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
+
+private:
+    explicit NODE_Renderbuffer(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_Renderbuffer() { glGenRenderbuffers(1, &gl_handle); }
+    ~NODE_Renderbuffer() { glDeleteRenderbuffers(1, &gl_handle); printf("Release Renderbuffer: %d\n", gl_handle); }
+
+    static NAN_METHOD(New);
+
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
+
+    static v8::Persistent<v8::Function> constructor;
+};
+
+v8::Persistent<v8::Function> NODE_Renderbuffer::constructor;
+
+void NODE_Renderbuffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("Renderbuffer"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("Renderbuffer"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_Renderbuffer::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_Renderbuffer* obj = new NODE_Renderbuffer();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_Renderbuffer* obj = new NODE_Renderbuffer(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        v8::Handle<v8::Value> NODE_Framebuffer::NODE_id(const v8::Arguments& args) {
-            NODE_Framebuffer* obj = ObjectWrap::Unwrap<NODE_Framebuffer>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
+NAN_METHOD(NODE_Renderbuffer::NODE_id) {
+    NODE_Renderbuffer* obj = ObjectWrap::Unwrap<NODE_Renderbuffer>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
+
+NAN_METHOD(NODE_Renderbuffer::NODE_delete) {
+    NODE_Renderbuffer* obj = ObjectWrap::Unwrap<NODE_Renderbuffer>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteRenderbuffers(1, &gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
+
+NAN_METHOD(NODE_Renderbuffer::NODE_toString) {
+    NODE_Renderbuffer* obj = ObjectWrap::Unwrap<NODE_Renderbuffer>(args.This());
+    char buf[64];
+    sprintf(buf, "Renderbuffer:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
+
+
+class NODE_VertexArray : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
+
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
+
+private:
+    explicit NODE_VertexArray(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_VertexArray() { glGenVertexArrays(1, &gl_handle); }
+    ~NODE_VertexArray() { glDeleteVertexArrays(1, &gl_handle); printf("Release VertexArray: %d\n", gl_handle); }
+
+    static NAN_METHOD(New);
+
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
+
+    static v8::Persistent<v8::Function> constructor;
+};
+
+v8::Persistent<v8::Function> NODE_VertexArray::constructor;
+
+void NODE_VertexArray::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("VertexArray"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("VertexArray"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_VertexArray::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_VertexArray* obj = new NODE_VertexArray();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_VertexArray* obj = new NODE_VertexArray(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        v8::Handle<v8::Value> NODE_Framebuffer::NODE_toString(const v8::Arguments& args) {
-            NODE_Framebuffer* obj = ObjectWrap::Unwrap<NODE_Framebuffer>(args.This());
-            char buf[64];
-            sprintf(buf, "Framebuffer:%d", obj->gl_handle);
-            return v8::String::New(buf);
+NAN_METHOD(NODE_VertexArray::NODE_id) {
+    NODE_VertexArray* obj = ObjectWrap::Unwrap<NODE_VertexArray>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
+
+NAN_METHOD(NODE_VertexArray::NODE_delete) {
+    NODE_VertexArray* obj = ObjectWrap::Unwrap<NODE_VertexArray>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteVertexArrays(1, &gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
+
+NAN_METHOD(NODE_VertexArray::NODE_toString) {
+    NODE_VertexArray* obj = ObjectWrap::Unwrap<NODE_VertexArray>(args.This());
+    char buf[64];
+    sprintf(buf, "VertexArray:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
+
+
+class NODE_Query : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
+
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
+
+private:
+    explicit NODE_Query(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_Query() { glGenQueries(1, &gl_handle); }
+    ~NODE_Query() { glDeleteQueries(1, &gl_handle); printf("Release Query: %d\n", gl_handle); }
+
+    static NAN_METHOD(New);
+
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
+
+    static v8::Persistent<v8::Function> constructor;
+};
+
+v8::Persistent<v8::Function> NODE_Query::constructor;
+
+void NODE_Query::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("Query"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("Query"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_Query::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_Query* obj = new NODE_Query();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_Query* obj = new NODE_Query(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
-        
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        class NODE_Shader : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
+NAN_METHOD(NODE_Query::NODE_id) {
+    NODE_Query* obj = ObjectWrap::Unwrap<NODE_Query>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
 
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
+NAN_METHOD(NODE_Query::NODE_delete) {
+    NODE_Query* obj = ObjectWrap::Unwrap<NODE_Query>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteQueries(1, &gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
 
-        private:
-            explicit NODE_Shader(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_Shader() { gl_handle = 0; }
-            ~NODE_Shader() { glDeleteShader(gl_handle); printf("Release Shader: %d\n", gl_handle); }
+NAN_METHOD(NODE_Query::NODE_toString) {
+    NODE_Query* obj = ObjectWrap::Unwrap<NODE_Query>(args.This());
+    char buf[64];
+    sprintf(buf, "Query:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
 
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
 
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
+class NODE_Buffer : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
 
-            static v8::Persistent<v8::Function> constructor;
-        };
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
 
-        v8::Persistent<v8::Function> NODE_Shader::constructor;
+private:
+    explicit NODE_Buffer(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_Buffer() { glGenBuffers(1, &gl_handle); }
+    ~NODE_Buffer() { glDeleteBuffers(1, &gl_handle); printf("Release Buffer: %d\n", gl_handle); }
 
-        void NODE_Shader::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("Shader"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
+    static NAN_METHOD(New);
 
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
 
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
+    static v8::Persistent<v8::Function> constructor;
+};
 
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("Shader"), constructor);
+v8::Persistent<v8::Function> NODE_Buffer::constructor;
+
+void NODE_Buffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("Buffer"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("Buffer"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_Buffer::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_Buffer* obj = new NODE_Buffer();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_Buffer* obj = new NODE_Buffer(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        v8::Handle<v8::Value> NODE_Shader::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
+NAN_METHOD(NODE_Buffer::NODE_id) {
+    NODE_Buffer* obj = ObjectWrap::Unwrap<NODE_Buffer>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
 
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_Shader* obj = new NODE_Shader();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_Shader* obj = new NODE_Shader(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
+NAN_METHOD(NODE_Buffer::NODE_delete) {
+    NODE_Buffer* obj = ObjectWrap::Unwrap<NODE_Buffer>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteBuffers(1, &gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
+
+NAN_METHOD(NODE_Buffer::NODE_toString) {
+    NODE_Buffer* obj = ObjectWrap::Unwrap<NODE_Buffer>(args.This());
+    char buf[64];
+    sprintf(buf, "Buffer:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
+
+
+class NODE_Program : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
+
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
+
+private:
+    explicit NODE_Program(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_Program() { gl_handle = 0; }
+    ~NODE_Program() { glDeleteProgram(gl_handle); printf("Release Program: %d\n", gl_handle); }
+
+    static NAN_METHOD(New);
+
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
+
+    static v8::Persistent<v8::Function> constructor;
+};
+
+v8::Persistent<v8::Function> NODE_Program::constructor;
+
+void NODE_Program::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("Program"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("Program"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_Program::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_Program* obj = new NODE_Program();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_Program* obj = new NODE_Program(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
 
-        v8::Handle<v8::Value> NODE_Shader::NODE_id(const v8::Arguments& args) {
-            NODE_Shader* obj = ObjectWrap::Unwrap<NODE_Shader>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
+NAN_METHOD(NODE_Program::NODE_id) {
+    NODE_Program* obj = ObjectWrap::Unwrap<NODE_Program>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
+
+NAN_METHOD(NODE_Program::NODE_delete) {
+    NODE_Program* obj = ObjectWrap::Unwrap<NODE_Program>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteProgram(gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
+
+NAN_METHOD(NODE_Program::NODE_toString) {
+    NODE_Program* obj = ObjectWrap::Unwrap<NODE_Program>(args.This());
+    char buf[64];
+    sprintf(buf, "Program:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
+
+
+class NODE_TransformFeedback : public node::ObjectWrap {
+public:
+    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    GLuint gl_handle;
+
+    static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
+        return NanNew(constructor)->NewInstance(argc, argv);
+    }
+
+private:
+    explicit NODE_TransformFeedback(GLuint gl_handle_) { gl_handle = gl_handle_; }
+    explicit NODE_TransformFeedback() { glGenTransformFeedbacks(1, &gl_handle); }
+    ~NODE_TransformFeedback() { glDeleteTransformFeedbacks(1, &gl_handle); printf("Release TransformFeedback: %d\n", gl_handle); }
+
+    static NAN_METHOD(New);
+
+    static NAN_METHOD(NODE_id);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_toString);
+
+    static v8::Persistent<v8::Function> constructor;
+};
+
+v8::Persistent<v8::Function> NODE_TransformFeedback::constructor;
+
+void NODE_TransformFeedback::Init(v8::Handle<v8::ObjectTemplate> exports) {
+    v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<v8::String>("TransformFeedback"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+    NanAssignPersistent(constructor, tpl->GetFunction());
+
+    // Export constructor.
+    exports->Set(NanNew<v8::String>("TransformFeedback"), tpl->GetFunction());
+}
+
+NAN_METHOD(NODE_TransformFeedback::New) {
+    NanScope();
+
+    if(args.IsConstructCall()) {
+        if(args.Length() == 0) {
+            NODE_TransformFeedback* obj = new NODE_TransformFeedback();
+            obj->Wrap(args.This());
+            NanReturnThis();
+        } else {
+            NODE_TransformFeedback* obj = new NODE_TransformFeedback(args[0]->Uint32Value());
+            obj->Wrap(args.This());
+            NanReturnThis();
         }
+    } else {
+        // Invoked as plain function `MyObject(...)`, turn into construct call.
+        const int argc = 1;
+        v8::Local<v8::Value> argv[argc] = { args[0] };
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+    }
+}
+
+NAN_METHOD(NODE_TransformFeedback::NODE_id) {
+    NODE_TransformFeedback* obj = ObjectWrap::Unwrap<NODE_TransformFeedback>(args.This());
+    NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+}
+
+NAN_METHOD(NODE_TransformFeedback::NODE_delete) {
+    NODE_TransformFeedback* obj = ObjectWrap::Unwrap<NODE_TransformFeedback>(args.This());
+    GLuint gl_handle = obj->gl_handle;
+    glDeleteTransformFeedbacks(1, &gl_handle);
+    obj->gl_handle = 0;
+    NanReturnUndefined();
+}
+
+NAN_METHOD(NODE_TransformFeedback::NODE_toString) {
+    NODE_TransformFeedback* obj = ObjectWrap::Unwrap<NODE_TransformFeedback>(args.This());
+    char buf[64];
+    sprintf(buf, "TransformFeedback:%d", obj->gl_handle);
+    NanReturnValue(NanNew<v8::String>(buf));
+}
 
-        v8::Handle<v8::Value> NODE_Shader::NODE_toString(const v8::Arguments& args) {
-            NODE_Shader* obj = ObjectWrap::Unwrap<NODE_Shader>(args.This());
-            char buf[64];
-            sprintf(buf, "Shader:%d", obj->gl_handle);
-            return v8::String::New(buf);
-        }
-        
-
-        class NODE_Texture : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
-
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
-
-        private:
-            explicit NODE_Texture(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_Texture() { glGenTextures(1, &gl_handle); }
-            ~NODE_Texture() { glDeleteTextures(1, &gl_handle); printf("Release Texture: %d\n", gl_handle); }
-
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
-
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
-
-            static v8::Persistent<v8::Function> constructor;
-        };
-
-        v8::Persistent<v8::Function> NODE_Texture::constructor;
-
-        void NODE_Texture::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("Texture"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("Texture"), constructor);
-        }
-
-        v8::Handle<v8::Value> NODE_Texture::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
-
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_Texture* obj = new NODE_Texture();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_Texture* obj = new NODE_Texture(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
-        }
-
-        v8::Handle<v8::Value> NODE_Texture::NODE_id(const v8::Arguments& args) {
-            NODE_Texture* obj = ObjectWrap::Unwrap<NODE_Texture>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
-        }
-
-        v8::Handle<v8::Value> NODE_Texture::NODE_toString(const v8::Arguments& args) {
-            NODE_Texture* obj = ObjectWrap::Unwrap<NODE_Texture>(args.This());
-            char buf[64];
-            sprintf(buf, "Texture:%d", obj->gl_handle);
-            return v8::String::New(buf);
-        }
-        
-
-        class NODE_ProgramPipeline : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
-
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
-
-        private:
-            explicit NODE_ProgramPipeline(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_ProgramPipeline() { glGenProgramPipelines(1, &gl_handle); }
-            ~NODE_ProgramPipeline() { glDeleteProgramPipelines(1, &gl_handle); printf("Release ProgramPipeline: %d\n", gl_handle); }
-
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
-
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
-
-            static v8::Persistent<v8::Function> constructor;
-        };
-
-        v8::Persistent<v8::Function> NODE_ProgramPipeline::constructor;
-
-        void NODE_ProgramPipeline::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("ProgramPipeline"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("ProgramPipeline"), constructor);
-        }
-
-        v8::Handle<v8::Value> NODE_ProgramPipeline::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
-
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_ProgramPipeline* obj = new NODE_ProgramPipeline();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_ProgramPipeline* obj = new NODE_ProgramPipeline(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
-        }
-
-        v8::Handle<v8::Value> NODE_ProgramPipeline::NODE_id(const v8::Arguments& args) {
-            NODE_ProgramPipeline* obj = ObjectWrap::Unwrap<NODE_ProgramPipeline>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
-        }
-
-        v8::Handle<v8::Value> NODE_ProgramPipeline::NODE_toString(const v8::Arguments& args) {
-            NODE_ProgramPipeline* obj = ObjectWrap::Unwrap<NODE_ProgramPipeline>(args.This());
-            char buf[64];
-            sprintf(buf, "ProgramPipeline:%d", obj->gl_handle);
-            return v8::String::New(buf);
-        }
-        
-
-        class NODE_Renderbuffer : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
-
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
-
-        private:
-            explicit NODE_Renderbuffer(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_Renderbuffer() { glGenRenderbuffers(1, &gl_handle); }
-            ~NODE_Renderbuffer() { glDeleteRenderbuffers(1, &gl_handle); printf("Release Renderbuffer: %d\n", gl_handle); }
-
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
-
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
-
-            static v8::Persistent<v8::Function> constructor;
-        };
-
-        v8::Persistent<v8::Function> NODE_Renderbuffer::constructor;
-
-        void NODE_Renderbuffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("Renderbuffer"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("Renderbuffer"), constructor);
-        }
-
-        v8::Handle<v8::Value> NODE_Renderbuffer::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
-
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_Renderbuffer* obj = new NODE_Renderbuffer();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_Renderbuffer* obj = new NODE_Renderbuffer(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
-        }
-
-        v8::Handle<v8::Value> NODE_Renderbuffer::NODE_id(const v8::Arguments& args) {
-            NODE_Renderbuffer* obj = ObjectWrap::Unwrap<NODE_Renderbuffer>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
-        }
-
-        v8::Handle<v8::Value> NODE_Renderbuffer::NODE_toString(const v8::Arguments& args) {
-            NODE_Renderbuffer* obj = ObjectWrap::Unwrap<NODE_Renderbuffer>(args.This());
-            char buf[64];
-            sprintf(buf, "Renderbuffer:%d", obj->gl_handle);
-            return v8::String::New(buf);
-        }
-        
-
-        class NODE_VertexArray : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
-
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
-
-        private:
-            explicit NODE_VertexArray(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_VertexArray() { glGenVertexArrays(1, &gl_handle); }
-            ~NODE_VertexArray() { glDeleteVertexArrays(1, &gl_handle); printf("Release VertexArray: %d\n", gl_handle); }
-
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
-
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
-
-            static v8::Persistent<v8::Function> constructor;
-        };
-
-        v8::Persistent<v8::Function> NODE_VertexArray::constructor;
-
-        void NODE_VertexArray::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("VertexArray"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("VertexArray"), constructor);
-        }
-
-        v8::Handle<v8::Value> NODE_VertexArray::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
-
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_VertexArray* obj = new NODE_VertexArray();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_VertexArray* obj = new NODE_VertexArray(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
-        }
-
-        v8::Handle<v8::Value> NODE_VertexArray::NODE_id(const v8::Arguments& args) {
-            NODE_VertexArray* obj = ObjectWrap::Unwrap<NODE_VertexArray>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
-        }
-
-        v8::Handle<v8::Value> NODE_VertexArray::NODE_toString(const v8::Arguments& args) {
-            NODE_VertexArray* obj = ObjectWrap::Unwrap<NODE_VertexArray>(args.This());
-            char buf[64];
-            sprintf(buf, "VertexArray:%d", obj->gl_handle);
-            return v8::String::New(buf);
-        }
-        
-
-        class NODE_Query : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
-
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
-
-        private:
-            explicit NODE_Query(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_Query() { glGenQueries(1, &gl_handle); }
-            ~NODE_Query() { glDeleteQueries(1, &gl_handle); printf("Release Query: %d\n", gl_handle); }
-
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
-
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
-
-            static v8::Persistent<v8::Function> constructor;
-        };
-
-        v8::Persistent<v8::Function> NODE_Query::constructor;
-
-        void NODE_Query::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("Query"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("Query"), constructor);
-        }
-
-        v8::Handle<v8::Value> NODE_Query::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
-
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_Query* obj = new NODE_Query();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_Query* obj = new NODE_Query(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
-        }
-
-        v8::Handle<v8::Value> NODE_Query::NODE_id(const v8::Arguments& args) {
-            NODE_Query* obj = ObjectWrap::Unwrap<NODE_Query>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
-        }
-
-        v8::Handle<v8::Value> NODE_Query::NODE_toString(const v8::Arguments& args) {
-            NODE_Query* obj = ObjectWrap::Unwrap<NODE_Query>(args.This());
-            char buf[64];
-            sprintf(buf, "Query:%d", obj->gl_handle);
-            return v8::String::New(buf);
-        }
-        
-
-        class NODE_Buffer : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
-
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
-
-        private:
-            explicit NODE_Buffer(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_Buffer() { glGenBuffers(1, &gl_handle); }
-            ~NODE_Buffer() { glDeleteBuffers(1, &gl_handle); printf("Release Buffer: %d\n", gl_handle); }
-
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
-
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
-
-            static v8::Persistent<v8::Function> constructor;
-        };
-
-        v8::Persistent<v8::Function> NODE_Buffer::constructor;
-
-        void NODE_Buffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("Buffer"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("Buffer"), constructor);
-        }
-
-        v8::Handle<v8::Value> NODE_Buffer::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
-
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_Buffer* obj = new NODE_Buffer();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_Buffer* obj = new NODE_Buffer(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
-        }
-
-        v8::Handle<v8::Value> NODE_Buffer::NODE_id(const v8::Arguments& args) {
-            NODE_Buffer* obj = ObjectWrap::Unwrap<NODE_Buffer>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
-        }
-
-        v8::Handle<v8::Value> NODE_Buffer::NODE_toString(const v8::Arguments& args) {
-            NODE_Buffer* obj = ObjectWrap::Unwrap<NODE_Buffer>(args.This());
-            char buf[64];
-            sprintf(buf, "Buffer:%d", obj->gl_handle);
-            return v8::String::New(buf);
-        }
-        
-
-        class NODE_Program : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
-
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
-
-        private:
-            explicit NODE_Program(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_Program() { gl_handle = 0; }
-            ~NODE_Program() { glDeleteProgram(gl_handle); printf("Release Program: %d\n", gl_handle); }
-
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
-
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
-
-            static v8::Persistent<v8::Function> constructor;
-        };
-
-        v8::Persistent<v8::Function> NODE_Program::constructor;
-
-        void NODE_Program::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("Program"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("Program"), constructor);
-        }
-
-        v8::Handle<v8::Value> NODE_Program::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
-
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_Program* obj = new NODE_Program();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_Program* obj = new NODE_Program(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
-        }
-
-        v8::Handle<v8::Value> NODE_Program::NODE_id(const v8::Arguments& args) {
-            NODE_Program* obj = ObjectWrap::Unwrap<NODE_Program>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
-        }
-
-        v8::Handle<v8::Value> NODE_Program::NODE_toString(const v8::Arguments& args) {
-            NODE_Program* obj = ObjectWrap::Unwrap<NODE_Program>(args.This());
-            char buf[64];
-            sprintf(buf, "Program:%d", obj->gl_handle);
-            return v8::String::New(buf);
-        }
-        
-
-        class NODE_TransformFeedback : public node::ObjectWrap {
-        public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
-            GLuint gl_handle;
-
-            static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
-            }
-
-        private:
-            explicit NODE_TransformFeedback(GLuint gl_handle_) { gl_handle = gl_handle_; }
-            explicit NODE_TransformFeedback() { glGenTransformFeedbacks(1, &gl_handle); }
-            ~NODE_TransformFeedback() { glDeleteTransformFeedbacks(1, &gl_handle); printf("Release TransformFeedback: %d\n", gl_handle); }
-
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
-
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
-
-            static v8::Persistent<v8::Function> constructor;
-        };
-
-        v8::Persistent<v8::Function> NODE_TransformFeedback::constructor;
-
-        void NODE_TransformFeedback::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("TransformFeedback"));
-            tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-            // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
-
-            // Export constructor.
-            exports->Set(v8::String::NewSymbol("TransformFeedback"), constructor);
-        }
-
-        v8::Handle<v8::Value> NODE_TransformFeedback::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
-
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
-                    NODE_TransformFeedback* obj = new NODE_TransformFeedback();
-                    obj->Wrap(args.This());
-                    return args.This();
-                } else {
-                    NODE_TransformFeedback* obj = new NODE_TransformFeedback(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    return args.This();
-                }
-            } else {
-                // Invoked as plain function `MyObject(...)`, turn into construct call.
-                const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
-            }
-        }
-
-        v8::Handle<v8::Value> NODE_TransformFeedback::NODE_id(const v8::Arguments& args) {
-            NODE_TransformFeedback* obj = ObjectWrap::Unwrap<NODE_TransformFeedback>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
-        }
-
-        v8::Handle<v8::Value> NODE_TransformFeedback::NODE_toString(const v8::Arguments& args) {
-            NODE_TransformFeedback* obj = ObjectWrap::Unwrap<NODE_TransformFeedback>(args.This());
-            char buf[64];
-            sprintf(buf, "TransformFeedback:%d", obj->gl_handle);
-            return v8::String::New(buf);
-        }
-        
 
 void defineObjects(v8::Handle<v8::ObjectTemplate> exports) {
     NODE_Sampler::Init(exports);
@@ -899,917 +993,917 @@ void defineObjects(v8::Handle<v8::ObjectTemplate> exports) {
 
 
 void defineConstants(v8::Handle<v8::ObjectTemplate> exports) {
-    exports->Set(v8::String::NewSymbol("DEPTH_BUFFER_BIT"), v8::Uint32::New(GL_DEPTH_BUFFER_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_BUFFER_BIT"), v8::Uint32::New(GL_STENCIL_BUFFER_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_BUFFER_BIT"), v8::Uint32::New(GL_COLOR_BUFFER_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FALSE"), v8::Uint32::New(GL_FALSE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRUE"), v8::Uint32::New(GL_TRUE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POINTS"), v8::Uint32::New(GL_POINTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINES"), v8::Uint32::New(GL_LINES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINE_LOOP"), v8::Uint32::New(GL_LINE_LOOP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINE_STRIP"), v8::Uint32::New(GL_LINE_STRIP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRIANGLES"), v8::Uint32::New(GL_TRIANGLES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRIANGLE_STRIP"), v8::Uint32::New(GL_TRIANGLE_STRIP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRIANGLE_FAN"), v8::Uint32::New(GL_TRIANGLE_FAN), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NEVER"), v8::Uint32::New(GL_NEVER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LESS"), v8::Uint32::New(GL_LESS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("EQUAL"), v8::Uint32::New(GL_EQUAL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LEQUAL"), v8::Uint32::New(GL_LEQUAL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GREATER"), v8::Uint32::New(GL_GREATER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NOTEQUAL"), v8::Uint32::New(GL_NOTEQUAL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GEQUAL"), v8::Uint32::New(GL_GEQUAL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ALWAYS"), v8::Uint32::New(GL_ALWAYS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ZERO"), v8::Uint32::New(GL_ZERO), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ONE"), v8::Uint32::New(GL_ONE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SRC_COLOR"), v8::Uint32::New(GL_SRC_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ONE_MINUS_SRC_COLOR"), v8::Uint32::New(GL_ONE_MINUS_SRC_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SRC_ALPHA"), v8::Uint32::New(GL_SRC_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ONE_MINUS_SRC_ALPHA"), v8::Uint32::New(GL_ONE_MINUS_SRC_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DST_ALPHA"), v8::Uint32::New(GL_DST_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ONE_MINUS_DST_ALPHA"), v8::Uint32::New(GL_ONE_MINUS_DST_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DST_COLOR"), v8::Uint32::New(GL_DST_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ONE_MINUS_DST_COLOR"), v8::Uint32::New(GL_ONE_MINUS_DST_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SRC_ALPHA_SATURATE"), v8::Uint32::New(GL_SRC_ALPHA_SATURATE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NONE"), v8::Uint32::New(GL_NONE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRONT_LEFT"), v8::Uint32::New(GL_FRONT_LEFT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRONT_RIGHT"), v8::Uint32::New(GL_FRONT_RIGHT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BACK_LEFT"), v8::Uint32::New(GL_BACK_LEFT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BACK_RIGHT"), v8::Uint32::New(GL_BACK_RIGHT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRONT"), v8::Uint32::New(GL_FRONT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BACK"), v8::Uint32::New(GL_BACK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LEFT"), v8::Uint32::New(GL_LEFT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RIGHT"), v8::Uint32::New(GL_RIGHT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRONT_AND_BACK"), v8::Uint32::New(GL_FRONT_AND_BACK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NO_ERROR"), v8::Uint32::New(GL_NO_ERROR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INVALID_ENUM"), v8::Uint32::New(GL_INVALID_ENUM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INVALID_VALUE"), v8::Uint32::New(GL_INVALID_VALUE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INVALID_OPERATION"), v8::Uint32::New(GL_INVALID_OPERATION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("OUT_OF_MEMORY"), v8::Uint32::New(GL_OUT_OF_MEMORY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CW"), v8::Uint32::New(GL_CW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CCW"), v8::Uint32::New(GL_CCW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POINT_SIZE"), v8::Uint32::New(GL_POINT_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POINT_SIZE_RANGE"), v8::Uint32::New(GL_POINT_SIZE_RANGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POINT_SIZE_GRANULARITY"), v8::Uint32::New(GL_POINT_SIZE_GRANULARITY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINE_SMOOTH"), v8::Uint32::New(GL_LINE_SMOOTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINE_WIDTH"), v8::Uint32::New(GL_LINE_WIDTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINE_WIDTH_RANGE"), v8::Uint32::New(GL_LINE_WIDTH_RANGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINE_WIDTH_GRANULARITY"), v8::Uint32::New(GL_LINE_WIDTH_GRANULARITY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POLYGON_MODE"), v8::Uint32::New(GL_POLYGON_MODE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POLYGON_SMOOTH"), v8::Uint32::New(GL_POLYGON_SMOOTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CULL_FACE"), v8::Uint32::New(GL_CULL_FACE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CULL_FACE_MODE"), v8::Uint32::New(GL_CULL_FACE_MODE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRONT_FACE"), v8::Uint32::New(GL_FRONT_FACE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_RANGE"), v8::Uint32::New(GL_DEPTH_RANGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_TEST"), v8::Uint32::New(GL_DEPTH_TEST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_WRITEMASK"), v8::Uint32::New(GL_DEPTH_WRITEMASK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_CLEAR_VALUE"), v8::Uint32::New(GL_DEPTH_CLEAR_VALUE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_FUNC"), v8::Uint32::New(GL_DEPTH_FUNC), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_TEST"), v8::Uint32::New(GL_STENCIL_TEST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_CLEAR_VALUE"), v8::Uint32::New(GL_STENCIL_CLEAR_VALUE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_FUNC"), v8::Uint32::New(GL_STENCIL_FUNC), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_VALUE_MASK"), v8::Uint32::New(GL_STENCIL_VALUE_MASK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_FAIL"), v8::Uint32::New(GL_STENCIL_FAIL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_PASS_DEPTH_FAIL"), v8::Uint32::New(GL_STENCIL_PASS_DEPTH_FAIL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_PASS_DEPTH_PASS"), v8::Uint32::New(GL_STENCIL_PASS_DEPTH_PASS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_REF"), v8::Uint32::New(GL_STENCIL_REF), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_WRITEMASK"), v8::Uint32::New(GL_STENCIL_WRITEMASK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VIEWPORT"), v8::Uint32::New(GL_VIEWPORT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DITHER"), v8::Uint32::New(GL_DITHER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_DST"), v8::Uint32::New(GL_BLEND_DST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_SRC"), v8::Uint32::New(GL_BLEND_SRC), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND"), v8::Uint32::New(GL_BLEND), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LOGIC_OP_MODE"), v8::Uint32::New(GL_LOGIC_OP_MODE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_LOGIC_OP"), v8::Uint32::New(GL_COLOR_LOGIC_OP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER"), v8::Uint32::New(GL_DRAW_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("READ_BUFFER"), v8::Uint32::New(GL_READ_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SCISSOR_BOX"), v8::Uint32::New(GL_SCISSOR_BOX), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SCISSOR_TEST"), v8::Uint32::New(GL_SCISSOR_TEST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_CLEAR_VALUE"), v8::Uint32::New(GL_COLOR_CLEAR_VALUE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_WRITEMASK"), v8::Uint32::New(GL_COLOR_WRITEMASK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLEBUFFER"), v8::Uint32::New(GL_DOUBLEBUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STEREO"), v8::Uint32::New(GL_STEREO), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINE_SMOOTH_HINT"), v8::Uint32::New(GL_LINE_SMOOTH_HINT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POLYGON_SMOOTH_HINT"), v8::Uint32::New(GL_POLYGON_SMOOTH_HINT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNPACK_SWAP_BYTES"), v8::Uint32::New(GL_UNPACK_SWAP_BYTES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNPACK_LSB_FIRST"), v8::Uint32::New(GL_UNPACK_LSB_FIRST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNPACK_ROW_LENGTH"), v8::Uint32::New(GL_UNPACK_ROW_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNPACK_SKIP_ROWS"), v8::Uint32::New(GL_UNPACK_SKIP_ROWS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNPACK_SKIP_PIXELS"), v8::Uint32::New(GL_UNPACK_SKIP_PIXELS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNPACK_ALIGNMENT"), v8::Uint32::New(GL_UNPACK_ALIGNMENT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PACK_SWAP_BYTES"), v8::Uint32::New(GL_PACK_SWAP_BYTES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PACK_LSB_FIRST"), v8::Uint32::New(GL_PACK_LSB_FIRST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PACK_ROW_LENGTH"), v8::Uint32::New(GL_PACK_ROW_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PACK_SKIP_ROWS"), v8::Uint32::New(GL_PACK_SKIP_ROWS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PACK_SKIP_PIXELS"), v8::Uint32::New(GL_PACK_SKIP_PIXELS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PACK_ALIGNMENT"), v8::Uint32::New(GL_PACK_ALIGNMENT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TEXTURE_SIZE"), v8::Uint32::New(GL_MAX_TEXTURE_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VIEWPORT_DIMS"), v8::Uint32::New(GL_MAX_VIEWPORT_DIMS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SUBPIXEL_BITS"), v8::Uint32::New(GL_SUBPIXEL_BITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_1D"), v8::Uint32::New(GL_TEXTURE_1D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_2D"), v8::Uint32::New(GL_TEXTURE_2D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POLYGON_OFFSET_UNITS"), v8::Uint32::New(GL_POLYGON_OFFSET_UNITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POLYGON_OFFSET_POINT"), v8::Uint32::New(GL_POLYGON_OFFSET_POINT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POLYGON_OFFSET_LINE"), v8::Uint32::New(GL_POLYGON_OFFSET_LINE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POLYGON_OFFSET_FILL"), v8::Uint32::New(GL_POLYGON_OFFSET_FILL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POLYGON_OFFSET_FACTOR"), v8::Uint32::New(GL_POLYGON_OFFSET_FACTOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_1D"), v8::Uint32::New(GL_TEXTURE_BINDING_1D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_2D"), v8::Uint32::New(GL_TEXTURE_BINDING_2D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_WIDTH"), v8::Uint32::New(GL_TEXTURE_WIDTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_HEIGHT"), v8::Uint32::New(GL_TEXTURE_HEIGHT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_INTERNAL_FORMAT"), v8::Uint32::New(GL_TEXTURE_INTERNAL_FORMAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BORDER_COLOR"), v8::Uint32::New(GL_TEXTURE_BORDER_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_RED_SIZE"), v8::Uint32::New(GL_TEXTURE_RED_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_GREEN_SIZE"), v8::Uint32::New(GL_TEXTURE_GREEN_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BLUE_SIZE"), v8::Uint32::New(GL_TEXTURE_BLUE_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_ALPHA_SIZE"), v8::Uint32::New(GL_TEXTURE_ALPHA_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DONT_CARE"), v8::Uint32::New(GL_DONT_CARE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FASTEST"), v8::Uint32::New(GL_FASTEST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NICEST"), v8::Uint32::New(GL_NICEST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BYTE"), v8::Uint32::New(GL_BYTE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_BYTE"), v8::Uint32::New(GL_UNSIGNED_BYTE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SHORT"), v8::Uint32::New(GL_SHORT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_SHORT"), v8::Uint32::New(GL_UNSIGNED_SHORT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT"), v8::Uint32::New(GL_INT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT"), v8::Uint32::New(GL_UNSIGNED_INT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT"), v8::Uint32::New(GL_FLOAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE"), v8::Uint32::New(GL_DOUBLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLEAR"), v8::Uint32::New(GL_CLEAR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("AND"), v8::Uint32::New(GL_AND), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("AND_REVERSE"), v8::Uint32::New(GL_AND_REVERSE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COPY"), v8::Uint32::New(GL_COPY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("AND_INVERTED"), v8::Uint32::New(GL_AND_INVERTED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NOOP"), v8::Uint32::New(GL_NOOP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("XOR"), v8::Uint32::New(GL_XOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("OR"), v8::Uint32::New(GL_OR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NOR"), v8::Uint32::New(GL_NOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("EQUIV"), v8::Uint32::New(GL_EQUIV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INVERT"), v8::Uint32::New(GL_INVERT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("OR_REVERSE"), v8::Uint32::New(GL_OR_REVERSE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COPY_INVERTED"), v8::Uint32::New(GL_COPY_INVERTED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("OR_INVERTED"), v8::Uint32::New(GL_OR_INVERTED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NAND"), v8::Uint32::New(GL_NAND), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SET"), v8::Uint32::New(GL_SET), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE"), v8::Uint32::New(GL_TEXTURE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR"), v8::Uint32::New(GL_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH"), v8::Uint32::New(GL_DEPTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL"), v8::Uint32::New(GL_STENCIL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_INDEX"), v8::Uint32::New(GL_STENCIL_INDEX), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_COMPONENT"), v8::Uint32::New(GL_DEPTH_COMPONENT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RED"), v8::Uint32::New(GL_RED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GREEN"), v8::Uint32::New(GL_GREEN), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLUE"), v8::Uint32::New(GL_BLUE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ALPHA"), v8::Uint32::New(GL_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB"), v8::Uint32::New(GL_RGB), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA"), v8::Uint32::New(GL_RGBA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POINT"), v8::Uint32::New(GL_POINT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINE"), v8::Uint32::New(GL_LINE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FILL"), v8::Uint32::New(GL_FILL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("KEEP"), v8::Uint32::New(GL_KEEP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("REPLACE"), v8::Uint32::New(GL_REPLACE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INCR"), v8::Uint32::New(GL_INCR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DECR"), v8::Uint32::New(GL_DECR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VENDOR"), v8::Uint32::New(GL_VENDOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERER"), v8::Uint32::New(GL_RENDERER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERSION"), v8::Uint32::New(GL_VERSION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("EXTENSIONS"), v8::Uint32::New(GL_EXTENSIONS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NEAREST"), v8::Uint32::New(GL_NEAREST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINEAR"), v8::Uint32::New(GL_LINEAR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NEAREST_MIPMAP_NEAREST"), v8::Uint32::New(GL_NEAREST_MIPMAP_NEAREST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINEAR_MIPMAP_NEAREST"), v8::Uint32::New(GL_LINEAR_MIPMAP_NEAREST), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NEAREST_MIPMAP_LINEAR"), v8::Uint32::New(GL_NEAREST_MIPMAP_LINEAR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINEAR_MIPMAP_LINEAR"), v8::Uint32::New(GL_LINEAR_MIPMAP_LINEAR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_MAG_FILTER"), v8::Uint32::New(GL_TEXTURE_MAG_FILTER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_MIN_FILTER"), v8::Uint32::New(GL_TEXTURE_MIN_FILTER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_WRAP_S"), v8::Uint32::New(GL_TEXTURE_WRAP_S), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_WRAP_T"), v8::Uint32::New(GL_TEXTURE_WRAP_T), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_1D"), v8::Uint32::New(GL_PROXY_TEXTURE_1D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_2D"), v8::Uint32::New(GL_PROXY_TEXTURE_2D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("REPEAT"), v8::Uint32::New(GL_REPEAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R3_G3_B2"), v8::Uint32::New(GL_R3_G3_B2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB4"), v8::Uint32::New(GL_RGB4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB5"), v8::Uint32::New(GL_RGB5), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB8"), v8::Uint32::New(GL_RGB8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB10"), v8::Uint32::New(GL_RGB10), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB12"), v8::Uint32::New(GL_RGB12), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB16"), v8::Uint32::New(GL_RGB16), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA2"), v8::Uint32::New(GL_RGBA2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA4"), v8::Uint32::New(GL_RGBA4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB5_A1"), v8::Uint32::New(GL_RGB5_A1), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA8"), v8::Uint32::New(GL_RGBA8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB10_A2"), v8::Uint32::New(GL_RGB10_A2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA12"), v8::Uint32::New(GL_RGBA12), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA16"), v8::Uint32::New(GL_RGBA16), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_BYTE_3_3_2"), v8::Uint32::New(GL_UNSIGNED_BYTE_3_3_2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_SHORT_4_4_4_4"), v8::Uint32::New(GL_UNSIGNED_SHORT_4_4_4_4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_SHORT_5_5_5_1"), v8::Uint32::New(GL_UNSIGNED_SHORT_5_5_5_1), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_8_8_8_8"), v8::Uint32::New(GL_UNSIGNED_INT_8_8_8_8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_10_10_10_2"), v8::Uint32::New(GL_UNSIGNED_INT_10_10_10_2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_3D"), v8::Uint32::New(GL_TEXTURE_BINDING_3D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PACK_SKIP_IMAGES"), v8::Uint32::New(GL_PACK_SKIP_IMAGES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PACK_IMAGE_HEIGHT"), v8::Uint32::New(GL_PACK_IMAGE_HEIGHT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNPACK_SKIP_IMAGES"), v8::Uint32::New(GL_UNPACK_SKIP_IMAGES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNPACK_IMAGE_HEIGHT"), v8::Uint32::New(GL_UNPACK_IMAGE_HEIGHT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_3D"), v8::Uint32::New(GL_TEXTURE_3D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_3D"), v8::Uint32::New(GL_PROXY_TEXTURE_3D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_DEPTH"), v8::Uint32::New(GL_TEXTURE_DEPTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_WRAP_R"), v8::Uint32::New(GL_TEXTURE_WRAP_R), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_3D_TEXTURE_SIZE"), v8::Uint32::New(GL_MAX_3D_TEXTURE_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_BYTE_2_3_3_REV"), v8::Uint32::New(GL_UNSIGNED_BYTE_2_3_3_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_SHORT_5_6_5"), v8::Uint32::New(GL_UNSIGNED_SHORT_5_6_5), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_SHORT_5_6_5_REV"), v8::Uint32::New(GL_UNSIGNED_SHORT_5_6_5_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_SHORT_4_4_4_4_REV"), v8::Uint32::New(GL_UNSIGNED_SHORT_4_4_4_4_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_SHORT_1_5_5_5_REV"), v8::Uint32::New(GL_UNSIGNED_SHORT_1_5_5_5_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_8_8_8_8_REV"), v8::Uint32::New(GL_UNSIGNED_INT_8_8_8_8_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_2_10_10_10_REV"), v8::Uint32::New(GL_UNSIGNED_INT_2_10_10_10_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BGR"), v8::Uint32::New(GL_BGR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BGRA"), v8::Uint32::New(GL_BGRA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_ELEMENTS_VERTICES"), v8::Uint32::New(GL_MAX_ELEMENTS_VERTICES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_ELEMENTS_INDICES"), v8::Uint32::New(GL_MAX_ELEMENTS_INDICES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLAMP_TO_EDGE"), v8::Uint32::New(GL_CLAMP_TO_EDGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_MIN_LOD"), v8::Uint32::New(GL_TEXTURE_MIN_LOD), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_MAX_LOD"), v8::Uint32::New(GL_TEXTURE_MAX_LOD), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BASE_LEVEL"), v8::Uint32::New(GL_TEXTURE_BASE_LEVEL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_MAX_LEVEL"), v8::Uint32::New(GL_TEXTURE_MAX_LEVEL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SMOOTH_POINT_SIZE_RANGE"), v8::Uint32::New(GL_SMOOTH_POINT_SIZE_RANGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SMOOTH_POINT_SIZE_GRANULARITY"), v8::Uint32::New(GL_SMOOTH_POINT_SIZE_GRANULARITY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SMOOTH_LINE_WIDTH_RANGE"), v8::Uint32::New(GL_SMOOTH_LINE_WIDTH_RANGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SMOOTH_LINE_WIDTH_GRANULARITY"), v8::Uint32::New(GL_SMOOTH_LINE_WIDTH_GRANULARITY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ALIASED_LINE_WIDTH_RANGE"), v8::Uint32::New(GL_ALIASED_LINE_WIDTH_RANGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CONSTANT_COLOR"), v8::Uint32::New(GL_CONSTANT_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ONE_MINUS_CONSTANT_COLOR"), v8::Uint32::New(GL_ONE_MINUS_CONSTANT_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CONSTANT_ALPHA"), v8::Uint32::New(GL_CONSTANT_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ONE_MINUS_CONSTANT_ALPHA"), v8::Uint32::New(GL_ONE_MINUS_CONSTANT_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_COLOR"), v8::Uint32::New(GL_BLEND_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FUNC_ADD"), v8::Uint32::New(GL_FUNC_ADD), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MIN"), v8::Uint32::New(GL_MIN), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX"), v8::Uint32::New(GL_MAX), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_EQUATION"), v8::Uint32::New(GL_BLEND_EQUATION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FUNC_SUBTRACT"), v8::Uint32::New(GL_FUNC_SUBTRACT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FUNC_REVERSE_SUBTRACT"), v8::Uint32::New(GL_FUNC_REVERSE_SUBTRACT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE0"), v8::Uint32::New(GL_TEXTURE0), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE1"), v8::Uint32::New(GL_TEXTURE1), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE2"), v8::Uint32::New(GL_TEXTURE2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE3"), v8::Uint32::New(GL_TEXTURE3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE4"), v8::Uint32::New(GL_TEXTURE4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE5"), v8::Uint32::New(GL_TEXTURE5), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE6"), v8::Uint32::New(GL_TEXTURE6), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE7"), v8::Uint32::New(GL_TEXTURE7), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE8"), v8::Uint32::New(GL_TEXTURE8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE9"), v8::Uint32::New(GL_TEXTURE9), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE10"), v8::Uint32::New(GL_TEXTURE10), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE11"), v8::Uint32::New(GL_TEXTURE11), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE12"), v8::Uint32::New(GL_TEXTURE12), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE13"), v8::Uint32::New(GL_TEXTURE13), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE14"), v8::Uint32::New(GL_TEXTURE14), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE15"), v8::Uint32::New(GL_TEXTURE15), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE16"), v8::Uint32::New(GL_TEXTURE16), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE17"), v8::Uint32::New(GL_TEXTURE17), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE18"), v8::Uint32::New(GL_TEXTURE18), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE19"), v8::Uint32::New(GL_TEXTURE19), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE20"), v8::Uint32::New(GL_TEXTURE20), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE21"), v8::Uint32::New(GL_TEXTURE21), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE22"), v8::Uint32::New(GL_TEXTURE22), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE23"), v8::Uint32::New(GL_TEXTURE23), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE24"), v8::Uint32::New(GL_TEXTURE24), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE25"), v8::Uint32::New(GL_TEXTURE25), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE26"), v8::Uint32::New(GL_TEXTURE26), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE27"), v8::Uint32::New(GL_TEXTURE27), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE28"), v8::Uint32::New(GL_TEXTURE28), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE29"), v8::Uint32::New(GL_TEXTURE29), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE30"), v8::Uint32::New(GL_TEXTURE30), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE31"), v8::Uint32::New(GL_TEXTURE31), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_TEXTURE"), v8::Uint32::New(GL_ACTIVE_TEXTURE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MULTISAMPLE"), v8::Uint32::New(GL_MULTISAMPLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_ALPHA_TO_COVERAGE"), v8::Uint32::New(GL_SAMPLE_ALPHA_TO_COVERAGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_ALPHA_TO_ONE"), v8::Uint32::New(GL_SAMPLE_ALPHA_TO_ONE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_COVERAGE"), v8::Uint32::New(GL_SAMPLE_COVERAGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_BUFFERS"), v8::Uint32::New(GL_SAMPLE_BUFFERS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLES"), v8::Uint32::New(GL_SAMPLES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_COVERAGE_VALUE"), v8::Uint32::New(GL_SAMPLE_COVERAGE_VALUE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_COVERAGE_INVERT"), v8::Uint32::New(GL_SAMPLE_COVERAGE_INVERT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_CUBE_MAP"), v8::Uint32::New(GL_TEXTURE_CUBE_MAP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_CUBE_MAP"), v8::Uint32::New(GL_TEXTURE_BINDING_CUBE_MAP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_CUBE_MAP_POSITIVE_X"), v8::Uint32::New(GL_TEXTURE_CUBE_MAP_POSITIVE_X), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_CUBE_MAP_NEGATIVE_X"), v8::Uint32::New(GL_TEXTURE_CUBE_MAP_NEGATIVE_X), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_CUBE_MAP_POSITIVE_Y"), v8::Uint32::New(GL_TEXTURE_CUBE_MAP_POSITIVE_Y), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_CUBE_MAP_NEGATIVE_Y"), v8::Uint32::New(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_CUBE_MAP_POSITIVE_Z"), v8::Uint32::New(GL_TEXTURE_CUBE_MAP_POSITIVE_Z), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_CUBE_MAP_NEGATIVE_Z"), v8::Uint32::New(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_CUBE_MAP"), v8::Uint32::New(GL_PROXY_TEXTURE_CUBE_MAP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_CUBE_MAP_TEXTURE_SIZE"), v8::Uint32::New(GL_MAX_CUBE_MAP_TEXTURE_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_RGB"), v8::Uint32::New(GL_COMPRESSED_RGB), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_RGBA"), v8::Uint32::New(GL_COMPRESSED_RGBA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_COMPRESSION_HINT"), v8::Uint32::New(GL_TEXTURE_COMPRESSION_HINT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_COMPRESSED_IMAGE_SIZE"), v8::Uint32::New(GL_TEXTURE_COMPRESSED_IMAGE_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_COMPRESSED"), v8::Uint32::New(GL_TEXTURE_COMPRESSED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NUM_COMPRESSED_TEXTURE_FORMATS"), v8::Uint32::New(GL_NUM_COMPRESSED_TEXTURE_FORMATS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_TEXTURE_FORMATS"), v8::Uint32::New(GL_COMPRESSED_TEXTURE_FORMATS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLAMP_TO_BORDER"), v8::Uint32::New(GL_CLAMP_TO_BORDER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_DST_RGB"), v8::Uint32::New(GL_BLEND_DST_RGB), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_SRC_RGB"), v8::Uint32::New(GL_BLEND_SRC_RGB), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_DST_ALPHA"), v8::Uint32::New(GL_BLEND_DST_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_SRC_ALPHA"), v8::Uint32::New(GL_BLEND_SRC_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POINT_FADE_THRESHOLD_SIZE"), v8::Uint32::New(GL_POINT_FADE_THRESHOLD_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_COMPONENT16"), v8::Uint32::New(GL_DEPTH_COMPONENT16), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_COMPONENT24"), v8::Uint32::New(GL_DEPTH_COMPONENT24), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_COMPONENT32"), v8::Uint32::New(GL_DEPTH_COMPONENT32), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MIRRORED_REPEAT"), v8::Uint32::New(GL_MIRRORED_REPEAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TEXTURE_LOD_BIAS"), v8::Uint32::New(GL_MAX_TEXTURE_LOD_BIAS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_LOD_BIAS"), v8::Uint32::New(GL_TEXTURE_LOD_BIAS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INCR_WRAP"), v8::Uint32::New(GL_INCR_WRAP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DECR_WRAP"), v8::Uint32::New(GL_DECR_WRAP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_DEPTH_SIZE"), v8::Uint32::New(GL_TEXTURE_DEPTH_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_COMPARE_MODE"), v8::Uint32::New(GL_TEXTURE_COMPARE_MODE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_COMPARE_FUNC"), v8::Uint32::New(GL_TEXTURE_COMPARE_FUNC), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BUFFER_SIZE"), v8::Uint32::New(GL_BUFFER_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BUFFER_USAGE"), v8::Uint32::New(GL_BUFFER_USAGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("QUERY_COUNTER_BITS"), v8::Uint32::New(GL_QUERY_COUNTER_BITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CURRENT_QUERY"), v8::Uint32::New(GL_CURRENT_QUERY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("QUERY_RESULT"), v8::Uint32::New(GL_QUERY_RESULT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("QUERY_RESULT_AVAILABLE"), v8::Uint32::New(GL_QUERY_RESULT_AVAILABLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ARRAY_BUFFER"), v8::Uint32::New(GL_ARRAY_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ELEMENT_ARRAY_BUFFER"), v8::Uint32::New(GL_ELEMENT_ARRAY_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ARRAY_BUFFER_BINDING"), v8::Uint32::New(GL_ARRAY_BUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ELEMENT_ARRAY_BUFFER_BINDING"), v8::Uint32::New(GL_ELEMENT_ARRAY_BUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ATTRIB_ARRAY_BUFFER_BINDING"), v8::Uint32::New(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("READ_ONLY"), v8::Uint32::New(GL_READ_ONLY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("WRITE_ONLY"), v8::Uint32::New(GL_WRITE_ONLY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("READ_WRITE"), v8::Uint32::New(GL_READ_WRITE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BUFFER_ACCESS"), v8::Uint32::New(GL_BUFFER_ACCESS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BUFFER_MAPPED"), v8::Uint32::New(GL_BUFFER_MAPPED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BUFFER_MAP_POINTER"), v8::Uint32::New(GL_BUFFER_MAP_POINTER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STREAM_DRAW"), v8::Uint32::New(GL_STREAM_DRAW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STREAM_READ"), v8::Uint32::New(GL_STREAM_READ), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STREAM_COPY"), v8::Uint32::New(GL_STREAM_COPY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STATIC_DRAW"), v8::Uint32::New(GL_STATIC_DRAW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STATIC_READ"), v8::Uint32::New(GL_STATIC_READ), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STATIC_COPY"), v8::Uint32::New(GL_STATIC_COPY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DYNAMIC_DRAW"), v8::Uint32::New(GL_DYNAMIC_DRAW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DYNAMIC_READ"), v8::Uint32::New(GL_DYNAMIC_READ), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DYNAMIC_COPY"), v8::Uint32::New(GL_DYNAMIC_COPY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLES_PASSED"), v8::Uint32::New(GL_SAMPLES_PASSED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_EQUATION_RGB"), v8::Uint32::New(GL_BLEND_EQUATION_RGB), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ATTRIB_ARRAY_ENABLED"), v8::Uint32::New(GL_VERTEX_ATTRIB_ARRAY_ENABLED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ATTRIB_ARRAY_SIZE"), v8::Uint32::New(GL_VERTEX_ATTRIB_ARRAY_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ATTRIB_ARRAY_STRIDE"), v8::Uint32::New(GL_VERTEX_ATTRIB_ARRAY_STRIDE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ATTRIB_ARRAY_TYPE"), v8::Uint32::New(GL_VERTEX_ATTRIB_ARRAY_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CURRENT_VERTEX_ATTRIB"), v8::Uint32::New(GL_CURRENT_VERTEX_ATTRIB), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_PROGRAM_POINT_SIZE"), v8::Uint32::New(GL_VERTEX_PROGRAM_POINT_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ATTRIB_ARRAY_POINTER"), v8::Uint32::New(GL_VERTEX_ATTRIB_ARRAY_POINTER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_BACK_FUNC"), v8::Uint32::New(GL_STENCIL_BACK_FUNC), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_BACK_FAIL"), v8::Uint32::New(GL_STENCIL_BACK_FAIL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_BACK_PASS_DEPTH_FAIL"), v8::Uint32::New(GL_STENCIL_BACK_PASS_DEPTH_FAIL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_BACK_PASS_DEPTH_PASS"), v8::Uint32::New(GL_STENCIL_BACK_PASS_DEPTH_PASS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_DRAW_BUFFERS"), v8::Uint32::New(GL_MAX_DRAW_BUFFERS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER0"), v8::Uint32::New(GL_DRAW_BUFFER0), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER1"), v8::Uint32::New(GL_DRAW_BUFFER1), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER2"), v8::Uint32::New(GL_DRAW_BUFFER2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER3"), v8::Uint32::New(GL_DRAW_BUFFER3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER4"), v8::Uint32::New(GL_DRAW_BUFFER4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER5"), v8::Uint32::New(GL_DRAW_BUFFER5), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER6"), v8::Uint32::New(GL_DRAW_BUFFER6), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER7"), v8::Uint32::New(GL_DRAW_BUFFER7), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER8"), v8::Uint32::New(GL_DRAW_BUFFER8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER9"), v8::Uint32::New(GL_DRAW_BUFFER9), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER10"), v8::Uint32::New(GL_DRAW_BUFFER10), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER11"), v8::Uint32::New(GL_DRAW_BUFFER11), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER12"), v8::Uint32::New(GL_DRAW_BUFFER12), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER13"), v8::Uint32::New(GL_DRAW_BUFFER13), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER14"), v8::Uint32::New(GL_DRAW_BUFFER14), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_BUFFER15"), v8::Uint32::New(GL_DRAW_BUFFER15), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLEND_EQUATION_ALPHA"), v8::Uint32::New(GL_BLEND_EQUATION_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VERTEX_ATTRIBS"), v8::Uint32::New(GL_MAX_VERTEX_ATTRIBS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ATTRIB_ARRAY_NORMALIZED"), v8::Uint32::New(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TEXTURE_IMAGE_UNITS"), v8::Uint32::New(GL_MAX_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAGMENT_SHADER"), v8::Uint32::New(GL_FRAGMENT_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_SHADER"), v8::Uint32::New(GL_VERTEX_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_FRAGMENT_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VERTEX_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_VERTEX_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VARYING_FLOATS"), v8::Uint32::New(GL_MAX_VARYING_FLOATS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VERTEX_TEXTURE_IMAGE_UNITS"), v8::Uint32::New(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_COMBINED_TEXTURE_IMAGE_UNITS"), v8::Uint32::New(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SHADER_TYPE"), v8::Uint32::New(GL_SHADER_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_VEC2"), v8::Uint32::New(GL_FLOAT_VEC2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_VEC3"), v8::Uint32::New(GL_FLOAT_VEC3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_VEC4"), v8::Uint32::New(GL_FLOAT_VEC4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_VEC2"), v8::Uint32::New(GL_INT_VEC2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_VEC3"), v8::Uint32::New(GL_INT_VEC3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_VEC4"), v8::Uint32::New(GL_INT_VEC4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BOOL"), v8::Uint32::New(GL_BOOL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BOOL_VEC2"), v8::Uint32::New(GL_BOOL_VEC2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BOOL_VEC3"), v8::Uint32::New(GL_BOOL_VEC3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BOOL_VEC4"), v8::Uint32::New(GL_BOOL_VEC4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_MAT2"), v8::Uint32::New(GL_FLOAT_MAT2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_MAT3"), v8::Uint32::New(GL_FLOAT_MAT3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_MAT4"), v8::Uint32::New(GL_FLOAT_MAT4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_1D"), v8::Uint32::New(GL_SAMPLER_1D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_2D"), v8::Uint32::New(GL_SAMPLER_2D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_3D"), v8::Uint32::New(GL_SAMPLER_3D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_CUBE"), v8::Uint32::New(GL_SAMPLER_CUBE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_1D_SHADOW"), v8::Uint32::New(GL_SAMPLER_1D_SHADOW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_2D_SHADOW"), v8::Uint32::New(GL_SAMPLER_2D_SHADOW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DELETE_STATUS"), v8::Uint32::New(GL_DELETE_STATUS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPILE_STATUS"), v8::Uint32::New(GL_COMPILE_STATUS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINK_STATUS"), v8::Uint32::New(GL_LINK_STATUS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VALIDATE_STATUS"), v8::Uint32::New(GL_VALIDATE_STATUS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INFO_LOG_LENGTH"), v8::Uint32::New(GL_INFO_LOG_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ATTACHED_SHADERS"), v8::Uint32::New(GL_ATTACHED_SHADERS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_UNIFORMS"), v8::Uint32::New(GL_ACTIVE_UNIFORMS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_UNIFORM_MAX_LENGTH"), v8::Uint32::New(GL_ACTIVE_UNIFORM_MAX_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SHADER_SOURCE_LENGTH"), v8::Uint32::New(GL_SHADER_SOURCE_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_ATTRIBUTES"), v8::Uint32::New(GL_ACTIVE_ATTRIBUTES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_ATTRIBUTE_MAX_LENGTH"), v8::Uint32::New(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAGMENT_SHADER_DERIVATIVE_HINT"), v8::Uint32::New(GL_FRAGMENT_SHADER_DERIVATIVE_HINT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SHADING_LANGUAGE_VERSION"), v8::Uint32::New(GL_SHADING_LANGUAGE_VERSION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CURRENT_PROGRAM"), v8::Uint32::New(GL_CURRENT_PROGRAM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("POINT_SPRITE_COORD_ORIGIN"), v8::Uint32::New(GL_POINT_SPRITE_COORD_ORIGIN), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LOWER_LEFT"), v8::Uint32::New(GL_LOWER_LEFT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UPPER_LEFT"), v8::Uint32::New(GL_UPPER_LEFT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_BACK_REF"), v8::Uint32::New(GL_STENCIL_BACK_REF), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_BACK_VALUE_MASK"), v8::Uint32::New(GL_STENCIL_BACK_VALUE_MASK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_BACK_WRITEMASK"), v8::Uint32::New(GL_STENCIL_BACK_WRITEMASK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PIXEL_PACK_BUFFER"), v8::Uint32::New(GL_PIXEL_PACK_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PIXEL_UNPACK_BUFFER"), v8::Uint32::New(GL_PIXEL_UNPACK_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PIXEL_PACK_BUFFER_BINDING"), v8::Uint32::New(GL_PIXEL_PACK_BUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PIXEL_UNPACK_BUFFER_BINDING"), v8::Uint32::New(GL_PIXEL_UNPACK_BUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_MAT2x3"), v8::Uint32::New(GL_FLOAT_MAT2x3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_MAT2x4"), v8::Uint32::New(GL_FLOAT_MAT2x4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_MAT3x2"), v8::Uint32::New(GL_FLOAT_MAT3x2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_MAT3x4"), v8::Uint32::New(GL_FLOAT_MAT3x4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_MAT4x2"), v8::Uint32::New(GL_FLOAT_MAT4x2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_MAT4x3"), v8::Uint32::New(GL_FLOAT_MAT4x3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SRGB"), v8::Uint32::New(GL_SRGB), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SRGB8"), v8::Uint32::New(GL_SRGB8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SRGB_ALPHA"), v8::Uint32::New(GL_SRGB_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SRGB8_ALPHA8"), v8::Uint32::New(GL_SRGB8_ALPHA8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_SRGB"), v8::Uint32::New(GL_COMPRESSED_SRGB), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_SRGB_ALPHA"), v8::Uint32::New(GL_COMPRESSED_SRGB_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPARE_REF_TO_TEXTURE"), v8::Uint32::New(GL_COMPARE_REF_TO_TEXTURE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLIP_DISTANCE0"), v8::Uint32::New(GL_CLIP_DISTANCE0), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLIP_DISTANCE1"), v8::Uint32::New(GL_CLIP_DISTANCE1), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLIP_DISTANCE2"), v8::Uint32::New(GL_CLIP_DISTANCE2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLIP_DISTANCE3"), v8::Uint32::New(GL_CLIP_DISTANCE3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLIP_DISTANCE4"), v8::Uint32::New(GL_CLIP_DISTANCE4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLIP_DISTANCE5"), v8::Uint32::New(GL_CLIP_DISTANCE5), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLIP_DISTANCE6"), v8::Uint32::New(GL_CLIP_DISTANCE6), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLIP_DISTANCE7"), v8::Uint32::New(GL_CLIP_DISTANCE7), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_CLIP_DISTANCES"), v8::Uint32::New(GL_MAX_CLIP_DISTANCES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAJOR_VERSION"), v8::Uint32::New(GL_MAJOR_VERSION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MINOR_VERSION"), v8::Uint32::New(GL_MINOR_VERSION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NUM_EXTENSIONS"), v8::Uint32::New(GL_NUM_EXTENSIONS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CONTEXT_FLAGS"), v8::Uint32::New(GL_CONTEXT_FLAGS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_RED"), v8::Uint32::New(GL_COMPRESSED_RED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_RG"), v8::Uint32::New(GL_COMPRESSED_RG), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT"), v8::Uint32::New(GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA32F"), v8::Uint32::New(GL_RGBA32F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB32F"), v8::Uint32::New(GL_RGB32F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA16F"), v8::Uint32::New(GL_RGBA16F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB16F"), v8::Uint32::New(GL_RGB16F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ATTRIB_ARRAY_INTEGER"), v8::Uint32::New(GL_VERTEX_ATTRIB_ARRAY_INTEGER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_ARRAY_TEXTURE_LAYERS"), v8::Uint32::New(GL_MAX_ARRAY_TEXTURE_LAYERS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MIN_PROGRAM_TEXEL_OFFSET"), v8::Uint32::New(GL_MIN_PROGRAM_TEXEL_OFFSET), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_PROGRAM_TEXEL_OFFSET"), v8::Uint32::New(GL_MAX_PROGRAM_TEXEL_OFFSET), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CLAMP_READ_COLOR"), v8::Uint32::New(GL_CLAMP_READ_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FIXED_ONLY"), v8::Uint32::New(GL_FIXED_ONLY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VARYING_COMPONENTS"), v8::Uint32::New(GL_MAX_VARYING_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_1D_ARRAY"), v8::Uint32::New(GL_TEXTURE_1D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_1D_ARRAY"), v8::Uint32::New(GL_PROXY_TEXTURE_1D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_2D_ARRAY"), v8::Uint32::New(GL_TEXTURE_2D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_2D_ARRAY"), v8::Uint32::New(GL_PROXY_TEXTURE_2D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_1D_ARRAY"), v8::Uint32::New(GL_TEXTURE_BINDING_1D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_2D_ARRAY"), v8::Uint32::New(GL_TEXTURE_BINDING_2D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R11F_G11F_B10F"), v8::Uint32::New(GL_R11F_G11F_B10F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_10F_11F_11F_REV"), v8::Uint32::New(GL_UNSIGNED_INT_10F_11F_11F_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB9_E5"), v8::Uint32::New(GL_RGB9_E5), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_5_9_9_9_REV"), v8::Uint32::New(GL_UNSIGNED_INT_5_9_9_9_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_SHARED_SIZE"), v8::Uint32::New(GL_TEXTURE_SHARED_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_BUFFER_MODE"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_BUFFER_MODE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS"), v8::Uint32::New(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_VARYINGS"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_VARYINGS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_BUFFER_START"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_BUFFER_START), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_BUFFER_SIZE"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_BUFFER_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PRIMITIVES_GENERATED"), v8::Uint32::New(GL_PRIMITIVES_GENERATED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RASTERIZER_DISCARD"), v8::Uint32::New(GL_RASTERIZER_DISCARD), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS"), v8::Uint32::New(GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS"), v8::Uint32::New(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INTERLEAVED_ATTRIBS"), v8::Uint32::New(GL_INTERLEAVED_ATTRIBS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SEPARATE_ATTRIBS"), v8::Uint32::New(GL_SEPARATE_ATTRIBS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_BUFFER"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_BUFFER_BINDING"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_BUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA32UI"), v8::Uint32::New(GL_RGBA32UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB32UI"), v8::Uint32::New(GL_RGB32UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA16UI"), v8::Uint32::New(GL_RGBA16UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB16UI"), v8::Uint32::New(GL_RGB16UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA8UI"), v8::Uint32::New(GL_RGBA8UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB8UI"), v8::Uint32::New(GL_RGB8UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA32I"), v8::Uint32::New(GL_RGBA32I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB32I"), v8::Uint32::New(GL_RGB32I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA16I"), v8::Uint32::New(GL_RGBA16I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB16I"), v8::Uint32::New(GL_RGB16I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA8I"), v8::Uint32::New(GL_RGBA8I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB8I"), v8::Uint32::New(GL_RGB8I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RED_INTEGER"), v8::Uint32::New(GL_RED_INTEGER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GREEN_INTEGER"), v8::Uint32::New(GL_GREEN_INTEGER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BLUE_INTEGER"), v8::Uint32::New(GL_BLUE_INTEGER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB_INTEGER"), v8::Uint32::New(GL_RGB_INTEGER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA_INTEGER"), v8::Uint32::New(GL_RGBA_INTEGER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BGR_INTEGER"), v8::Uint32::New(GL_BGR_INTEGER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BGRA_INTEGER"), v8::Uint32::New(GL_BGRA_INTEGER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_1D_ARRAY"), v8::Uint32::New(GL_SAMPLER_1D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_2D_ARRAY"), v8::Uint32::New(GL_SAMPLER_2D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_1D_ARRAY_SHADOW"), v8::Uint32::New(GL_SAMPLER_1D_ARRAY_SHADOW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_2D_ARRAY_SHADOW"), v8::Uint32::New(GL_SAMPLER_2D_ARRAY_SHADOW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_CUBE_SHADOW"), v8::Uint32::New(GL_SAMPLER_CUBE_SHADOW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_VEC2"), v8::Uint32::New(GL_UNSIGNED_INT_VEC2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_VEC3"), v8::Uint32::New(GL_UNSIGNED_INT_VEC3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_VEC4"), v8::Uint32::New(GL_UNSIGNED_INT_VEC4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_1D"), v8::Uint32::New(GL_INT_SAMPLER_1D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_2D"), v8::Uint32::New(GL_INT_SAMPLER_2D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_3D"), v8::Uint32::New(GL_INT_SAMPLER_3D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_CUBE"), v8::Uint32::New(GL_INT_SAMPLER_CUBE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_1D_ARRAY"), v8::Uint32::New(GL_INT_SAMPLER_1D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_2D_ARRAY"), v8::Uint32::New(GL_INT_SAMPLER_2D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_1D"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_1D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_2D"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_2D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_3D"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_3D), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_CUBE"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_CUBE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_1D_ARRAY"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_1D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_2D_ARRAY"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_2D_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("QUERY_WAIT"), v8::Uint32::New(GL_QUERY_WAIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("QUERY_NO_WAIT"), v8::Uint32::New(GL_QUERY_NO_WAIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("QUERY_BY_REGION_WAIT"), v8::Uint32::New(GL_QUERY_BY_REGION_WAIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("QUERY_BY_REGION_NO_WAIT"), v8::Uint32::New(GL_QUERY_BY_REGION_NO_WAIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BUFFER_ACCESS_FLAGS"), v8::Uint32::New(GL_BUFFER_ACCESS_FLAGS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BUFFER_MAP_LENGTH"), v8::Uint32::New(GL_BUFFER_MAP_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("BUFFER_MAP_OFFSET"), v8::Uint32::New(GL_BUFFER_MAP_OFFSET), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_2D_RECT"), v8::Uint32::New(GL_SAMPLER_2D_RECT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_2D_RECT_SHADOW"), v8::Uint32::New(GL_SAMPLER_2D_RECT_SHADOW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_BUFFER"), v8::Uint32::New(GL_SAMPLER_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_2D_RECT"), v8::Uint32::New(GL_INT_SAMPLER_2D_RECT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_BUFFER"), v8::Uint32::New(GL_INT_SAMPLER_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_2D_RECT"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_2D_RECT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_BUFFER"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BUFFER"), v8::Uint32::New(GL_TEXTURE_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TEXTURE_BUFFER_SIZE"), v8::Uint32::New(GL_MAX_TEXTURE_BUFFER_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_BUFFER"), v8::Uint32::New(GL_TEXTURE_BINDING_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BUFFER_DATA_STORE_BINDING"), v8::Uint32::New(GL_TEXTURE_BUFFER_DATA_STORE_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_RECTANGLE"), v8::Uint32::New(GL_TEXTURE_RECTANGLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_RECTANGLE"), v8::Uint32::New(GL_TEXTURE_BINDING_RECTANGLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_RECTANGLE"), v8::Uint32::New(GL_PROXY_TEXTURE_RECTANGLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_RECTANGLE_TEXTURE_SIZE"), v8::Uint32::New(GL_MAX_RECTANGLE_TEXTURE_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R8_SNORM"), v8::Uint32::New(GL_R8_SNORM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG8_SNORM"), v8::Uint32::New(GL_RG8_SNORM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB8_SNORM"), v8::Uint32::New(GL_RGB8_SNORM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA8_SNORM"), v8::Uint32::New(GL_RGBA8_SNORM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R16_SNORM"), v8::Uint32::New(GL_R16_SNORM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG16_SNORM"), v8::Uint32::New(GL_RG16_SNORM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB16_SNORM"), v8::Uint32::New(GL_RGB16_SNORM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGBA16_SNORM"), v8::Uint32::New(GL_RGBA16_SNORM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SIGNED_NORMALIZED"), v8::Uint32::New(GL_SIGNED_NORMALIZED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PRIMITIVE_RESTART"), v8::Uint32::New(GL_PRIMITIVE_RESTART), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PRIMITIVE_RESTART_INDEX"), v8::Uint32::New(GL_PRIMITIVE_RESTART_INDEX), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CONTEXT_CORE_PROFILE_BIT"), v8::Uint32::New(GL_CONTEXT_CORE_PROFILE_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CONTEXT_COMPATIBILITY_PROFILE_BIT"), v8::Uint32::New(GL_CONTEXT_COMPATIBILITY_PROFILE_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINES_ADJACENCY"), v8::Uint32::New(GL_LINES_ADJACENCY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LINE_STRIP_ADJACENCY"), v8::Uint32::New(GL_LINE_STRIP_ADJACENCY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRIANGLES_ADJACENCY"), v8::Uint32::New(GL_TRIANGLES_ADJACENCY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRIANGLE_STRIP_ADJACENCY"), v8::Uint32::New(GL_TRIANGLE_STRIP_ADJACENCY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROGRAM_POINT_SIZE"), v8::Uint32::New(GL_PROGRAM_POINT_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_GEOMETRY_TEXTURE_IMAGE_UNITS"), v8::Uint32::New(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_LAYERED"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_LAYERED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"), v8::Uint32::New(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GEOMETRY_SHADER"), v8::Uint32::New(GL_GEOMETRY_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GEOMETRY_VERTICES_OUT"), v8::Uint32::New(GL_GEOMETRY_VERTICES_OUT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GEOMETRY_INPUT_TYPE"), v8::Uint32::New(GL_GEOMETRY_INPUT_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GEOMETRY_OUTPUT_TYPE"), v8::Uint32::New(GL_GEOMETRY_OUTPUT_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_GEOMETRY_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_GEOMETRY_OUTPUT_VERTICES"), v8::Uint32::New(GL_MAX_GEOMETRY_OUTPUT_VERTICES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VERTEX_OUTPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_VERTEX_OUTPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_GEOMETRY_INPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_GEOMETRY_INPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_GEOMETRY_OUTPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_FRAGMENT_INPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_FRAGMENT_INPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CONTEXT_PROFILE_MASK"), v8::Uint32::New(GL_CONTEXT_PROFILE_MASK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ATTRIB_ARRAY_DIVISOR"), v8::Uint32::New(GL_VERTEX_ATTRIB_ARRAY_DIVISOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_SHADING"), v8::Uint32::New(GL_SAMPLE_SHADING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MIN_SAMPLE_SHADING_VALUE"), v8::Uint32::New(GL_MIN_SAMPLE_SHADING_VALUE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MIN_PROGRAM_TEXTURE_GATHER_OFFSET"), v8::Uint32::New(GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_PROGRAM_TEXTURE_GATHER_OFFSET"), v8::Uint32::New(GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_CUBE_MAP_ARRAY"), v8::Uint32::New(GL_TEXTURE_CUBE_MAP_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_CUBE_MAP_ARRAY"), v8::Uint32::New(GL_TEXTURE_BINDING_CUBE_MAP_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_CUBE_MAP_ARRAY"), v8::Uint32::New(GL_PROXY_TEXTURE_CUBE_MAP_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_CUBE_MAP_ARRAY"), v8::Uint32::New(GL_SAMPLER_CUBE_MAP_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_CUBE_MAP_ARRAY_SHADOW"), v8::Uint32::New(GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_CUBE_MAP_ARRAY"), v8::Uint32::New(GL_INT_SAMPLER_CUBE_MAP_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_COMPONENT32F"), v8::Uint32::New(GL_DEPTH_COMPONENT32F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH32F_STENCIL8"), v8::Uint32::New(GL_DEPTH32F_STENCIL8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FLOAT_32_UNSIGNED_INT_24_8_REV"), v8::Uint32::New(GL_FLOAT_32_UNSIGNED_INT_24_8_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INVALID_FRAMEBUFFER_OPERATION"), v8::Uint32::New(GL_INVALID_FRAMEBUFFER_OPERATION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_RED_SIZE"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_GREEN_SIZE"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_BLUE_SIZE"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_DEFAULT"), v8::Uint32::New(GL_FRAMEBUFFER_DEFAULT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_UNDEFINED"), v8::Uint32::New(GL_FRAMEBUFFER_UNDEFINED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_STENCIL_ATTACHMENT"), v8::Uint32::New(GL_DEPTH_STENCIL_ATTACHMENT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_RENDERBUFFER_SIZE"), v8::Uint32::New(GL_MAX_RENDERBUFFER_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_STENCIL"), v8::Uint32::New(GL_DEPTH_STENCIL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_24_8"), v8::Uint32::New(GL_UNSIGNED_INT_24_8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH24_STENCIL8"), v8::Uint32::New(GL_DEPTH24_STENCIL8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_STENCIL_SIZE"), v8::Uint32::New(GL_TEXTURE_STENCIL_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_RED_TYPE"), v8::Uint32::New(GL_TEXTURE_RED_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_GREEN_TYPE"), v8::Uint32::New(GL_TEXTURE_GREEN_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BLUE_TYPE"), v8::Uint32::New(GL_TEXTURE_BLUE_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_ALPHA_TYPE"), v8::Uint32::New(GL_TEXTURE_ALPHA_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_DEPTH_TYPE"), v8::Uint32::New(GL_TEXTURE_DEPTH_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_NORMALIZED"), v8::Uint32::New(GL_UNSIGNED_NORMALIZED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_BINDING"), v8::Uint32::New(GL_FRAMEBUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_BINDING"), v8::Uint32::New(GL_RENDERBUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("READ_FRAMEBUFFER"), v8::Uint32::New(GL_READ_FRAMEBUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_FRAMEBUFFER"), v8::Uint32::New(GL_DRAW_FRAMEBUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("READ_FRAMEBUFFER_BINDING"), v8::Uint32::New(GL_READ_FRAMEBUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_SAMPLES"), v8::Uint32::New(GL_RENDERBUFFER_SAMPLES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_OBJECT_NAME"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER"), v8::Uint32::New(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_COMPLETE"), v8::Uint32::New(GL_FRAMEBUFFER_COMPLETE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_INCOMPLETE_ATTACHMENT"), v8::Uint32::New(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"), v8::Uint32::New(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"), v8::Uint32::New(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_INCOMPLETE_READ_BUFFER"), v8::Uint32::New(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_UNSUPPORTED"), v8::Uint32::New(GL_FRAMEBUFFER_UNSUPPORTED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_COLOR_ATTACHMENTS"), v8::Uint32::New(GL_MAX_COLOR_ATTACHMENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT0"), v8::Uint32::New(GL_COLOR_ATTACHMENT0), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT1"), v8::Uint32::New(GL_COLOR_ATTACHMENT1), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT2"), v8::Uint32::New(GL_COLOR_ATTACHMENT2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT3"), v8::Uint32::New(GL_COLOR_ATTACHMENT3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT4"), v8::Uint32::New(GL_COLOR_ATTACHMENT4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT5"), v8::Uint32::New(GL_COLOR_ATTACHMENT5), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT6"), v8::Uint32::New(GL_COLOR_ATTACHMENT6), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT7"), v8::Uint32::New(GL_COLOR_ATTACHMENT7), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT8"), v8::Uint32::New(GL_COLOR_ATTACHMENT8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT9"), v8::Uint32::New(GL_COLOR_ATTACHMENT9), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT10"), v8::Uint32::New(GL_COLOR_ATTACHMENT10), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT11"), v8::Uint32::New(GL_COLOR_ATTACHMENT11), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT12"), v8::Uint32::New(GL_COLOR_ATTACHMENT12), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT13"), v8::Uint32::New(GL_COLOR_ATTACHMENT13), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT14"), v8::Uint32::New(GL_COLOR_ATTACHMENT14), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COLOR_ATTACHMENT15"), v8::Uint32::New(GL_COLOR_ATTACHMENT15), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_ATTACHMENT"), v8::Uint32::New(GL_DEPTH_ATTACHMENT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_ATTACHMENT"), v8::Uint32::New(GL_STENCIL_ATTACHMENT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER"), v8::Uint32::New(GL_FRAMEBUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER"), v8::Uint32::New(GL_RENDERBUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_WIDTH"), v8::Uint32::New(GL_RENDERBUFFER_WIDTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_HEIGHT"), v8::Uint32::New(GL_RENDERBUFFER_HEIGHT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_INTERNAL_FORMAT"), v8::Uint32::New(GL_RENDERBUFFER_INTERNAL_FORMAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_INDEX1"), v8::Uint32::New(GL_STENCIL_INDEX1), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_INDEX4"), v8::Uint32::New(GL_STENCIL_INDEX4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_INDEX8"), v8::Uint32::New(GL_STENCIL_INDEX8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("STENCIL_INDEX16"), v8::Uint32::New(GL_STENCIL_INDEX16), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_RED_SIZE"), v8::Uint32::New(GL_RENDERBUFFER_RED_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_GREEN_SIZE"), v8::Uint32::New(GL_RENDERBUFFER_GREEN_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_BLUE_SIZE"), v8::Uint32::New(GL_RENDERBUFFER_BLUE_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_ALPHA_SIZE"), v8::Uint32::New(GL_RENDERBUFFER_ALPHA_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_DEPTH_SIZE"), v8::Uint32::New(GL_RENDERBUFFER_DEPTH_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RENDERBUFFER_STENCIL_SIZE"), v8::Uint32::New(GL_RENDERBUFFER_STENCIL_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"), v8::Uint32::New(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_SAMPLES"), v8::Uint32::New(GL_MAX_SAMPLES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAMEBUFFER_SRGB"), v8::Uint32::New(GL_FRAMEBUFFER_SRGB), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("HALF_FLOAT"), v8::Uint32::New(GL_HALF_FLOAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAP_READ_BIT"), v8::Uint32::New(GL_MAP_READ_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAP_WRITE_BIT"), v8::Uint32::New(GL_MAP_WRITE_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAP_INVALIDATE_RANGE_BIT"), v8::Uint32::New(GL_MAP_INVALIDATE_RANGE_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAP_INVALIDATE_BUFFER_BIT"), v8::Uint32::New(GL_MAP_INVALIDATE_BUFFER_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAP_FLUSH_EXPLICIT_BIT"), v8::Uint32::New(GL_MAP_FLUSH_EXPLICIT_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAP_UNSYNCHRONIZED_BIT"), v8::Uint32::New(GL_MAP_UNSYNCHRONIZED_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_RED_RGTC1"), v8::Uint32::New(GL_COMPRESSED_RED_RGTC1), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_SIGNED_RED_RGTC1"), v8::Uint32::New(GL_COMPRESSED_SIGNED_RED_RGTC1), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_RG_RGTC2"), v8::Uint32::New(GL_COMPRESSED_RG_RGTC2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPRESSED_SIGNED_RG_RGTC2"), v8::Uint32::New(GL_COMPRESSED_SIGNED_RG_RGTC2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG"), v8::Uint32::New(GL_RG), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG_INTEGER"), v8::Uint32::New(GL_RG_INTEGER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R8"), v8::Uint32::New(GL_R8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R16"), v8::Uint32::New(GL_R16), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG8"), v8::Uint32::New(GL_RG8), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG16"), v8::Uint32::New(GL_RG16), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R16F"), v8::Uint32::New(GL_R16F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R32F"), v8::Uint32::New(GL_R32F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG16F"), v8::Uint32::New(GL_RG16F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG32F"), v8::Uint32::New(GL_RG32F), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R8I"), v8::Uint32::New(GL_R8I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R8UI"), v8::Uint32::New(GL_R8UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R16I"), v8::Uint32::New(GL_R16I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R16UI"), v8::Uint32::New(GL_R16UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R32I"), v8::Uint32::New(GL_R32I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("R32UI"), v8::Uint32::New(GL_R32UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG8I"), v8::Uint32::New(GL_RG8I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG8UI"), v8::Uint32::New(GL_RG8UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG16I"), v8::Uint32::New(GL_RG16I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG16UI"), v8::Uint32::New(GL_RG16UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG32I"), v8::Uint32::New(GL_RG32I), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RG32UI"), v8::Uint32::New(GL_RG32UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_ARRAY_BINDING"), v8::Uint32::New(GL_VERTEX_ARRAY_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BUFFER"), v8::Uint32::New(GL_UNIFORM_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BUFFER_BINDING"), v8::Uint32::New(GL_UNIFORM_BUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BUFFER_START"), v8::Uint32::New(GL_UNIFORM_BUFFER_START), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BUFFER_SIZE"), v8::Uint32::New(GL_UNIFORM_BUFFER_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VERTEX_UNIFORM_BLOCKS"), v8::Uint32::New(GL_MAX_VERTEX_UNIFORM_BLOCKS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_GEOMETRY_UNIFORM_BLOCKS"), v8::Uint32::New(GL_MAX_GEOMETRY_UNIFORM_BLOCKS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_FRAGMENT_UNIFORM_BLOCKS"), v8::Uint32::New(GL_MAX_FRAGMENT_UNIFORM_BLOCKS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_COMBINED_UNIFORM_BLOCKS"), v8::Uint32::New(GL_MAX_COMBINED_UNIFORM_BLOCKS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_UNIFORM_BUFFER_BINDINGS"), v8::Uint32::New(GL_MAX_UNIFORM_BUFFER_BINDINGS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_UNIFORM_BLOCK_SIZE"), v8::Uint32::New(GL_MAX_UNIFORM_BLOCK_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BUFFER_OFFSET_ALIGNMENT"), v8::Uint32::New(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH"), v8::Uint32::New(GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_UNIFORM_BLOCKS"), v8::Uint32::New(GL_ACTIVE_UNIFORM_BLOCKS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_TYPE"), v8::Uint32::New(GL_UNIFORM_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_SIZE"), v8::Uint32::New(GL_UNIFORM_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_NAME_LENGTH"), v8::Uint32::New(GL_UNIFORM_NAME_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_INDEX"), v8::Uint32::New(GL_UNIFORM_BLOCK_INDEX), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_OFFSET"), v8::Uint32::New(GL_UNIFORM_OFFSET), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_ARRAY_STRIDE"), v8::Uint32::New(GL_UNIFORM_ARRAY_STRIDE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_MATRIX_STRIDE"), v8::Uint32::New(GL_UNIFORM_MATRIX_STRIDE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_IS_ROW_MAJOR"), v8::Uint32::New(GL_UNIFORM_IS_ROW_MAJOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_BINDING"), v8::Uint32::New(GL_UNIFORM_BLOCK_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_DATA_SIZE"), v8::Uint32::New(GL_UNIFORM_BLOCK_DATA_SIZE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_NAME_LENGTH"), v8::Uint32::New(GL_UNIFORM_BLOCK_NAME_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_ACTIVE_UNIFORMS"), v8::Uint32::New(GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES"), v8::Uint32::New(GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER"), v8::Uint32::New(GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER"), v8::Uint32::New(GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER"), v8::Uint32::New(GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COPY_READ_BUFFER"), v8::Uint32::New(GL_COPY_READ_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COPY_WRITE_BUFFER"), v8::Uint32::New(GL_COPY_WRITE_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DEPTH_CLAMP"), v8::Uint32::New(GL_DEPTH_CLAMP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FIRST_VERTEX_CONVENTION"), v8::Uint32::New(GL_FIRST_VERTEX_CONVENTION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LAST_VERTEX_CONVENTION"), v8::Uint32::New(GL_LAST_VERTEX_CONVENTION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROVOKING_VERTEX"), v8::Uint32::New(GL_PROVOKING_VERTEX), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_CUBE_MAP_SEAMLESS"), v8::Uint32::New(GL_TEXTURE_CUBE_MAP_SEAMLESS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_SERVER_WAIT_TIMEOUT"), v8::Uint32::New(GL_MAX_SERVER_WAIT_TIMEOUT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("OBJECT_TYPE"), v8::Uint32::New(GL_OBJECT_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SYNC_CONDITION"), v8::Uint32::New(GL_SYNC_CONDITION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SYNC_STATUS"), v8::Uint32::New(GL_SYNC_STATUS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SYNC_FLAGS"), v8::Uint32::New(GL_SYNC_FLAGS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SYNC_FENCE"), v8::Uint32::New(GL_SYNC_FENCE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SYNC_GPU_COMMANDS_COMPLETE"), v8::Uint32::New(GL_SYNC_GPU_COMMANDS_COMPLETE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNALED"), v8::Uint32::New(GL_UNSIGNALED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SIGNALED"), v8::Uint32::New(GL_SIGNALED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ALREADY_SIGNALED"), v8::Uint32::New(GL_ALREADY_SIGNALED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TIMEOUT_EXPIRED"), v8::Uint32::New(GL_TIMEOUT_EXPIRED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("CONDITION_SATISFIED"), v8::Uint32::New(GL_CONDITION_SATISFIED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("WAIT_FAILED"), v8::Uint32::New(GL_WAIT_FAILED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SYNC_FLUSH_COMMANDS_BIT"), v8::Uint32::New(GL_SYNC_FLUSH_COMMANDS_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_POSITION"), v8::Uint32::New(GL_SAMPLE_POSITION), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_MASK"), v8::Uint32::New(GL_SAMPLE_MASK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLE_MASK_VALUE"), v8::Uint32::New(GL_SAMPLE_MASK_VALUE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_SAMPLE_MASK_WORDS"), v8::Uint32::New(GL_MAX_SAMPLE_MASK_WORDS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_2D_MULTISAMPLE"), v8::Uint32::New(GL_TEXTURE_2D_MULTISAMPLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_2D_MULTISAMPLE"), v8::Uint32::New(GL_PROXY_TEXTURE_2D_MULTISAMPLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_2D_MULTISAMPLE_ARRAY"), v8::Uint32::New(GL_TEXTURE_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY"), v8::Uint32::New(GL_PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_2D_MULTISAMPLE"), v8::Uint32::New(GL_TEXTURE_BINDING_2D_MULTISAMPLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY"), v8::Uint32::New(GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_SAMPLES"), v8::Uint32::New(GL_TEXTURE_SAMPLES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_FIXED_SAMPLE_LOCATIONS"), v8::Uint32::New(GL_TEXTURE_FIXED_SAMPLE_LOCATIONS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_2D_MULTISAMPLE"), v8::Uint32::New(GL_SAMPLER_2D_MULTISAMPLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_2D_MULTISAMPLE"), v8::Uint32::New(GL_INT_SAMPLER_2D_MULTISAMPLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_2D_MULTISAMPLE_ARRAY"), v8::Uint32::New(GL_SAMPLER_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_SAMPLER_2D_MULTISAMPLE_ARRAY"), v8::Uint32::New(GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY"), v8::Uint32::New(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_COLOR_TEXTURE_SAMPLES"), v8::Uint32::New(GL_MAX_COLOR_TEXTURE_SAMPLES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_DEPTH_TEXTURE_SAMPLES"), v8::Uint32::New(GL_MAX_DEPTH_TEXTURE_SAMPLES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_INTEGER_SAMPLES"), v8::Uint32::New(GL_MAX_INTEGER_SAMPLES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SRC1_COLOR"), v8::Uint32::New(GL_SRC1_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SRC1_ALPHA"), v8::Uint32::New(GL_SRC1_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ONE_MINUS_SRC1_COLOR"), v8::Uint32::New(GL_ONE_MINUS_SRC1_COLOR), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ONE_MINUS_SRC1_ALPHA"), v8::Uint32::New(GL_ONE_MINUS_SRC1_ALPHA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_DUAL_SOURCE_DRAW_BUFFERS"), v8::Uint32::New(GL_MAX_DUAL_SOURCE_DRAW_BUFFERS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ANY_SAMPLES_PASSED"), v8::Uint32::New(GL_ANY_SAMPLES_PASSED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SAMPLER_BINDING"), v8::Uint32::New(GL_SAMPLER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB10_A2UI"), v8::Uint32::New(GL_RGB10_A2UI), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_SWIZZLE_R"), v8::Uint32::New(GL_TEXTURE_SWIZZLE_R), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_SWIZZLE_G"), v8::Uint32::New(GL_TEXTURE_SWIZZLE_G), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_SWIZZLE_B"), v8::Uint32::New(GL_TEXTURE_SWIZZLE_B), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_SWIZZLE_A"), v8::Uint32::New(GL_TEXTURE_SWIZZLE_A), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TEXTURE_SWIZZLE_RGBA"), v8::Uint32::New(GL_TEXTURE_SWIZZLE_RGBA), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TIME_ELAPSED"), v8::Uint32::New(GL_TIME_ELAPSED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TIMESTAMP"), v8::Uint32::New(GL_TIMESTAMP), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("INT_2_10_10_10_REV"), v8::Uint32::New(GL_INT_2_10_10_10_REV), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_INDIRECT_BUFFER"), v8::Uint32::New(GL_DRAW_INDIRECT_BUFFER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DRAW_INDIRECT_BUFFER_BINDING"), v8::Uint32::New(GL_DRAW_INDIRECT_BUFFER_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GEOMETRY_SHADER_INVOCATIONS"), v8::Uint32::New(GL_GEOMETRY_SHADER_INVOCATIONS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_GEOMETRY_SHADER_INVOCATIONS"), v8::Uint32::New(GL_MAX_GEOMETRY_SHADER_INVOCATIONS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MIN_FRAGMENT_INTERPOLATION_OFFSET"), v8::Uint32::New(GL_MIN_FRAGMENT_INTERPOLATION_OFFSET), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_FRAGMENT_INTERPOLATION_OFFSET"), v8::Uint32::New(GL_MAX_FRAGMENT_INTERPOLATION_OFFSET), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAGMENT_INTERPOLATION_OFFSET_BITS"), v8::Uint32::New(GL_FRAGMENT_INTERPOLATION_OFFSET_BITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_VEC2"), v8::Uint32::New(GL_DOUBLE_VEC2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_VEC3"), v8::Uint32::New(GL_DOUBLE_VEC3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_VEC4"), v8::Uint32::New(GL_DOUBLE_VEC4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_MAT2"), v8::Uint32::New(GL_DOUBLE_MAT2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_MAT3"), v8::Uint32::New(GL_DOUBLE_MAT3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_MAT4"), v8::Uint32::New(GL_DOUBLE_MAT4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_MAT2x3"), v8::Uint32::New(GL_DOUBLE_MAT2x3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_MAT2x4"), v8::Uint32::New(GL_DOUBLE_MAT2x4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_MAT3x2"), v8::Uint32::New(GL_DOUBLE_MAT3x2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_MAT3x4"), v8::Uint32::New(GL_DOUBLE_MAT3x4), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_MAT4x2"), v8::Uint32::New(GL_DOUBLE_MAT4x2), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("DOUBLE_MAT4x3"), v8::Uint32::New(GL_DOUBLE_MAT4x3), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_SUBROUTINES"), v8::Uint32::New(GL_ACTIVE_SUBROUTINES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_SUBROUTINE_UNIFORMS"), v8::Uint32::New(GL_ACTIVE_SUBROUTINE_UNIFORMS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS"), v8::Uint32::New(GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_SUBROUTINE_MAX_LENGTH"), v8::Uint32::New(GL_ACTIVE_SUBROUTINE_MAX_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH"), v8::Uint32::New(GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_SUBROUTINES"), v8::Uint32::New(GL_MAX_SUBROUTINES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_SUBROUTINE_UNIFORM_LOCATIONS"), v8::Uint32::New(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NUM_COMPATIBLE_SUBROUTINES"), v8::Uint32::New(GL_NUM_COMPATIBLE_SUBROUTINES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("COMPATIBLE_SUBROUTINES"), v8::Uint32::New(GL_COMPATIBLE_SUBROUTINES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PATCHES"), v8::Uint32::New(GL_PATCHES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PATCH_VERTICES"), v8::Uint32::New(GL_PATCH_VERTICES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PATCH_DEFAULT_INNER_LEVEL"), v8::Uint32::New(GL_PATCH_DEFAULT_INNER_LEVEL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PATCH_DEFAULT_OUTER_LEVEL"), v8::Uint32::New(GL_PATCH_DEFAULT_OUTER_LEVEL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TESS_CONTROL_OUTPUT_VERTICES"), v8::Uint32::New(GL_TESS_CONTROL_OUTPUT_VERTICES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TESS_GEN_MODE"), v8::Uint32::New(GL_TESS_GEN_MODE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TESS_GEN_SPACING"), v8::Uint32::New(GL_TESS_GEN_SPACING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TESS_GEN_VERTEX_ORDER"), v8::Uint32::New(GL_TESS_GEN_VERTEX_ORDER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TESS_GEN_POINT_MODE"), v8::Uint32::New(GL_TESS_GEN_POINT_MODE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("QUADS"), v8::Uint32::New(GL_QUADS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ISOLINES"), v8::Uint32::New(GL_ISOLINES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRACTIONAL_ODD"), v8::Uint32::New(GL_FRACTIONAL_ODD), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRACTIONAL_EVEN"), v8::Uint32::New(GL_FRACTIONAL_EVEN), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_PATCH_VERTICES"), v8::Uint32::New(GL_MAX_PATCH_VERTICES), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_GEN_LEVEL"), v8::Uint32::New(GL_MAX_TESS_GEN_LEVEL), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_CONTROL_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_EVALUATION_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS"), v8::Uint32::New(GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS"), v8::Uint32::New(GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_CONTROL_OUTPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_PATCH_COMPONENTS"), v8::Uint32::New(GL_MAX_TESS_PATCH_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_EVALUATION_OUTPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_CONTROL_UNIFORM_BLOCKS"), v8::Uint32::New(GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_EVALUATION_UNIFORM_BLOCKS"), v8::Uint32::New(GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_CONTROL_INPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TESS_EVALUATION_INPUT_COMPONENTS"), v8::Uint32::New(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS"), v8::Uint32::New(GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER"), v8::Uint32::New(GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER"), v8::Uint32::New(GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TESS_EVALUATION_SHADER"), v8::Uint32::New(GL_TESS_EVALUATION_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TESS_CONTROL_SHADER"), v8::Uint32::New(GL_TESS_CONTROL_SHADER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_BUFFER_PAUSED"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_BUFFER_ACTIVE"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TRANSFORM_FEEDBACK_BINDING"), v8::Uint32::New(GL_TRANSFORM_FEEDBACK_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_TRANSFORM_FEEDBACK_BUFFERS"), v8::Uint32::New(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VERTEX_STREAMS"), v8::Uint32::New(GL_MAX_VERTEX_STREAMS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FIXED"), v8::Uint32::New(GL_FIXED), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("IMPLEMENTATION_COLOR_READ_TYPE"), v8::Uint32::New(GL_IMPLEMENTATION_COLOR_READ_TYPE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("IMPLEMENTATION_COLOR_READ_FORMAT"), v8::Uint32::New(GL_IMPLEMENTATION_COLOR_READ_FORMAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LOW_FLOAT"), v8::Uint32::New(GL_LOW_FLOAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MEDIUM_FLOAT"), v8::Uint32::New(GL_MEDIUM_FLOAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("HIGH_FLOAT"), v8::Uint32::New(GL_HIGH_FLOAT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LOW_INT"), v8::Uint32::New(GL_LOW_INT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MEDIUM_INT"), v8::Uint32::New(GL_MEDIUM_INT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("HIGH_INT"), v8::Uint32::New(GL_HIGH_INT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SHADER_COMPILER"), v8::Uint32::New(GL_SHADER_COMPILER), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("SHADER_BINARY_FORMATS"), v8::Uint32::New(GL_SHADER_BINARY_FORMATS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NUM_SHADER_BINARY_FORMATS"), v8::Uint32::New(GL_NUM_SHADER_BINARY_FORMATS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VERTEX_UNIFORM_VECTORS"), v8::Uint32::New(GL_MAX_VERTEX_UNIFORM_VECTORS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VARYING_VECTORS"), v8::Uint32::New(GL_MAX_VARYING_VECTORS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_FRAGMENT_UNIFORM_VECTORS"), v8::Uint32::New(GL_MAX_FRAGMENT_UNIFORM_VECTORS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("RGB565"), v8::Uint32::New(GL_RGB565), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROGRAM_BINARY_RETRIEVABLE_HINT"), v8::Uint32::New(GL_PROGRAM_BINARY_RETRIEVABLE_HINT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROGRAM_BINARY_LENGTH"), v8::Uint32::New(GL_PROGRAM_BINARY_LENGTH), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("NUM_PROGRAM_BINARY_FORMATS"), v8::Uint32::New(GL_NUM_PROGRAM_BINARY_FORMATS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROGRAM_BINARY_FORMATS"), v8::Uint32::New(GL_PROGRAM_BINARY_FORMATS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VERTEX_SHADER_BIT"), v8::Uint32::New(GL_VERTEX_SHADER_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("FRAGMENT_SHADER_BIT"), v8::Uint32::New(GL_FRAGMENT_SHADER_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("GEOMETRY_SHADER_BIT"), v8::Uint32::New(GL_GEOMETRY_SHADER_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TESS_CONTROL_SHADER_BIT"), v8::Uint32::New(GL_TESS_CONTROL_SHADER_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("TESS_EVALUATION_SHADER_BIT"), v8::Uint32::New(GL_TESS_EVALUATION_SHADER_BIT), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ALL_SHADER_BITS"), v8::Uint32::New(GL_ALL_SHADER_BITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROGRAM_SEPARABLE"), v8::Uint32::New(GL_PROGRAM_SEPARABLE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("ACTIVE_PROGRAM"), v8::Uint32::New(GL_ACTIVE_PROGRAM), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("PROGRAM_PIPELINE_BINDING"), v8::Uint32::New(GL_PROGRAM_PIPELINE_BINDING), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("MAX_VIEWPORTS"), v8::Uint32::New(GL_MAX_VIEWPORTS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VIEWPORT_SUBPIXEL_BITS"), v8::Uint32::New(GL_VIEWPORT_SUBPIXEL_BITS), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VIEWPORT_BOUNDS_RANGE"), v8::Uint32::New(GL_VIEWPORT_BOUNDS_RANGE), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("LAYER_PROVOKING_VERTEX"), v8::Uint32::New(GL_LAYER_PROVOKING_VERTEX), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("VIEWPORT_INDEX_PROVOKING_VERTEX"), v8::Uint32::New(GL_VIEWPORT_INDEX_PROVOKING_VERTEX), v8::ReadOnly);
-    exports->Set(v8::String::NewSymbol("UNDEFINED_VERTEX"), v8::Uint32::New(GL_UNDEFINED_VERTEX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_BUFFER_BIT"), NanNew<v8::Uint32>(GL_DEPTH_BUFFER_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_BUFFER_BIT"), NanNew<v8::Uint32>(GL_STENCIL_BUFFER_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_BUFFER_BIT"), NanNew<v8::Uint32>(GL_COLOR_BUFFER_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FALSE"), NanNew<v8::Uint32>(GL_FALSE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRUE"), NanNew<v8::Uint32>(GL_TRUE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POINTS"), NanNew<v8::Uint32>(GL_POINTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINES"), NanNew<v8::Uint32>(GL_LINES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINE_LOOP"), NanNew<v8::Uint32>(GL_LINE_LOOP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINE_STRIP"), NanNew<v8::Uint32>(GL_LINE_STRIP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRIANGLES"), NanNew<v8::Uint32>(GL_TRIANGLES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRIANGLE_STRIP"), NanNew<v8::Uint32>(GL_TRIANGLE_STRIP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRIANGLE_FAN"), NanNew<v8::Uint32>(GL_TRIANGLE_FAN), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NEVER"), NanNew<v8::Uint32>(GL_NEVER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LESS"), NanNew<v8::Uint32>(GL_LESS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("EQUAL"), NanNew<v8::Uint32>(GL_EQUAL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LEQUAL"), NanNew<v8::Uint32>(GL_LEQUAL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GREATER"), NanNew<v8::Uint32>(GL_GREATER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NOTEQUAL"), NanNew<v8::Uint32>(GL_NOTEQUAL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GEQUAL"), NanNew<v8::Uint32>(GL_GEQUAL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ALWAYS"), NanNew<v8::Uint32>(GL_ALWAYS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ZERO"), NanNew<v8::Uint32>(GL_ZERO), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ONE"), NanNew<v8::Uint32>(GL_ONE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SRC_COLOR"), NanNew<v8::Uint32>(GL_SRC_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ONE_MINUS_SRC_COLOR"), NanNew<v8::Uint32>(GL_ONE_MINUS_SRC_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SRC_ALPHA"), NanNew<v8::Uint32>(GL_SRC_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ONE_MINUS_SRC_ALPHA"), NanNew<v8::Uint32>(GL_ONE_MINUS_SRC_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DST_ALPHA"), NanNew<v8::Uint32>(GL_DST_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ONE_MINUS_DST_ALPHA"), NanNew<v8::Uint32>(GL_ONE_MINUS_DST_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DST_COLOR"), NanNew<v8::Uint32>(GL_DST_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ONE_MINUS_DST_COLOR"), NanNew<v8::Uint32>(GL_ONE_MINUS_DST_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SRC_ALPHA_SATURATE"), NanNew<v8::Uint32>(GL_SRC_ALPHA_SATURATE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NONE"), NanNew<v8::Uint32>(GL_NONE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRONT_LEFT"), NanNew<v8::Uint32>(GL_FRONT_LEFT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRONT_RIGHT"), NanNew<v8::Uint32>(GL_FRONT_RIGHT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BACK_LEFT"), NanNew<v8::Uint32>(GL_BACK_LEFT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BACK_RIGHT"), NanNew<v8::Uint32>(GL_BACK_RIGHT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRONT"), NanNew<v8::Uint32>(GL_FRONT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BACK"), NanNew<v8::Uint32>(GL_BACK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LEFT"), NanNew<v8::Uint32>(GL_LEFT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RIGHT"), NanNew<v8::Uint32>(GL_RIGHT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRONT_AND_BACK"), NanNew<v8::Uint32>(GL_FRONT_AND_BACK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NO_ERROR"), NanNew<v8::Uint32>(GL_NO_ERROR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INVALID_ENUM"), NanNew<v8::Uint32>(GL_INVALID_ENUM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INVALID_VALUE"), NanNew<v8::Uint32>(GL_INVALID_VALUE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INVALID_OPERATION"), NanNew<v8::Uint32>(GL_INVALID_OPERATION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("OUT_OF_MEMORY"), NanNew<v8::Uint32>(GL_OUT_OF_MEMORY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CW"), NanNew<v8::Uint32>(GL_CW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CCW"), NanNew<v8::Uint32>(GL_CCW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POINT_SIZE"), NanNew<v8::Uint32>(GL_POINT_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POINT_SIZE_RANGE"), NanNew<v8::Uint32>(GL_POINT_SIZE_RANGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POINT_SIZE_GRANULARITY"), NanNew<v8::Uint32>(GL_POINT_SIZE_GRANULARITY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINE_SMOOTH"), NanNew<v8::Uint32>(GL_LINE_SMOOTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINE_WIDTH"), NanNew<v8::Uint32>(GL_LINE_WIDTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINE_WIDTH_RANGE"), NanNew<v8::Uint32>(GL_LINE_WIDTH_RANGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINE_WIDTH_GRANULARITY"), NanNew<v8::Uint32>(GL_LINE_WIDTH_GRANULARITY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POLYGON_MODE"), NanNew<v8::Uint32>(GL_POLYGON_MODE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POLYGON_SMOOTH"), NanNew<v8::Uint32>(GL_POLYGON_SMOOTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CULL_FACE"), NanNew<v8::Uint32>(GL_CULL_FACE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CULL_FACE_MODE"), NanNew<v8::Uint32>(GL_CULL_FACE_MODE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRONT_FACE"), NanNew<v8::Uint32>(GL_FRONT_FACE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_RANGE"), NanNew<v8::Uint32>(GL_DEPTH_RANGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_TEST"), NanNew<v8::Uint32>(GL_DEPTH_TEST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_WRITEMASK"), NanNew<v8::Uint32>(GL_DEPTH_WRITEMASK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_CLEAR_VALUE"), NanNew<v8::Uint32>(GL_DEPTH_CLEAR_VALUE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_FUNC"), NanNew<v8::Uint32>(GL_DEPTH_FUNC), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_TEST"), NanNew<v8::Uint32>(GL_STENCIL_TEST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_CLEAR_VALUE"), NanNew<v8::Uint32>(GL_STENCIL_CLEAR_VALUE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_FUNC"), NanNew<v8::Uint32>(GL_STENCIL_FUNC), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_VALUE_MASK"), NanNew<v8::Uint32>(GL_STENCIL_VALUE_MASK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_FAIL"), NanNew<v8::Uint32>(GL_STENCIL_FAIL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_PASS_DEPTH_FAIL"), NanNew<v8::Uint32>(GL_STENCIL_PASS_DEPTH_FAIL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_PASS_DEPTH_PASS"), NanNew<v8::Uint32>(GL_STENCIL_PASS_DEPTH_PASS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_REF"), NanNew<v8::Uint32>(GL_STENCIL_REF), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_WRITEMASK"), NanNew<v8::Uint32>(GL_STENCIL_WRITEMASK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VIEWPORT"), NanNew<v8::Uint32>(GL_VIEWPORT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DITHER"), NanNew<v8::Uint32>(GL_DITHER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_DST"), NanNew<v8::Uint32>(GL_BLEND_DST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_SRC"), NanNew<v8::Uint32>(GL_BLEND_SRC), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND"), NanNew<v8::Uint32>(GL_BLEND), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LOGIC_OP_MODE"), NanNew<v8::Uint32>(GL_LOGIC_OP_MODE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_LOGIC_OP"), NanNew<v8::Uint32>(GL_COLOR_LOGIC_OP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER"), NanNew<v8::Uint32>(GL_DRAW_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("READ_BUFFER"), NanNew<v8::Uint32>(GL_READ_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SCISSOR_BOX"), NanNew<v8::Uint32>(GL_SCISSOR_BOX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SCISSOR_TEST"), NanNew<v8::Uint32>(GL_SCISSOR_TEST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_CLEAR_VALUE"), NanNew<v8::Uint32>(GL_COLOR_CLEAR_VALUE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_WRITEMASK"), NanNew<v8::Uint32>(GL_COLOR_WRITEMASK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLEBUFFER"), NanNew<v8::Uint32>(GL_DOUBLEBUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STEREO"), NanNew<v8::Uint32>(GL_STEREO), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINE_SMOOTH_HINT"), NanNew<v8::Uint32>(GL_LINE_SMOOTH_HINT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POLYGON_SMOOTH_HINT"), NanNew<v8::Uint32>(GL_POLYGON_SMOOTH_HINT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNPACK_SWAP_BYTES"), NanNew<v8::Uint32>(GL_UNPACK_SWAP_BYTES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNPACK_LSB_FIRST"), NanNew<v8::Uint32>(GL_UNPACK_LSB_FIRST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNPACK_ROW_LENGTH"), NanNew<v8::Uint32>(GL_UNPACK_ROW_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNPACK_SKIP_ROWS"), NanNew<v8::Uint32>(GL_UNPACK_SKIP_ROWS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNPACK_SKIP_PIXELS"), NanNew<v8::Uint32>(GL_UNPACK_SKIP_PIXELS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNPACK_ALIGNMENT"), NanNew<v8::Uint32>(GL_UNPACK_ALIGNMENT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PACK_SWAP_BYTES"), NanNew<v8::Uint32>(GL_PACK_SWAP_BYTES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PACK_LSB_FIRST"), NanNew<v8::Uint32>(GL_PACK_LSB_FIRST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PACK_ROW_LENGTH"), NanNew<v8::Uint32>(GL_PACK_ROW_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PACK_SKIP_ROWS"), NanNew<v8::Uint32>(GL_PACK_SKIP_ROWS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PACK_SKIP_PIXELS"), NanNew<v8::Uint32>(GL_PACK_SKIP_PIXELS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PACK_ALIGNMENT"), NanNew<v8::Uint32>(GL_PACK_ALIGNMENT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TEXTURE_SIZE"), NanNew<v8::Uint32>(GL_MAX_TEXTURE_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VIEWPORT_DIMS"), NanNew<v8::Uint32>(GL_MAX_VIEWPORT_DIMS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SUBPIXEL_BITS"), NanNew<v8::Uint32>(GL_SUBPIXEL_BITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_1D"), NanNew<v8::Uint32>(GL_TEXTURE_1D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_2D"), NanNew<v8::Uint32>(GL_TEXTURE_2D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POLYGON_OFFSET_UNITS"), NanNew<v8::Uint32>(GL_POLYGON_OFFSET_UNITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POLYGON_OFFSET_POINT"), NanNew<v8::Uint32>(GL_POLYGON_OFFSET_POINT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POLYGON_OFFSET_LINE"), NanNew<v8::Uint32>(GL_POLYGON_OFFSET_LINE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POLYGON_OFFSET_FILL"), NanNew<v8::Uint32>(GL_POLYGON_OFFSET_FILL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POLYGON_OFFSET_FACTOR"), NanNew<v8::Uint32>(GL_POLYGON_OFFSET_FACTOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_1D"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_1D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_2D"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_2D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_WIDTH"), NanNew<v8::Uint32>(GL_TEXTURE_WIDTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_HEIGHT"), NanNew<v8::Uint32>(GL_TEXTURE_HEIGHT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_INTERNAL_FORMAT"), NanNew<v8::Uint32>(GL_TEXTURE_INTERNAL_FORMAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BORDER_COLOR"), NanNew<v8::Uint32>(GL_TEXTURE_BORDER_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_RED_SIZE"), NanNew<v8::Uint32>(GL_TEXTURE_RED_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_GREEN_SIZE"), NanNew<v8::Uint32>(GL_TEXTURE_GREEN_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BLUE_SIZE"), NanNew<v8::Uint32>(GL_TEXTURE_BLUE_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_ALPHA_SIZE"), NanNew<v8::Uint32>(GL_TEXTURE_ALPHA_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DONT_CARE"), NanNew<v8::Uint32>(GL_DONT_CARE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FASTEST"), NanNew<v8::Uint32>(GL_FASTEST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NICEST"), NanNew<v8::Uint32>(GL_NICEST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BYTE"), NanNew<v8::Uint32>(GL_BYTE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_BYTE"), NanNew<v8::Uint32>(GL_UNSIGNED_BYTE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SHORT"), NanNew<v8::Uint32>(GL_SHORT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_SHORT"), NanNew<v8::Uint32>(GL_UNSIGNED_SHORT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT"), NanNew<v8::Uint32>(GL_INT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT"), NanNew<v8::Uint32>(GL_UNSIGNED_INT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT"), NanNew<v8::Uint32>(GL_FLOAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE"), NanNew<v8::Uint32>(GL_DOUBLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLEAR"), NanNew<v8::Uint32>(GL_CLEAR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("AND"), NanNew<v8::Uint32>(GL_AND), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("AND_REVERSE"), NanNew<v8::Uint32>(GL_AND_REVERSE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COPY"), NanNew<v8::Uint32>(GL_COPY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("AND_INVERTED"), NanNew<v8::Uint32>(GL_AND_INVERTED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NOOP"), NanNew<v8::Uint32>(GL_NOOP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("XOR"), NanNew<v8::Uint32>(GL_XOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("OR"), NanNew<v8::Uint32>(GL_OR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NOR"), NanNew<v8::Uint32>(GL_NOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("EQUIV"), NanNew<v8::Uint32>(GL_EQUIV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INVERT"), NanNew<v8::Uint32>(GL_INVERT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("OR_REVERSE"), NanNew<v8::Uint32>(GL_OR_REVERSE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COPY_INVERTED"), NanNew<v8::Uint32>(GL_COPY_INVERTED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("OR_INVERTED"), NanNew<v8::Uint32>(GL_OR_INVERTED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NAND"), NanNew<v8::Uint32>(GL_NAND), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SET"), NanNew<v8::Uint32>(GL_SET), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE"), NanNew<v8::Uint32>(GL_TEXTURE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR"), NanNew<v8::Uint32>(GL_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH"), NanNew<v8::Uint32>(GL_DEPTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL"), NanNew<v8::Uint32>(GL_STENCIL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_INDEX"), NanNew<v8::Uint32>(GL_STENCIL_INDEX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_COMPONENT"), NanNew<v8::Uint32>(GL_DEPTH_COMPONENT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RED"), NanNew<v8::Uint32>(GL_RED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GREEN"), NanNew<v8::Uint32>(GL_GREEN), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLUE"), NanNew<v8::Uint32>(GL_BLUE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ALPHA"), NanNew<v8::Uint32>(GL_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB"), NanNew<v8::Uint32>(GL_RGB), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA"), NanNew<v8::Uint32>(GL_RGBA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POINT"), NanNew<v8::Uint32>(GL_POINT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINE"), NanNew<v8::Uint32>(GL_LINE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FILL"), NanNew<v8::Uint32>(GL_FILL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("KEEP"), NanNew<v8::Uint32>(GL_KEEP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("REPLACE"), NanNew<v8::Uint32>(GL_REPLACE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INCR"), NanNew<v8::Uint32>(GL_INCR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DECR"), NanNew<v8::Uint32>(GL_DECR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VENDOR"), NanNew<v8::Uint32>(GL_VENDOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERER"), NanNew<v8::Uint32>(GL_RENDERER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERSION"), NanNew<v8::Uint32>(GL_VERSION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("EXTENSIONS"), NanNew<v8::Uint32>(GL_EXTENSIONS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NEAREST"), NanNew<v8::Uint32>(GL_NEAREST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINEAR"), NanNew<v8::Uint32>(GL_LINEAR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NEAREST_MIPMAP_NEAREST"), NanNew<v8::Uint32>(GL_NEAREST_MIPMAP_NEAREST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINEAR_MIPMAP_NEAREST"), NanNew<v8::Uint32>(GL_LINEAR_MIPMAP_NEAREST), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NEAREST_MIPMAP_LINEAR"), NanNew<v8::Uint32>(GL_NEAREST_MIPMAP_LINEAR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINEAR_MIPMAP_LINEAR"), NanNew<v8::Uint32>(GL_LINEAR_MIPMAP_LINEAR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_MAG_FILTER"), NanNew<v8::Uint32>(GL_TEXTURE_MAG_FILTER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_MIN_FILTER"), NanNew<v8::Uint32>(GL_TEXTURE_MIN_FILTER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_WRAP_S"), NanNew<v8::Uint32>(GL_TEXTURE_WRAP_S), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_WRAP_T"), NanNew<v8::Uint32>(GL_TEXTURE_WRAP_T), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_1D"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_1D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_2D"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_2D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("REPEAT"), NanNew<v8::Uint32>(GL_REPEAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R3_G3_B2"), NanNew<v8::Uint32>(GL_R3_G3_B2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB4"), NanNew<v8::Uint32>(GL_RGB4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB5"), NanNew<v8::Uint32>(GL_RGB5), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB8"), NanNew<v8::Uint32>(GL_RGB8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB10"), NanNew<v8::Uint32>(GL_RGB10), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB12"), NanNew<v8::Uint32>(GL_RGB12), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB16"), NanNew<v8::Uint32>(GL_RGB16), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA2"), NanNew<v8::Uint32>(GL_RGBA2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA4"), NanNew<v8::Uint32>(GL_RGBA4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB5_A1"), NanNew<v8::Uint32>(GL_RGB5_A1), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA8"), NanNew<v8::Uint32>(GL_RGBA8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB10_A2"), NanNew<v8::Uint32>(GL_RGB10_A2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA12"), NanNew<v8::Uint32>(GL_RGBA12), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA16"), NanNew<v8::Uint32>(GL_RGBA16), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_BYTE_3_3_2"), NanNew<v8::Uint32>(GL_UNSIGNED_BYTE_3_3_2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_SHORT_4_4_4_4"), NanNew<v8::Uint32>(GL_UNSIGNED_SHORT_4_4_4_4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_SHORT_5_5_5_1"), NanNew<v8::Uint32>(GL_UNSIGNED_SHORT_5_5_5_1), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_8_8_8_8"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_8_8_8_8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_10_10_10_2"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_10_10_10_2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_3D"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_3D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PACK_SKIP_IMAGES"), NanNew<v8::Uint32>(GL_PACK_SKIP_IMAGES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PACK_IMAGE_HEIGHT"), NanNew<v8::Uint32>(GL_PACK_IMAGE_HEIGHT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNPACK_SKIP_IMAGES"), NanNew<v8::Uint32>(GL_UNPACK_SKIP_IMAGES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNPACK_IMAGE_HEIGHT"), NanNew<v8::Uint32>(GL_UNPACK_IMAGE_HEIGHT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_3D"), NanNew<v8::Uint32>(GL_TEXTURE_3D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_3D"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_3D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_DEPTH"), NanNew<v8::Uint32>(GL_TEXTURE_DEPTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_WRAP_R"), NanNew<v8::Uint32>(GL_TEXTURE_WRAP_R), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_3D_TEXTURE_SIZE"), NanNew<v8::Uint32>(GL_MAX_3D_TEXTURE_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_BYTE_2_3_3_REV"), NanNew<v8::Uint32>(GL_UNSIGNED_BYTE_2_3_3_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_SHORT_5_6_5"), NanNew<v8::Uint32>(GL_UNSIGNED_SHORT_5_6_5), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_SHORT_5_6_5_REV"), NanNew<v8::Uint32>(GL_UNSIGNED_SHORT_5_6_5_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_SHORT_4_4_4_4_REV"), NanNew<v8::Uint32>(GL_UNSIGNED_SHORT_4_4_4_4_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_SHORT_1_5_5_5_REV"), NanNew<v8::Uint32>(GL_UNSIGNED_SHORT_1_5_5_5_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_8_8_8_8_REV"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_8_8_8_8_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_2_10_10_10_REV"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_2_10_10_10_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BGR"), NanNew<v8::Uint32>(GL_BGR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BGRA"), NanNew<v8::Uint32>(GL_BGRA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_ELEMENTS_VERTICES"), NanNew<v8::Uint32>(GL_MAX_ELEMENTS_VERTICES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_ELEMENTS_INDICES"), NanNew<v8::Uint32>(GL_MAX_ELEMENTS_INDICES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLAMP_TO_EDGE"), NanNew<v8::Uint32>(GL_CLAMP_TO_EDGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_MIN_LOD"), NanNew<v8::Uint32>(GL_TEXTURE_MIN_LOD), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_MAX_LOD"), NanNew<v8::Uint32>(GL_TEXTURE_MAX_LOD), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BASE_LEVEL"), NanNew<v8::Uint32>(GL_TEXTURE_BASE_LEVEL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_MAX_LEVEL"), NanNew<v8::Uint32>(GL_TEXTURE_MAX_LEVEL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SMOOTH_POINT_SIZE_RANGE"), NanNew<v8::Uint32>(GL_SMOOTH_POINT_SIZE_RANGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SMOOTH_POINT_SIZE_GRANULARITY"), NanNew<v8::Uint32>(GL_SMOOTH_POINT_SIZE_GRANULARITY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SMOOTH_LINE_WIDTH_RANGE"), NanNew<v8::Uint32>(GL_SMOOTH_LINE_WIDTH_RANGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SMOOTH_LINE_WIDTH_GRANULARITY"), NanNew<v8::Uint32>(GL_SMOOTH_LINE_WIDTH_GRANULARITY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ALIASED_LINE_WIDTH_RANGE"), NanNew<v8::Uint32>(GL_ALIASED_LINE_WIDTH_RANGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CONSTANT_COLOR"), NanNew<v8::Uint32>(GL_CONSTANT_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ONE_MINUS_CONSTANT_COLOR"), NanNew<v8::Uint32>(GL_ONE_MINUS_CONSTANT_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CONSTANT_ALPHA"), NanNew<v8::Uint32>(GL_CONSTANT_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ONE_MINUS_CONSTANT_ALPHA"), NanNew<v8::Uint32>(GL_ONE_MINUS_CONSTANT_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_COLOR"), NanNew<v8::Uint32>(GL_BLEND_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FUNC_ADD"), NanNew<v8::Uint32>(GL_FUNC_ADD), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MIN"), NanNew<v8::Uint32>(GL_MIN), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX"), NanNew<v8::Uint32>(GL_MAX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_EQUATION"), NanNew<v8::Uint32>(GL_BLEND_EQUATION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FUNC_SUBTRACT"), NanNew<v8::Uint32>(GL_FUNC_SUBTRACT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FUNC_REVERSE_SUBTRACT"), NanNew<v8::Uint32>(GL_FUNC_REVERSE_SUBTRACT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE0"), NanNew<v8::Uint32>(GL_TEXTURE0), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE1"), NanNew<v8::Uint32>(GL_TEXTURE1), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE2"), NanNew<v8::Uint32>(GL_TEXTURE2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE3"), NanNew<v8::Uint32>(GL_TEXTURE3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE4"), NanNew<v8::Uint32>(GL_TEXTURE4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE5"), NanNew<v8::Uint32>(GL_TEXTURE5), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE6"), NanNew<v8::Uint32>(GL_TEXTURE6), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE7"), NanNew<v8::Uint32>(GL_TEXTURE7), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE8"), NanNew<v8::Uint32>(GL_TEXTURE8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE9"), NanNew<v8::Uint32>(GL_TEXTURE9), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE10"), NanNew<v8::Uint32>(GL_TEXTURE10), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE11"), NanNew<v8::Uint32>(GL_TEXTURE11), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE12"), NanNew<v8::Uint32>(GL_TEXTURE12), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE13"), NanNew<v8::Uint32>(GL_TEXTURE13), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE14"), NanNew<v8::Uint32>(GL_TEXTURE14), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE15"), NanNew<v8::Uint32>(GL_TEXTURE15), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE16"), NanNew<v8::Uint32>(GL_TEXTURE16), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE17"), NanNew<v8::Uint32>(GL_TEXTURE17), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE18"), NanNew<v8::Uint32>(GL_TEXTURE18), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE19"), NanNew<v8::Uint32>(GL_TEXTURE19), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE20"), NanNew<v8::Uint32>(GL_TEXTURE20), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE21"), NanNew<v8::Uint32>(GL_TEXTURE21), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE22"), NanNew<v8::Uint32>(GL_TEXTURE22), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE23"), NanNew<v8::Uint32>(GL_TEXTURE23), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE24"), NanNew<v8::Uint32>(GL_TEXTURE24), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE25"), NanNew<v8::Uint32>(GL_TEXTURE25), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE26"), NanNew<v8::Uint32>(GL_TEXTURE26), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE27"), NanNew<v8::Uint32>(GL_TEXTURE27), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE28"), NanNew<v8::Uint32>(GL_TEXTURE28), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE29"), NanNew<v8::Uint32>(GL_TEXTURE29), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE30"), NanNew<v8::Uint32>(GL_TEXTURE30), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE31"), NanNew<v8::Uint32>(GL_TEXTURE31), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_TEXTURE"), NanNew<v8::Uint32>(GL_ACTIVE_TEXTURE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MULTISAMPLE"), NanNew<v8::Uint32>(GL_MULTISAMPLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_ALPHA_TO_COVERAGE"), NanNew<v8::Uint32>(GL_SAMPLE_ALPHA_TO_COVERAGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_ALPHA_TO_ONE"), NanNew<v8::Uint32>(GL_SAMPLE_ALPHA_TO_ONE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_COVERAGE"), NanNew<v8::Uint32>(GL_SAMPLE_COVERAGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_BUFFERS"), NanNew<v8::Uint32>(GL_SAMPLE_BUFFERS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLES"), NanNew<v8::Uint32>(GL_SAMPLES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_COVERAGE_VALUE"), NanNew<v8::Uint32>(GL_SAMPLE_COVERAGE_VALUE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_COVERAGE_INVERT"), NanNew<v8::Uint32>(GL_SAMPLE_COVERAGE_INVERT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_CUBE_MAP"), NanNew<v8::Uint32>(GL_TEXTURE_CUBE_MAP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_CUBE_MAP"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_CUBE_MAP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_CUBE_MAP_POSITIVE_X"), NanNew<v8::Uint32>(GL_TEXTURE_CUBE_MAP_POSITIVE_X), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_CUBE_MAP_NEGATIVE_X"), NanNew<v8::Uint32>(GL_TEXTURE_CUBE_MAP_NEGATIVE_X), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_CUBE_MAP_POSITIVE_Y"), NanNew<v8::Uint32>(GL_TEXTURE_CUBE_MAP_POSITIVE_Y), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_CUBE_MAP_NEGATIVE_Y"), NanNew<v8::Uint32>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_CUBE_MAP_POSITIVE_Z"), NanNew<v8::Uint32>(GL_TEXTURE_CUBE_MAP_POSITIVE_Z), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_CUBE_MAP_NEGATIVE_Z"), NanNew<v8::Uint32>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_CUBE_MAP"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_CUBE_MAP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_CUBE_MAP_TEXTURE_SIZE"), NanNew<v8::Uint32>(GL_MAX_CUBE_MAP_TEXTURE_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RGB"), NanNew<v8::Uint32>(GL_COMPRESSED_RGB), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RGBA"), NanNew<v8::Uint32>(GL_COMPRESSED_RGBA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_COMPRESSION_HINT"), NanNew<v8::Uint32>(GL_TEXTURE_COMPRESSION_HINT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_COMPRESSED_IMAGE_SIZE"), NanNew<v8::Uint32>(GL_TEXTURE_COMPRESSED_IMAGE_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_COMPRESSED"), NanNew<v8::Uint32>(GL_TEXTURE_COMPRESSED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NUM_COMPRESSED_TEXTURE_FORMATS"), NanNew<v8::Uint32>(GL_NUM_COMPRESSED_TEXTURE_FORMATS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_TEXTURE_FORMATS"), NanNew<v8::Uint32>(GL_COMPRESSED_TEXTURE_FORMATS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLAMP_TO_BORDER"), NanNew<v8::Uint32>(GL_CLAMP_TO_BORDER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_DST_RGB"), NanNew<v8::Uint32>(GL_BLEND_DST_RGB), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_SRC_RGB"), NanNew<v8::Uint32>(GL_BLEND_SRC_RGB), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_DST_ALPHA"), NanNew<v8::Uint32>(GL_BLEND_DST_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_SRC_ALPHA"), NanNew<v8::Uint32>(GL_BLEND_SRC_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POINT_FADE_THRESHOLD_SIZE"), NanNew<v8::Uint32>(GL_POINT_FADE_THRESHOLD_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_COMPONENT16"), NanNew<v8::Uint32>(GL_DEPTH_COMPONENT16), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_COMPONENT24"), NanNew<v8::Uint32>(GL_DEPTH_COMPONENT24), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_COMPONENT32"), NanNew<v8::Uint32>(GL_DEPTH_COMPONENT32), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MIRRORED_REPEAT"), NanNew<v8::Uint32>(GL_MIRRORED_REPEAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TEXTURE_LOD_BIAS"), NanNew<v8::Uint32>(GL_MAX_TEXTURE_LOD_BIAS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_LOD_BIAS"), NanNew<v8::Uint32>(GL_TEXTURE_LOD_BIAS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INCR_WRAP"), NanNew<v8::Uint32>(GL_INCR_WRAP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DECR_WRAP"), NanNew<v8::Uint32>(GL_DECR_WRAP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_DEPTH_SIZE"), NanNew<v8::Uint32>(GL_TEXTURE_DEPTH_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_COMPARE_MODE"), NanNew<v8::Uint32>(GL_TEXTURE_COMPARE_MODE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_COMPARE_FUNC"), NanNew<v8::Uint32>(GL_TEXTURE_COMPARE_FUNC), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BUFFER_SIZE"), NanNew<v8::Uint32>(GL_BUFFER_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BUFFER_USAGE"), NanNew<v8::Uint32>(GL_BUFFER_USAGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("QUERY_COUNTER_BITS"), NanNew<v8::Uint32>(GL_QUERY_COUNTER_BITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CURRENT_QUERY"), NanNew<v8::Uint32>(GL_CURRENT_QUERY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("QUERY_RESULT"), NanNew<v8::Uint32>(GL_QUERY_RESULT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("QUERY_RESULT_AVAILABLE"), NanNew<v8::Uint32>(GL_QUERY_RESULT_AVAILABLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ARRAY_BUFFER"), NanNew<v8::Uint32>(GL_ARRAY_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ELEMENT_ARRAY_BUFFER"), NanNew<v8::Uint32>(GL_ELEMENT_ARRAY_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ARRAY_BUFFER_BINDING"), NanNew<v8::Uint32>(GL_ARRAY_BUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ELEMENT_ARRAY_BUFFER_BINDING"), NanNew<v8::Uint32>(GL_ELEMENT_ARRAY_BUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ATTRIB_ARRAY_BUFFER_BINDING"), NanNew<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("READ_ONLY"), NanNew<v8::Uint32>(GL_READ_ONLY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("WRITE_ONLY"), NanNew<v8::Uint32>(GL_WRITE_ONLY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("READ_WRITE"), NanNew<v8::Uint32>(GL_READ_WRITE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BUFFER_ACCESS"), NanNew<v8::Uint32>(GL_BUFFER_ACCESS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BUFFER_MAPPED"), NanNew<v8::Uint32>(GL_BUFFER_MAPPED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BUFFER_MAP_POINTER"), NanNew<v8::Uint32>(GL_BUFFER_MAP_POINTER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STREAM_DRAW"), NanNew<v8::Uint32>(GL_STREAM_DRAW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STREAM_READ"), NanNew<v8::Uint32>(GL_STREAM_READ), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STREAM_COPY"), NanNew<v8::Uint32>(GL_STREAM_COPY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STATIC_DRAW"), NanNew<v8::Uint32>(GL_STATIC_DRAW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STATIC_READ"), NanNew<v8::Uint32>(GL_STATIC_READ), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STATIC_COPY"), NanNew<v8::Uint32>(GL_STATIC_COPY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DYNAMIC_DRAW"), NanNew<v8::Uint32>(GL_DYNAMIC_DRAW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DYNAMIC_READ"), NanNew<v8::Uint32>(GL_DYNAMIC_READ), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DYNAMIC_COPY"), NanNew<v8::Uint32>(GL_DYNAMIC_COPY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLES_PASSED"), NanNew<v8::Uint32>(GL_SAMPLES_PASSED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_EQUATION_RGB"), NanNew<v8::Uint32>(GL_BLEND_EQUATION_RGB), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ATTRIB_ARRAY_ENABLED"), NanNew<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_ENABLED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ATTRIB_ARRAY_SIZE"), NanNew<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ATTRIB_ARRAY_STRIDE"), NanNew<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_STRIDE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ATTRIB_ARRAY_TYPE"), NanNew<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CURRENT_VERTEX_ATTRIB"), NanNew<v8::Uint32>(GL_CURRENT_VERTEX_ATTRIB), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_PROGRAM_POINT_SIZE"), NanNew<v8::Uint32>(GL_VERTEX_PROGRAM_POINT_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ATTRIB_ARRAY_POINTER"), NanNew<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_POINTER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_BACK_FUNC"), NanNew<v8::Uint32>(GL_STENCIL_BACK_FUNC), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_BACK_FAIL"), NanNew<v8::Uint32>(GL_STENCIL_BACK_FAIL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_BACK_PASS_DEPTH_FAIL"), NanNew<v8::Uint32>(GL_STENCIL_BACK_PASS_DEPTH_FAIL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_BACK_PASS_DEPTH_PASS"), NanNew<v8::Uint32>(GL_STENCIL_BACK_PASS_DEPTH_PASS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_DRAW_BUFFERS"), NanNew<v8::Uint32>(GL_MAX_DRAW_BUFFERS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER0"), NanNew<v8::Uint32>(GL_DRAW_BUFFER0), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER1"), NanNew<v8::Uint32>(GL_DRAW_BUFFER1), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER2"), NanNew<v8::Uint32>(GL_DRAW_BUFFER2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER3"), NanNew<v8::Uint32>(GL_DRAW_BUFFER3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER4"), NanNew<v8::Uint32>(GL_DRAW_BUFFER4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER5"), NanNew<v8::Uint32>(GL_DRAW_BUFFER5), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER6"), NanNew<v8::Uint32>(GL_DRAW_BUFFER6), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER7"), NanNew<v8::Uint32>(GL_DRAW_BUFFER7), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER8"), NanNew<v8::Uint32>(GL_DRAW_BUFFER8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER9"), NanNew<v8::Uint32>(GL_DRAW_BUFFER9), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER10"), NanNew<v8::Uint32>(GL_DRAW_BUFFER10), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER11"), NanNew<v8::Uint32>(GL_DRAW_BUFFER11), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER12"), NanNew<v8::Uint32>(GL_DRAW_BUFFER12), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER13"), NanNew<v8::Uint32>(GL_DRAW_BUFFER13), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER14"), NanNew<v8::Uint32>(GL_DRAW_BUFFER14), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_BUFFER15"), NanNew<v8::Uint32>(GL_DRAW_BUFFER15), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLEND_EQUATION_ALPHA"), NanNew<v8::Uint32>(GL_BLEND_EQUATION_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VERTEX_ATTRIBS"), NanNew<v8::Uint32>(GL_MAX_VERTEX_ATTRIBS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ATTRIB_ARRAY_NORMALIZED"), NanNew<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TEXTURE_IMAGE_UNITS"), NanNew<v8::Uint32>(GL_MAX_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAGMENT_SHADER"), NanNew<v8::Uint32>(GL_FRAGMENT_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_SHADER"), NanNew<v8::Uint32>(GL_VERTEX_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_FRAGMENT_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VERTEX_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_VERTEX_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VARYING_FLOATS"), NanNew<v8::Uint32>(GL_MAX_VARYING_FLOATS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VERTEX_TEXTURE_IMAGE_UNITS"), NanNew<v8::Uint32>(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_COMBINED_TEXTURE_IMAGE_UNITS"), NanNew<v8::Uint32>(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SHADER_TYPE"), NanNew<v8::Uint32>(GL_SHADER_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_VEC2"), NanNew<v8::Uint32>(GL_FLOAT_VEC2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_VEC3"), NanNew<v8::Uint32>(GL_FLOAT_VEC3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_VEC4"), NanNew<v8::Uint32>(GL_FLOAT_VEC4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_VEC2"), NanNew<v8::Uint32>(GL_INT_VEC2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_VEC3"), NanNew<v8::Uint32>(GL_INT_VEC3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_VEC4"), NanNew<v8::Uint32>(GL_INT_VEC4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BOOL"), NanNew<v8::Uint32>(GL_BOOL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BOOL_VEC2"), NanNew<v8::Uint32>(GL_BOOL_VEC2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BOOL_VEC3"), NanNew<v8::Uint32>(GL_BOOL_VEC3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BOOL_VEC4"), NanNew<v8::Uint32>(GL_BOOL_VEC4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_MAT2"), NanNew<v8::Uint32>(GL_FLOAT_MAT2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_MAT3"), NanNew<v8::Uint32>(GL_FLOAT_MAT3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_MAT4"), NanNew<v8::Uint32>(GL_FLOAT_MAT4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_1D"), NanNew<v8::Uint32>(GL_SAMPLER_1D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_2D"), NanNew<v8::Uint32>(GL_SAMPLER_2D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_3D"), NanNew<v8::Uint32>(GL_SAMPLER_3D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_CUBE"), NanNew<v8::Uint32>(GL_SAMPLER_CUBE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_1D_SHADOW"), NanNew<v8::Uint32>(GL_SAMPLER_1D_SHADOW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_2D_SHADOW"), NanNew<v8::Uint32>(GL_SAMPLER_2D_SHADOW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DELETE_STATUS"), NanNew<v8::Uint32>(GL_DELETE_STATUS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPILE_STATUS"), NanNew<v8::Uint32>(GL_COMPILE_STATUS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINK_STATUS"), NanNew<v8::Uint32>(GL_LINK_STATUS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VALIDATE_STATUS"), NanNew<v8::Uint32>(GL_VALIDATE_STATUS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INFO_LOG_LENGTH"), NanNew<v8::Uint32>(GL_INFO_LOG_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ATTACHED_SHADERS"), NanNew<v8::Uint32>(GL_ATTACHED_SHADERS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_UNIFORMS"), NanNew<v8::Uint32>(GL_ACTIVE_UNIFORMS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_UNIFORM_MAX_LENGTH"), NanNew<v8::Uint32>(GL_ACTIVE_UNIFORM_MAX_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SHADER_SOURCE_LENGTH"), NanNew<v8::Uint32>(GL_SHADER_SOURCE_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_ATTRIBUTES"), NanNew<v8::Uint32>(GL_ACTIVE_ATTRIBUTES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_ATTRIBUTE_MAX_LENGTH"), NanNew<v8::Uint32>(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAGMENT_SHADER_DERIVATIVE_HINT"), NanNew<v8::Uint32>(GL_FRAGMENT_SHADER_DERIVATIVE_HINT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SHADING_LANGUAGE_VERSION"), NanNew<v8::Uint32>(GL_SHADING_LANGUAGE_VERSION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CURRENT_PROGRAM"), NanNew<v8::Uint32>(GL_CURRENT_PROGRAM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("POINT_SPRITE_COORD_ORIGIN"), NanNew<v8::Uint32>(GL_POINT_SPRITE_COORD_ORIGIN), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LOWER_LEFT"), NanNew<v8::Uint32>(GL_LOWER_LEFT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UPPER_LEFT"), NanNew<v8::Uint32>(GL_UPPER_LEFT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_BACK_REF"), NanNew<v8::Uint32>(GL_STENCIL_BACK_REF), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_BACK_VALUE_MASK"), NanNew<v8::Uint32>(GL_STENCIL_BACK_VALUE_MASK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_BACK_WRITEMASK"), NanNew<v8::Uint32>(GL_STENCIL_BACK_WRITEMASK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PIXEL_PACK_BUFFER"), NanNew<v8::Uint32>(GL_PIXEL_PACK_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PIXEL_UNPACK_BUFFER"), NanNew<v8::Uint32>(GL_PIXEL_UNPACK_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PIXEL_PACK_BUFFER_BINDING"), NanNew<v8::Uint32>(GL_PIXEL_PACK_BUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PIXEL_UNPACK_BUFFER_BINDING"), NanNew<v8::Uint32>(GL_PIXEL_UNPACK_BUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_MAT2x3"), NanNew<v8::Uint32>(GL_FLOAT_MAT2x3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_MAT2x4"), NanNew<v8::Uint32>(GL_FLOAT_MAT2x4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_MAT3x2"), NanNew<v8::Uint32>(GL_FLOAT_MAT3x2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_MAT3x4"), NanNew<v8::Uint32>(GL_FLOAT_MAT3x4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_MAT4x2"), NanNew<v8::Uint32>(GL_FLOAT_MAT4x2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_MAT4x3"), NanNew<v8::Uint32>(GL_FLOAT_MAT4x3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SRGB"), NanNew<v8::Uint32>(GL_SRGB), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SRGB8"), NanNew<v8::Uint32>(GL_SRGB8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SRGB_ALPHA"), NanNew<v8::Uint32>(GL_SRGB_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SRGB8_ALPHA8"), NanNew<v8::Uint32>(GL_SRGB8_ALPHA8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_SRGB"), NanNew<v8::Uint32>(GL_COMPRESSED_SRGB), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_SRGB_ALPHA"), NanNew<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPARE_REF_TO_TEXTURE"), NanNew<v8::Uint32>(GL_COMPARE_REF_TO_TEXTURE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLIP_DISTANCE0"), NanNew<v8::Uint32>(GL_CLIP_DISTANCE0), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLIP_DISTANCE1"), NanNew<v8::Uint32>(GL_CLIP_DISTANCE1), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLIP_DISTANCE2"), NanNew<v8::Uint32>(GL_CLIP_DISTANCE2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLIP_DISTANCE3"), NanNew<v8::Uint32>(GL_CLIP_DISTANCE3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLIP_DISTANCE4"), NanNew<v8::Uint32>(GL_CLIP_DISTANCE4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLIP_DISTANCE5"), NanNew<v8::Uint32>(GL_CLIP_DISTANCE5), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLIP_DISTANCE6"), NanNew<v8::Uint32>(GL_CLIP_DISTANCE6), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLIP_DISTANCE7"), NanNew<v8::Uint32>(GL_CLIP_DISTANCE7), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_CLIP_DISTANCES"), NanNew<v8::Uint32>(GL_MAX_CLIP_DISTANCES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAJOR_VERSION"), NanNew<v8::Uint32>(GL_MAJOR_VERSION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MINOR_VERSION"), NanNew<v8::Uint32>(GL_MINOR_VERSION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NUM_EXTENSIONS"), NanNew<v8::Uint32>(GL_NUM_EXTENSIONS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CONTEXT_FLAGS"), NanNew<v8::Uint32>(GL_CONTEXT_FLAGS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RED"), NanNew<v8::Uint32>(GL_COMPRESSED_RED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RG"), NanNew<v8::Uint32>(GL_COMPRESSED_RG), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT"), NanNew<v8::Uint32>(GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA32F"), NanNew<v8::Uint32>(GL_RGBA32F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB32F"), NanNew<v8::Uint32>(GL_RGB32F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA16F"), NanNew<v8::Uint32>(GL_RGBA16F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB16F"), NanNew<v8::Uint32>(GL_RGB16F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ATTRIB_ARRAY_INTEGER"), NanNew<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_INTEGER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_ARRAY_TEXTURE_LAYERS"), NanNew<v8::Uint32>(GL_MAX_ARRAY_TEXTURE_LAYERS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MIN_PROGRAM_TEXEL_OFFSET"), NanNew<v8::Uint32>(GL_MIN_PROGRAM_TEXEL_OFFSET), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_PROGRAM_TEXEL_OFFSET"), NanNew<v8::Uint32>(GL_MAX_PROGRAM_TEXEL_OFFSET), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CLAMP_READ_COLOR"), NanNew<v8::Uint32>(GL_CLAMP_READ_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FIXED_ONLY"), NanNew<v8::Uint32>(GL_FIXED_ONLY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VARYING_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_VARYING_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_1D_ARRAY"), NanNew<v8::Uint32>(GL_TEXTURE_1D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_1D_ARRAY"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_1D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_2D_ARRAY"), NanNew<v8::Uint32>(GL_TEXTURE_2D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_2D_ARRAY"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_2D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_1D_ARRAY"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_1D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_2D_ARRAY"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_2D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R11F_G11F_B10F"), NanNew<v8::Uint32>(GL_R11F_G11F_B10F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_10F_11F_11F_REV"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_10F_11F_11F_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB9_E5"), NanNew<v8::Uint32>(GL_RGB9_E5), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_5_9_9_9_REV"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_5_9_9_9_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_SHARED_SIZE"), NanNew<v8::Uint32>(GL_TEXTURE_SHARED_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_BUFFER_MODE"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_MODE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_VARYINGS"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_VARYINGS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_BUFFER_START"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_START), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_BUFFER_SIZE"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PRIMITIVES_GENERATED"), NanNew<v8::Uint32>(GL_PRIMITIVES_GENERATED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RASTERIZER_DISCARD"), NanNew<v8::Uint32>(GL_RASTERIZER_DISCARD), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS"), NanNew<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INTERLEAVED_ATTRIBS"), NanNew<v8::Uint32>(GL_INTERLEAVED_ATTRIBS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SEPARATE_ATTRIBS"), NanNew<v8::Uint32>(GL_SEPARATE_ATTRIBS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_BUFFER"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_BUFFER_BINDING"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA32UI"), NanNew<v8::Uint32>(GL_RGBA32UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB32UI"), NanNew<v8::Uint32>(GL_RGB32UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA16UI"), NanNew<v8::Uint32>(GL_RGBA16UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB16UI"), NanNew<v8::Uint32>(GL_RGB16UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA8UI"), NanNew<v8::Uint32>(GL_RGBA8UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB8UI"), NanNew<v8::Uint32>(GL_RGB8UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA32I"), NanNew<v8::Uint32>(GL_RGBA32I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB32I"), NanNew<v8::Uint32>(GL_RGB32I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA16I"), NanNew<v8::Uint32>(GL_RGBA16I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB16I"), NanNew<v8::Uint32>(GL_RGB16I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA8I"), NanNew<v8::Uint32>(GL_RGBA8I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB8I"), NanNew<v8::Uint32>(GL_RGB8I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RED_INTEGER"), NanNew<v8::Uint32>(GL_RED_INTEGER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GREEN_INTEGER"), NanNew<v8::Uint32>(GL_GREEN_INTEGER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BLUE_INTEGER"), NanNew<v8::Uint32>(GL_BLUE_INTEGER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB_INTEGER"), NanNew<v8::Uint32>(GL_RGB_INTEGER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA_INTEGER"), NanNew<v8::Uint32>(GL_RGBA_INTEGER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BGR_INTEGER"), NanNew<v8::Uint32>(GL_BGR_INTEGER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BGRA_INTEGER"), NanNew<v8::Uint32>(GL_BGRA_INTEGER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_1D_ARRAY"), NanNew<v8::Uint32>(GL_SAMPLER_1D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_2D_ARRAY"), NanNew<v8::Uint32>(GL_SAMPLER_2D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_1D_ARRAY_SHADOW"), NanNew<v8::Uint32>(GL_SAMPLER_1D_ARRAY_SHADOW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_2D_ARRAY_SHADOW"), NanNew<v8::Uint32>(GL_SAMPLER_2D_ARRAY_SHADOW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_CUBE_SHADOW"), NanNew<v8::Uint32>(GL_SAMPLER_CUBE_SHADOW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_VEC2"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_VEC2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_VEC3"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_VEC3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_VEC4"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_VEC4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_1D"), NanNew<v8::Uint32>(GL_INT_SAMPLER_1D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_2D"), NanNew<v8::Uint32>(GL_INT_SAMPLER_2D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_3D"), NanNew<v8::Uint32>(GL_INT_SAMPLER_3D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_CUBE"), NanNew<v8::Uint32>(GL_INT_SAMPLER_CUBE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_1D_ARRAY"), NanNew<v8::Uint32>(GL_INT_SAMPLER_1D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_2D_ARRAY"), NanNew<v8::Uint32>(GL_INT_SAMPLER_2D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_1D"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_1D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_2D"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_3D"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_3D), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_CUBE"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_CUBE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_1D_ARRAY"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_1D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_2D_ARRAY"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("QUERY_WAIT"), NanNew<v8::Uint32>(GL_QUERY_WAIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("QUERY_NO_WAIT"), NanNew<v8::Uint32>(GL_QUERY_NO_WAIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("QUERY_BY_REGION_WAIT"), NanNew<v8::Uint32>(GL_QUERY_BY_REGION_WAIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("QUERY_BY_REGION_NO_WAIT"), NanNew<v8::Uint32>(GL_QUERY_BY_REGION_NO_WAIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BUFFER_ACCESS_FLAGS"), NanNew<v8::Uint32>(GL_BUFFER_ACCESS_FLAGS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BUFFER_MAP_LENGTH"), NanNew<v8::Uint32>(GL_BUFFER_MAP_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("BUFFER_MAP_OFFSET"), NanNew<v8::Uint32>(GL_BUFFER_MAP_OFFSET), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_2D_RECT"), NanNew<v8::Uint32>(GL_SAMPLER_2D_RECT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_2D_RECT_SHADOW"), NanNew<v8::Uint32>(GL_SAMPLER_2D_RECT_SHADOW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_BUFFER"), NanNew<v8::Uint32>(GL_SAMPLER_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_2D_RECT"), NanNew<v8::Uint32>(GL_INT_SAMPLER_2D_RECT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_BUFFER"), NanNew<v8::Uint32>(GL_INT_SAMPLER_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_2D_RECT"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_RECT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_BUFFER"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BUFFER"), NanNew<v8::Uint32>(GL_TEXTURE_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TEXTURE_BUFFER_SIZE"), NanNew<v8::Uint32>(GL_MAX_TEXTURE_BUFFER_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_BUFFER"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BUFFER_DATA_STORE_BINDING"), NanNew<v8::Uint32>(GL_TEXTURE_BUFFER_DATA_STORE_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_RECTANGLE"), NanNew<v8::Uint32>(GL_TEXTURE_RECTANGLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_RECTANGLE"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_RECTANGLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_RECTANGLE"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_RECTANGLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_RECTANGLE_TEXTURE_SIZE"), NanNew<v8::Uint32>(GL_MAX_RECTANGLE_TEXTURE_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R8_SNORM"), NanNew<v8::Uint32>(GL_R8_SNORM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG8_SNORM"), NanNew<v8::Uint32>(GL_RG8_SNORM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB8_SNORM"), NanNew<v8::Uint32>(GL_RGB8_SNORM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA8_SNORM"), NanNew<v8::Uint32>(GL_RGBA8_SNORM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R16_SNORM"), NanNew<v8::Uint32>(GL_R16_SNORM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG16_SNORM"), NanNew<v8::Uint32>(GL_RG16_SNORM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB16_SNORM"), NanNew<v8::Uint32>(GL_RGB16_SNORM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGBA16_SNORM"), NanNew<v8::Uint32>(GL_RGBA16_SNORM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SIGNED_NORMALIZED"), NanNew<v8::Uint32>(GL_SIGNED_NORMALIZED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PRIMITIVE_RESTART"), NanNew<v8::Uint32>(GL_PRIMITIVE_RESTART), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PRIMITIVE_RESTART_INDEX"), NanNew<v8::Uint32>(GL_PRIMITIVE_RESTART_INDEX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CONTEXT_CORE_PROFILE_BIT"), NanNew<v8::Uint32>(GL_CONTEXT_CORE_PROFILE_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CONTEXT_COMPATIBILITY_PROFILE_BIT"), NanNew<v8::Uint32>(GL_CONTEXT_COMPATIBILITY_PROFILE_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINES_ADJACENCY"), NanNew<v8::Uint32>(GL_LINES_ADJACENCY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LINE_STRIP_ADJACENCY"), NanNew<v8::Uint32>(GL_LINE_STRIP_ADJACENCY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRIANGLES_ADJACENCY"), NanNew<v8::Uint32>(GL_TRIANGLES_ADJACENCY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRIANGLE_STRIP_ADJACENCY"), NanNew<v8::Uint32>(GL_TRIANGLE_STRIP_ADJACENCY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROGRAM_POINT_SIZE"), NanNew<v8::Uint32>(GL_PROGRAM_POINT_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_GEOMETRY_TEXTURE_IMAGE_UNITS"), NanNew<v8::Uint32>(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_LAYERED"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_LAYERED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GEOMETRY_SHADER"), NanNew<v8::Uint32>(GL_GEOMETRY_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GEOMETRY_VERTICES_OUT"), NanNew<v8::Uint32>(GL_GEOMETRY_VERTICES_OUT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GEOMETRY_INPUT_TYPE"), NanNew<v8::Uint32>(GL_GEOMETRY_INPUT_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GEOMETRY_OUTPUT_TYPE"), NanNew<v8::Uint32>(GL_GEOMETRY_OUTPUT_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_GEOMETRY_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_GEOMETRY_OUTPUT_VERTICES"), NanNew<v8::Uint32>(GL_MAX_GEOMETRY_OUTPUT_VERTICES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VERTEX_OUTPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_VERTEX_OUTPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_GEOMETRY_INPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_GEOMETRY_INPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_GEOMETRY_OUTPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_FRAGMENT_INPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_FRAGMENT_INPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CONTEXT_PROFILE_MASK"), NanNew<v8::Uint32>(GL_CONTEXT_PROFILE_MASK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ATTRIB_ARRAY_DIVISOR"), NanNew<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_DIVISOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_SHADING"), NanNew<v8::Uint32>(GL_SAMPLE_SHADING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MIN_SAMPLE_SHADING_VALUE"), NanNew<v8::Uint32>(GL_MIN_SAMPLE_SHADING_VALUE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MIN_PROGRAM_TEXTURE_GATHER_OFFSET"), NanNew<v8::Uint32>(GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_PROGRAM_TEXTURE_GATHER_OFFSET"), NanNew<v8::Uint32>(GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_CUBE_MAP_ARRAY"), NanNew<v8::Uint32>(GL_TEXTURE_CUBE_MAP_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_CUBE_MAP_ARRAY"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_CUBE_MAP_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_CUBE_MAP_ARRAY"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_CUBE_MAP_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_CUBE_MAP_ARRAY"), NanNew<v8::Uint32>(GL_SAMPLER_CUBE_MAP_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_CUBE_MAP_ARRAY_SHADOW"), NanNew<v8::Uint32>(GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_CUBE_MAP_ARRAY"), NanNew<v8::Uint32>(GL_INT_SAMPLER_CUBE_MAP_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_COMPONENT32F"), NanNew<v8::Uint32>(GL_DEPTH_COMPONENT32F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH32F_STENCIL8"), NanNew<v8::Uint32>(GL_DEPTH32F_STENCIL8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FLOAT_32_UNSIGNED_INT_24_8_REV"), NanNew<v8::Uint32>(GL_FLOAT_32_UNSIGNED_INT_24_8_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INVALID_FRAMEBUFFER_OPERATION"), NanNew<v8::Uint32>(GL_INVALID_FRAMEBUFFER_OPERATION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_RED_SIZE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_GREEN_SIZE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_BLUE_SIZE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_DEFAULT"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_DEFAULT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_UNDEFINED"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_UNDEFINED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_STENCIL_ATTACHMENT"), NanNew<v8::Uint32>(GL_DEPTH_STENCIL_ATTACHMENT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_RENDERBUFFER_SIZE"), NanNew<v8::Uint32>(GL_MAX_RENDERBUFFER_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_STENCIL"), NanNew<v8::Uint32>(GL_DEPTH_STENCIL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_24_8"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_24_8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH24_STENCIL8"), NanNew<v8::Uint32>(GL_DEPTH24_STENCIL8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_STENCIL_SIZE"), NanNew<v8::Uint32>(GL_TEXTURE_STENCIL_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_RED_TYPE"), NanNew<v8::Uint32>(GL_TEXTURE_RED_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_GREEN_TYPE"), NanNew<v8::Uint32>(GL_TEXTURE_GREEN_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BLUE_TYPE"), NanNew<v8::Uint32>(GL_TEXTURE_BLUE_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_ALPHA_TYPE"), NanNew<v8::Uint32>(GL_TEXTURE_ALPHA_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_DEPTH_TYPE"), NanNew<v8::Uint32>(GL_TEXTURE_DEPTH_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_NORMALIZED"), NanNew<v8::Uint32>(GL_UNSIGNED_NORMALIZED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_BINDING"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_BINDING"), NanNew<v8::Uint32>(GL_RENDERBUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("READ_FRAMEBUFFER"), NanNew<v8::Uint32>(GL_READ_FRAMEBUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_FRAMEBUFFER"), NanNew<v8::Uint32>(GL_DRAW_FRAMEBUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("READ_FRAMEBUFFER_BINDING"), NanNew<v8::Uint32>(GL_READ_FRAMEBUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_SAMPLES"), NanNew<v8::Uint32>(GL_RENDERBUFFER_SAMPLES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_OBJECT_NAME"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_COMPLETE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_COMPLETE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_INCOMPLETE_ATTACHMENT"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_INCOMPLETE_READ_BUFFER"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_UNSUPPORTED"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_UNSUPPORTED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_COLOR_ATTACHMENTS"), NanNew<v8::Uint32>(GL_MAX_COLOR_ATTACHMENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT0"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT0), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT1"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT1), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT2"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT3"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT4"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT5"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT5), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT6"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT6), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT7"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT7), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT8"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT9"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT9), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT10"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT10), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT11"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT11), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT12"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT12), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT13"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT13), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT14"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT14), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COLOR_ATTACHMENT15"), NanNew<v8::Uint32>(GL_COLOR_ATTACHMENT15), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_ATTACHMENT"), NanNew<v8::Uint32>(GL_DEPTH_ATTACHMENT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_ATTACHMENT"), NanNew<v8::Uint32>(GL_STENCIL_ATTACHMENT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER"), NanNew<v8::Uint32>(GL_FRAMEBUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER"), NanNew<v8::Uint32>(GL_RENDERBUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_WIDTH"), NanNew<v8::Uint32>(GL_RENDERBUFFER_WIDTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_HEIGHT"), NanNew<v8::Uint32>(GL_RENDERBUFFER_HEIGHT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_INTERNAL_FORMAT"), NanNew<v8::Uint32>(GL_RENDERBUFFER_INTERNAL_FORMAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_INDEX1"), NanNew<v8::Uint32>(GL_STENCIL_INDEX1), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_INDEX4"), NanNew<v8::Uint32>(GL_STENCIL_INDEX4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_INDEX8"), NanNew<v8::Uint32>(GL_STENCIL_INDEX8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("STENCIL_INDEX16"), NanNew<v8::Uint32>(GL_STENCIL_INDEX16), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_RED_SIZE"), NanNew<v8::Uint32>(GL_RENDERBUFFER_RED_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_GREEN_SIZE"), NanNew<v8::Uint32>(GL_RENDERBUFFER_GREEN_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_BLUE_SIZE"), NanNew<v8::Uint32>(GL_RENDERBUFFER_BLUE_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_ALPHA_SIZE"), NanNew<v8::Uint32>(GL_RENDERBUFFER_ALPHA_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_DEPTH_SIZE"), NanNew<v8::Uint32>(GL_RENDERBUFFER_DEPTH_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RENDERBUFFER_STENCIL_SIZE"), NanNew<v8::Uint32>(GL_RENDERBUFFER_STENCIL_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_SAMPLES"), NanNew<v8::Uint32>(GL_MAX_SAMPLES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAMEBUFFER_SRGB"), NanNew<v8::Uint32>(GL_FRAMEBUFFER_SRGB), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("HALF_FLOAT"), NanNew<v8::Uint32>(GL_HALF_FLOAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAP_READ_BIT"), NanNew<v8::Uint32>(GL_MAP_READ_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAP_WRITE_BIT"), NanNew<v8::Uint32>(GL_MAP_WRITE_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAP_INVALIDATE_RANGE_BIT"), NanNew<v8::Uint32>(GL_MAP_INVALIDATE_RANGE_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAP_INVALIDATE_BUFFER_BIT"), NanNew<v8::Uint32>(GL_MAP_INVALIDATE_BUFFER_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAP_FLUSH_EXPLICIT_BIT"), NanNew<v8::Uint32>(GL_MAP_FLUSH_EXPLICIT_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAP_UNSYNCHRONIZED_BIT"), NanNew<v8::Uint32>(GL_MAP_UNSYNCHRONIZED_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RED_RGTC1"), NanNew<v8::Uint32>(GL_COMPRESSED_RED_RGTC1), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_SIGNED_RED_RGTC1"), NanNew<v8::Uint32>(GL_COMPRESSED_SIGNED_RED_RGTC1), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RG_RGTC2"), NanNew<v8::Uint32>(GL_COMPRESSED_RG_RGTC2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_SIGNED_RG_RGTC2"), NanNew<v8::Uint32>(GL_COMPRESSED_SIGNED_RG_RGTC2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG"), NanNew<v8::Uint32>(GL_RG), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG_INTEGER"), NanNew<v8::Uint32>(GL_RG_INTEGER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R8"), NanNew<v8::Uint32>(GL_R8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R16"), NanNew<v8::Uint32>(GL_R16), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG8"), NanNew<v8::Uint32>(GL_RG8), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG16"), NanNew<v8::Uint32>(GL_RG16), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R16F"), NanNew<v8::Uint32>(GL_R16F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R32F"), NanNew<v8::Uint32>(GL_R32F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG16F"), NanNew<v8::Uint32>(GL_RG16F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG32F"), NanNew<v8::Uint32>(GL_RG32F), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R8I"), NanNew<v8::Uint32>(GL_R8I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R8UI"), NanNew<v8::Uint32>(GL_R8UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R16I"), NanNew<v8::Uint32>(GL_R16I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R16UI"), NanNew<v8::Uint32>(GL_R16UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R32I"), NanNew<v8::Uint32>(GL_R32I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("R32UI"), NanNew<v8::Uint32>(GL_R32UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG8I"), NanNew<v8::Uint32>(GL_RG8I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG8UI"), NanNew<v8::Uint32>(GL_RG8UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG16I"), NanNew<v8::Uint32>(GL_RG16I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG16UI"), NanNew<v8::Uint32>(GL_RG16UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG32I"), NanNew<v8::Uint32>(GL_RG32I), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RG32UI"), NanNew<v8::Uint32>(GL_RG32UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_ARRAY_BINDING"), NanNew<v8::Uint32>(GL_VERTEX_ARRAY_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BUFFER"), NanNew<v8::Uint32>(GL_UNIFORM_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BUFFER_BINDING"), NanNew<v8::Uint32>(GL_UNIFORM_BUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BUFFER_START"), NanNew<v8::Uint32>(GL_UNIFORM_BUFFER_START), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BUFFER_SIZE"), NanNew<v8::Uint32>(GL_UNIFORM_BUFFER_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VERTEX_UNIFORM_BLOCKS"), NanNew<v8::Uint32>(GL_MAX_VERTEX_UNIFORM_BLOCKS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_GEOMETRY_UNIFORM_BLOCKS"), NanNew<v8::Uint32>(GL_MAX_GEOMETRY_UNIFORM_BLOCKS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_FRAGMENT_UNIFORM_BLOCKS"), NanNew<v8::Uint32>(GL_MAX_FRAGMENT_UNIFORM_BLOCKS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_COMBINED_UNIFORM_BLOCKS"), NanNew<v8::Uint32>(GL_MAX_COMBINED_UNIFORM_BLOCKS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_UNIFORM_BUFFER_BINDINGS"), NanNew<v8::Uint32>(GL_MAX_UNIFORM_BUFFER_BINDINGS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_UNIFORM_BLOCK_SIZE"), NanNew<v8::Uint32>(GL_MAX_UNIFORM_BLOCK_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BUFFER_OFFSET_ALIGNMENT"), NanNew<v8::Uint32>(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH"), NanNew<v8::Uint32>(GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_UNIFORM_BLOCKS"), NanNew<v8::Uint32>(GL_ACTIVE_UNIFORM_BLOCKS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_TYPE"), NanNew<v8::Uint32>(GL_UNIFORM_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_SIZE"), NanNew<v8::Uint32>(GL_UNIFORM_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_NAME_LENGTH"), NanNew<v8::Uint32>(GL_UNIFORM_NAME_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_INDEX"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_INDEX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_OFFSET"), NanNew<v8::Uint32>(GL_UNIFORM_OFFSET), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_ARRAY_STRIDE"), NanNew<v8::Uint32>(GL_UNIFORM_ARRAY_STRIDE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_MATRIX_STRIDE"), NanNew<v8::Uint32>(GL_UNIFORM_MATRIX_STRIDE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_IS_ROW_MAJOR"), NanNew<v8::Uint32>(GL_UNIFORM_IS_ROW_MAJOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_BINDING"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_DATA_SIZE"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_DATA_SIZE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_NAME_LENGTH"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_NAME_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_ACTIVE_UNIFORMS"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COPY_READ_BUFFER"), NanNew<v8::Uint32>(GL_COPY_READ_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COPY_WRITE_BUFFER"), NanNew<v8::Uint32>(GL_COPY_WRITE_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_CLAMP"), NanNew<v8::Uint32>(GL_DEPTH_CLAMP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FIRST_VERTEX_CONVENTION"), NanNew<v8::Uint32>(GL_FIRST_VERTEX_CONVENTION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LAST_VERTEX_CONVENTION"), NanNew<v8::Uint32>(GL_LAST_VERTEX_CONVENTION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROVOKING_VERTEX"), NanNew<v8::Uint32>(GL_PROVOKING_VERTEX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_CUBE_MAP_SEAMLESS"), NanNew<v8::Uint32>(GL_TEXTURE_CUBE_MAP_SEAMLESS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_SERVER_WAIT_TIMEOUT"), NanNew<v8::Uint32>(GL_MAX_SERVER_WAIT_TIMEOUT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("OBJECT_TYPE"), NanNew<v8::Uint32>(GL_OBJECT_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SYNC_CONDITION"), NanNew<v8::Uint32>(GL_SYNC_CONDITION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SYNC_STATUS"), NanNew<v8::Uint32>(GL_SYNC_STATUS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SYNC_FLAGS"), NanNew<v8::Uint32>(GL_SYNC_FLAGS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SYNC_FENCE"), NanNew<v8::Uint32>(GL_SYNC_FENCE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SYNC_GPU_COMMANDS_COMPLETE"), NanNew<v8::Uint32>(GL_SYNC_GPU_COMMANDS_COMPLETE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNALED"), NanNew<v8::Uint32>(GL_UNSIGNALED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SIGNALED"), NanNew<v8::Uint32>(GL_SIGNALED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ALREADY_SIGNALED"), NanNew<v8::Uint32>(GL_ALREADY_SIGNALED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TIMEOUT_EXPIRED"), NanNew<v8::Uint32>(GL_TIMEOUT_EXPIRED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("CONDITION_SATISFIED"), NanNew<v8::Uint32>(GL_CONDITION_SATISFIED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("WAIT_FAILED"), NanNew<v8::Uint32>(GL_WAIT_FAILED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SYNC_FLUSH_COMMANDS_BIT"), NanNew<v8::Uint32>(GL_SYNC_FLUSH_COMMANDS_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_POSITION"), NanNew<v8::Uint32>(GL_SAMPLE_POSITION), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_MASK"), NanNew<v8::Uint32>(GL_SAMPLE_MASK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLE_MASK_VALUE"), NanNew<v8::Uint32>(GL_SAMPLE_MASK_VALUE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_SAMPLE_MASK_WORDS"), NanNew<v8::Uint32>(GL_MAX_SAMPLE_MASK_WORDS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_2D_MULTISAMPLE"), NanNew<v8::Uint32>(GL_TEXTURE_2D_MULTISAMPLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_2D_MULTISAMPLE"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_2D_MULTISAMPLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_2D_MULTISAMPLE_ARRAY"), NanNew<v8::Uint32>(GL_TEXTURE_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY"), NanNew<v8::Uint32>(GL_PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_2D_MULTISAMPLE"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_2D_MULTISAMPLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY"), NanNew<v8::Uint32>(GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_SAMPLES"), NanNew<v8::Uint32>(GL_TEXTURE_SAMPLES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_FIXED_SAMPLE_LOCATIONS"), NanNew<v8::Uint32>(GL_TEXTURE_FIXED_SAMPLE_LOCATIONS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_2D_MULTISAMPLE"), NanNew<v8::Uint32>(GL_SAMPLER_2D_MULTISAMPLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_2D_MULTISAMPLE"), NanNew<v8::Uint32>(GL_INT_SAMPLER_2D_MULTISAMPLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_2D_MULTISAMPLE_ARRAY"), NanNew<v8::Uint32>(GL_SAMPLER_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_SAMPLER_2D_MULTISAMPLE_ARRAY"), NanNew<v8::Uint32>(GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY"), NanNew<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_COLOR_TEXTURE_SAMPLES"), NanNew<v8::Uint32>(GL_MAX_COLOR_TEXTURE_SAMPLES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_DEPTH_TEXTURE_SAMPLES"), NanNew<v8::Uint32>(GL_MAX_DEPTH_TEXTURE_SAMPLES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_INTEGER_SAMPLES"), NanNew<v8::Uint32>(GL_MAX_INTEGER_SAMPLES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SRC1_COLOR"), NanNew<v8::Uint32>(GL_SRC1_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SRC1_ALPHA"), NanNew<v8::Uint32>(GL_SRC1_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ONE_MINUS_SRC1_COLOR"), NanNew<v8::Uint32>(GL_ONE_MINUS_SRC1_COLOR), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ONE_MINUS_SRC1_ALPHA"), NanNew<v8::Uint32>(GL_ONE_MINUS_SRC1_ALPHA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_DUAL_SOURCE_DRAW_BUFFERS"), NanNew<v8::Uint32>(GL_MAX_DUAL_SOURCE_DRAW_BUFFERS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ANY_SAMPLES_PASSED"), NanNew<v8::Uint32>(GL_ANY_SAMPLES_PASSED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SAMPLER_BINDING"), NanNew<v8::Uint32>(GL_SAMPLER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB10_A2UI"), NanNew<v8::Uint32>(GL_RGB10_A2UI), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_SWIZZLE_R"), NanNew<v8::Uint32>(GL_TEXTURE_SWIZZLE_R), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_SWIZZLE_G"), NanNew<v8::Uint32>(GL_TEXTURE_SWIZZLE_G), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_SWIZZLE_B"), NanNew<v8::Uint32>(GL_TEXTURE_SWIZZLE_B), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_SWIZZLE_A"), NanNew<v8::Uint32>(GL_TEXTURE_SWIZZLE_A), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_SWIZZLE_RGBA"), NanNew<v8::Uint32>(GL_TEXTURE_SWIZZLE_RGBA), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TIME_ELAPSED"), NanNew<v8::Uint32>(GL_TIME_ELAPSED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TIMESTAMP"), NanNew<v8::Uint32>(GL_TIMESTAMP), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("INT_2_10_10_10_REV"), NanNew<v8::Uint32>(GL_INT_2_10_10_10_REV), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_INDIRECT_BUFFER"), NanNew<v8::Uint32>(GL_DRAW_INDIRECT_BUFFER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DRAW_INDIRECT_BUFFER_BINDING"), NanNew<v8::Uint32>(GL_DRAW_INDIRECT_BUFFER_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GEOMETRY_SHADER_INVOCATIONS"), NanNew<v8::Uint32>(GL_GEOMETRY_SHADER_INVOCATIONS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_GEOMETRY_SHADER_INVOCATIONS"), NanNew<v8::Uint32>(GL_MAX_GEOMETRY_SHADER_INVOCATIONS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MIN_FRAGMENT_INTERPOLATION_OFFSET"), NanNew<v8::Uint32>(GL_MIN_FRAGMENT_INTERPOLATION_OFFSET), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_FRAGMENT_INTERPOLATION_OFFSET"), NanNew<v8::Uint32>(GL_MAX_FRAGMENT_INTERPOLATION_OFFSET), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAGMENT_INTERPOLATION_OFFSET_BITS"), NanNew<v8::Uint32>(GL_FRAGMENT_INTERPOLATION_OFFSET_BITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_VEC2"), NanNew<v8::Uint32>(GL_DOUBLE_VEC2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_VEC3"), NanNew<v8::Uint32>(GL_DOUBLE_VEC3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_VEC4"), NanNew<v8::Uint32>(GL_DOUBLE_VEC4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_MAT2"), NanNew<v8::Uint32>(GL_DOUBLE_MAT2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_MAT3"), NanNew<v8::Uint32>(GL_DOUBLE_MAT3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_MAT4"), NanNew<v8::Uint32>(GL_DOUBLE_MAT4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_MAT2x3"), NanNew<v8::Uint32>(GL_DOUBLE_MAT2x3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_MAT2x4"), NanNew<v8::Uint32>(GL_DOUBLE_MAT2x4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_MAT3x2"), NanNew<v8::Uint32>(GL_DOUBLE_MAT3x2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_MAT3x4"), NanNew<v8::Uint32>(GL_DOUBLE_MAT3x4), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_MAT4x2"), NanNew<v8::Uint32>(GL_DOUBLE_MAT4x2), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DOUBLE_MAT4x3"), NanNew<v8::Uint32>(GL_DOUBLE_MAT4x3), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_SUBROUTINES"), NanNew<v8::Uint32>(GL_ACTIVE_SUBROUTINES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_SUBROUTINE_UNIFORMS"), NanNew<v8::Uint32>(GL_ACTIVE_SUBROUTINE_UNIFORMS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS"), NanNew<v8::Uint32>(GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_SUBROUTINE_MAX_LENGTH"), NanNew<v8::Uint32>(GL_ACTIVE_SUBROUTINE_MAX_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH"), NanNew<v8::Uint32>(GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_SUBROUTINES"), NanNew<v8::Uint32>(GL_MAX_SUBROUTINES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_SUBROUTINE_UNIFORM_LOCATIONS"), NanNew<v8::Uint32>(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NUM_COMPATIBLE_SUBROUTINES"), NanNew<v8::Uint32>(GL_NUM_COMPATIBLE_SUBROUTINES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPATIBLE_SUBROUTINES"), NanNew<v8::Uint32>(GL_COMPATIBLE_SUBROUTINES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PATCHES"), NanNew<v8::Uint32>(GL_PATCHES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PATCH_VERTICES"), NanNew<v8::Uint32>(GL_PATCH_VERTICES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PATCH_DEFAULT_INNER_LEVEL"), NanNew<v8::Uint32>(GL_PATCH_DEFAULT_INNER_LEVEL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PATCH_DEFAULT_OUTER_LEVEL"), NanNew<v8::Uint32>(GL_PATCH_DEFAULT_OUTER_LEVEL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TESS_CONTROL_OUTPUT_VERTICES"), NanNew<v8::Uint32>(GL_TESS_CONTROL_OUTPUT_VERTICES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TESS_GEN_MODE"), NanNew<v8::Uint32>(GL_TESS_GEN_MODE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TESS_GEN_SPACING"), NanNew<v8::Uint32>(GL_TESS_GEN_SPACING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TESS_GEN_VERTEX_ORDER"), NanNew<v8::Uint32>(GL_TESS_GEN_VERTEX_ORDER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TESS_GEN_POINT_MODE"), NanNew<v8::Uint32>(GL_TESS_GEN_POINT_MODE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("QUADS"), NanNew<v8::Uint32>(GL_QUADS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ISOLINES"), NanNew<v8::Uint32>(GL_ISOLINES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRACTIONAL_ODD"), NanNew<v8::Uint32>(GL_FRACTIONAL_ODD), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRACTIONAL_EVEN"), NanNew<v8::Uint32>(GL_FRACTIONAL_EVEN), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_PATCH_VERTICES"), NanNew<v8::Uint32>(GL_MAX_PATCH_VERTICES), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_GEN_LEVEL"), NanNew<v8::Uint32>(GL_MAX_TESS_GEN_LEVEL), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_CONTROL_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_EVALUATION_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS"), NanNew<v8::Uint32>(GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS"), NanNew<v8::Uint32>(GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_CONTROL_OUTPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_PATCH_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TESS_PATCH_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_EVALUATION_OUTPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_CONTROL_UNIFORM_BLOCKS"), NanNew<v8::Uint32>(GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_EVALUATION_UNIFORM_BLOCKS"), NanNew<v8::Uint32>(GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_CONTROL_INPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TESS_EVALUATION_INPUT_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS"), NanNew<v8::Uint32>(GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER"), NanNew<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TESS_EVALUATION_SHADER"), NanNew<v8::Uint32>(GL_TESS_EVALUATION_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TESS_CONTROL_SHADER"), NanNew<v8::Uint32>(GL_TESS_CONTROL_SHADER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_BUFFER_PAUSED"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_BUFFER_ACTIVE"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TRANSFORM_FEEDBACK_BINDING"), NanNew<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TRANSFORM_FEEDBACK_BUFFERS"), NanNew<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VERTEX_STREAMS"), NanNew<v8::Uint32>(GL_MAX_VERTEX_STREAMS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FIXED"), NanNew<v8::Uint32>(GL_FIXED), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("IMPLEMENTATION_COLOR_READ_TYPE"), NanNew<v8::Uint32>(GL_IMPLEMENTATION_COLOR_READ_TYPE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("IMPLEMENTATION_COLOR_READ_FORMAT"), NanNew<v8::Uint32>(GL_IMPLEMENTATION_COLOR_READ_FORMAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LOW_FLOAT"), NanNew<v8::Uint32>(GL_LOW_FLOAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MEDIUM_FLOAT"), NanNew<v8::Uint32>(GL_MEDIUM_FLOAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("HIGH_FLOAT"), NanNew<v8::Uint32>(GL_HIGH_FLOAT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LOW_INT"), NanNew<v8::Uint32>(GL_LOW_INT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MEDIUM_INT"), NanNew<v8::Uint32>(GL_MEDIUM_INT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("HIGH_INT"), NanNew<v8::Uint32>(GL_HIGH_INT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SHADER_COMPILER"), NanNew<v8::Uint32>(GL_SHADER_COMPILER), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SHADER_BINARY_FORMATS"), NanNew<v8::Uint32>(GL_SHADER_BINARY_FORMATS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NUM_SHADER_BINARY_FORMATS"), NanNew<v8::Uint32>(GL_NUM_SHADER_BINARY_FORMATS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VERTEX_UNIFORM_VECTORS"), NanNew<v8::Uint32>(GL_MAX_VERTEX_UNIFORM_VECTORS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VARYING_VECTORS"), NanNew<v8::Uint32>(GL_MAX_VARYING_VECTORS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_FRAGMENT_UNIFORM_VECTORS"), NanNew<v8::Uint32>(GL_MAX_FRAGMENT_UNIFORM_VECTORS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("RGB565"), NanNew<v8::Uint32>(GL_RGB565), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROGRAM_BINARY_RETRIEVABLE_HINT"), NanNew<v8::Uint32>(GL_PROGRAM_BINARY_RETRIEVABLE_HINT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROGRAM_BINARY_LENGTH"), NanNew<v8::Uint32>(GL_PROGRAM_BINARY_LENGTH), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("NUM_PROGRAM_BINARY_FORMATS"), NanNew<v8::Uint32>(GL_NUM_PROGRAM_BINARY_FORMATS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROGRAM_BINARY_FORMATS"), NanNew<v8::Uint32>(GL_PROGRAM_BINARY_FORMATS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VERTEX_SHADER_BIT"), NanNew<v8::Uint32>(GL_VERTEX_SHADER_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("FRAGMENT_SHADER_BIT"), NanNew<v8::Uint32>(GL_FRAGMENT_SHADER_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("GEOMETRY_SHADER_BIT"), NanNew<v8::Uint32>(GL_GEOMETRY_SHADER_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TESS_CONTROL_SHADER_BIT"), NanNew<v8::Uint32>(GL_TESS_CONTROL_SHADER_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TESS_EVALUATION_SHADER_BIT"), NanNew<v8::Uint32>(GL_TESS_EVALUATION_SHADER_BIT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ALL_SHADER_BITS"), NanNew<v8::Uint32>(GL_ALL_SHADER_BITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROGRAM_SEPARABLE"), NanNew<v8::Uint32>(GL_PROGRAM_SEPARABLE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("ACTIVE_PROGRAM"), NanNew<v8::Uint32>(GL_ACTIVE_PROGRAM), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("PROGRAM_PIPELINE_BINDING"), NanNew<v8::Uint32>(GL_PROGRAM_PIPELINE_BINDING), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_VIEWPORTS"), NanNew<v8::Uint32>(GL_MAX_VIEWPORTS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VIEWPORT_SUBPIXEL_BITS"), NanNew<v8::Uint32>(GL_VIEWPORT_SUBPIXEL_BITS), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VIEWPORT_BOUNDS_RANGE"), NanNew<v8::Uint32>(GL_VIEWPORT_BOUNDS_RANGE), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("LAYER_PROVOKING_VERTEX"), NanNew<v8::Uint32>(GL_LAYER_PROVOKING_VERTEX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("VIEWPORT_INDEX_PROVOKING_VERTEX"), NanNew<v8::Uint32>(GL_VIEWPORT_INDEX_PROVOKING_VERTEX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("UNDEFINED_VERTEX"), NanNew<v8::Uint32>(GL_UNDEFINED_VERTEX), v8::ReadOnly);
 }
 
 #if (GL_DEPTH_BUFFER_BIT != 256)
@@ -4545,7 +4639,7 @@ void defineConstants(v8::Handle<v8::ObjectTemplate> exports) {
 #if (GL_UNDEFINED_VERTEX != 33376)
  #error "GL3 constant UNDEFINED_VERTEX's value is incorrect."
 #endif
-v8::Handle<v8::Value> EXPORT_cullFace(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_cullFace) {
     NanScope();
     // None
     GLenum arg0;
@@ -4553,7 +4647,7 @@ v8::Handle<v8::Value> EXPORT_cullFace(const v8::Arguments& args) {
     glCullFace(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_frontFace(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_frontFace) {
     NanScope();
     // None
     GLenum arg0;
@@ -4561,7 +4655,7 @@ v8::Handle<v8::Value> EXPORT_frontFace(const v8::Arguments& args) {
     glFrontFace(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_hint(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_hint) {
     NanScope();
     // None
     GLenum arg0;
@@ -4571,7 +4665,7 @@ v8::Handle<v8::Value> EXPORT_hint(const v8::Arguments& args) {
     glHint(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_lineWidth(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_lineWidth) {
     NanScope();
     // None
     GLfloat arg0;
@@ -4579,7 +4673,7 @@ v8::Handle<v8::Value> EXPORT_lineWidth(const v8::Arguments& args) {
     glLineWidth(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_pointSize(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_pointSize) {
     NanScope();
     // None
     GLfloat arg0;
@@ -4587,7 +4681,7 @@ v8::Handle<v8::Value> EXPORT_pointSize(const v8::Arguments& args) {
     glPointSize(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_polygonMode(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_polygonMode) {
     NanScope();
     // None
     GLenum arg0;
@@ -4597,7 +4691,7 @@ v8::Handle<v8::Value> EXPORT_polygonMode(const v8::Arguments& args) {
     glPolygonMode(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_scissor(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_scissor) {
     NanScope();
     // None
     GLint arg0;
@@ -4611,7 +4705,7 @@ v8::Handle<v8::Value> EXPORT_scissor(const v8::Arguments& args) {
     glScissor(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texParameterf(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texParameterf) {
     NanScope();
     // None
     GLenum arg0;
@@ -4623,7 +4717,7 @@ v8::Handle<v8::Value> EXPORT_texParameterf(const v8::Arguments& args) {
     glTexParameterf(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texParameterfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texParameterfv) {
     NanScope();
     // None
     GLenum arg0;
@@ -4640,7 +4734,7 @@ v8::Handle<v8::Value> EXPORT_texParameterfv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (const GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (const GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -4650,7 +4744,7 @@ v8::Handle<v8::Value> EXPORT_texParameterfv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texParameteri(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texParameteri) {
     NanScope();
     // None
     GLenum arg0;
@@ -4662,7 +4756,7 @@ v8::Handle<v8::Value> EXPORT_texParameteri(const v8::Arguments& args) {
     glTexParameteri(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texParameteriv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texParameteriv) {
     NanScope();
     // None
     GLenum arg0;
@@ -4679,7 +4773,7 @@ v8::Handle<v8::Value> EXPORT_texParameteriv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -4689,7 +4783,7 @@ v8::Handle<v8::Value> EXPORT_texParameteriv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texImage1D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texImage1D) {
     NanScope();
     // None
     GLenum arg0;
@@ -4716,7 +4810,7 @@ v8::Handle<v8::Value> EXPORT_texImage1D(const v8::Arguments& args) {
         arg7_nonconst = new GLubyte[arg7_array->Length()];
         arg7 = (const GLvoid*)arg7_nonconst;
     } else if(args[7]->IsObject()) {
-        arg7 = (const GLvoid*)node::Buffer::Data(args[7]);
+        arg7 = (const GLvoid*)glbind_get_buffer_data(args[7]);
     } else if(args[7]->IsNumber()) {
         arg7 = (const GLvoid*)(args[7]->IntegerValue());
     } else {
@@ -4726,7 +4820,7 @@ v8::Handle<v8::Value> EXPORT_texImage1D(const v8::Arguments& args) {
     if(arg7_nonconst) delete [] arg7_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texImage2D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texImage2D) {
     NanScope();
     // None
     GLenum arg0;
@@ -4755,7 +4849,7 @@ v8::Handle<v8::Value> EXPORT_texImage2D(const v8::Arguments& args) {
         arg8_nonconst = new GLubyte[arg8_array->Length()];
         arg8 = (const GLvoid*)arg8_nonconst;
     } else if(args[8]->IsObject()) {
-        arg8 = (const GLvoid*)node::Buffer::Data(args[8]);
+        arg8 = (const GLvoid*)glbind_get_buffer_data(args[8]);
     } else if(args[8]->IsNumber()) {
         arg8 = (const GLvoid*)(args[8]->IntegerValue());
     } else {
@@ -4765,7 +4859,7 @@ v8::Handle<v8::Value> EXPORT_texImage2D(const v8::Arguments& args) {
     if(arg8_nonconst) delete [] arg8_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawBuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawBuffer) {
     NanScope();
     // None
     GLenum arg0;
@@ -4773,7 +4867,7 @@ v8::Handle<v8::Value> EXPORT_drawBuffer(const v8::Arguments& args) {
     glDrawBuffer(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clear(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clear) {
     NanScope();
     // None
     GLbitfield arg0;
@@ -4781,7 +4875,7 @@ v8::Handle<v8::Value> EXPORT_clear(const v8::Arguments& args) {
     glClear(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clearColor(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clearColor) {
     NanScope();
     // None
     GLfloat arg0;
@@ -4795,7 +4889,7 @@ v8::Handle<v8::Value> EXPORT_clearColor(const v8::Arguments& args) {
     glClearColor(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clearStencil(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clearStencil) {
     NanScope();
     // None
     GLint arg0;
@@ -4803,7 +4897,7 @@ v8::Handle<v8::Value> EXPORT_clearStencil(const v8::Arguments& args) {
     glClearStencil(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clearDepth(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clearDepth) {
     NanScope();
     // None
     GLclampd arg0;
@@ -4811,7 +4905,7 @@ v8::Handle<v8::Value> EXPORT_clearDepth(const v8::Arguments& args) {
     glClearDepth(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_stencilMask(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_stencilMask) {
     NanScope();
     // None
     GLuint arg0;
@@ -4819,7 +4913,7 @@ v8::Handle<v8::Value> EXPORT_stencilMask(const v8::Arguments& args) {
     glStencilMask(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_colorMask(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_colorMask) {
     NanScope();
     // None
     GLboolean arg0;
@@ -4833,7 +4927,7 @@ v8::Handle<v8::Value> EXPORT_colorMask(const v8::Arguments& args) {
     glColorMask(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_depthMask(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_depthMask) {
     NanScope();
     // None
     GLboolean arg0;
@@ -4841,7 +4935,7 @@ v8::Handle<v8::Value> EXPORT_depthMask(const v8::Arguments& args) {
     glDepthMask(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_disable(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_disable) {
     NanScope();
     // None
     GLenum arg0;
@@ -4849,7 +4943,7 @@ v8::Handle<v8::Value> EXPORT_disable(const v8::Arguments& args) {
     glDisable(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_enable(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_enable) {
     NanScope();
     // None
     GLenum arg0;
@@ -4857,19 +4951,19 @@ v8::Handle<v8::Value> EXPORT_enable(const v8::Arguments& args) {
     glEnable(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_finish(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_finish) {
     NanScope();
     // None
     glFinish();
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_flush(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_flush) {
     NanScope();
     // None
     glFlush();
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_blendFunc(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blendFunc) {
     NanScope();
     // None
     GLenum arg0;
@@ -4879,7 +4973,7 @@ v8::Handle<v8::Value> EXPORT_blendFunc(const v8::Arguments& args) {
     glBlendFunc(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_logicOp(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_logicOp) {
     NanScope();
     // None
     GLenum arg0;
@@ -4887,7 +4981,7 @@ v8::Handle<v8::Value> EXPORT_logicOp(const v8::Arguments& args) {
     glLogicOp(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_stencilFunc(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_stencilFunc) {
     NanScope();
     // None
     GLenum arg0;
@@ -4899,7 +4993,7 @@ v8::Handle<v8::Value> EXPORT_stencilFunc(const v8::Arguments& args) {
     glStencilFunc(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_stencilOp(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_stencilOp) {
     NanScope();
     // None
     GLenum arg0;
@@ -4911,7 +5005,7 @@ v8::Handle<v8::Value> EXPORT_stencilOp(const v8::Arguments& args) {
     glStencilOp(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_depthFunc(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_depthFunc) {
     NanScope();
     // None
     GLenum arg0;
@@ -4919,7 +5013,7 @@ v8::Handle<v8::Value> EXPORT_depthFunc(const v8::Arguments& args) {
     glDepthFunc(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_pixelStoref(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_pixelStoref) {
     NanScope();
     // None
     GLenum arg0;
@@ -4929,7 +5023,7 @@ v8::Handle<v8::Value> EXPORT_pixelStoref(const v8::Arguments& args) {
     glPixelStoref(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_pixelStorei(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_pixelStorei) {
     NanScope();
     // None
     GLenum arg0;
@@ -4939,7 +5033,7 @@ v8::Handle<v8::Value> EXPORT_pixelStorei(const v8::Arguments& args) {
     glPixelStorei(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_readBuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_readBuffer) {
     NanScope();
     // None
     GLenum arg0;
@@ -4947,7 +5041,7 @@ v8::Handle<v8::Value> EXPORT_readBuffer(const v8::Arguments& args) {
     glReadBuffer(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_readPixels(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_readPixels) {
     NanScope();
     // None
     GLint arg0;
@@ -4972,7 +5066,7 @@ v8::Handle<v8::Value> EXPORT_readPixels(const v8::Arguments& args) {
         arg6_nonconst = new GLubyte[arg6_array->Length()];
         arg6 = (GLvoid*)arg6_nonconst;
     } else if(args[6]->IsObject()) {
-        arg6 = (GLvoid*)node::Buffer::Data(args[6]);
+        arg6 = (GLvoid*)glbind_get_buffer_data(args[6]);
     } else if(args[6]->IsNumber()) {
         arg6 = (GLvoid*)(args[6]->IntegerValue());
     } else {
@@ -4982,7 +5076,7 @@ v8::Handle<v8::Value> EXPORT_readPixels(const v8::Arguments& args) {
     if(arg6_nonconst) delete [] arg6_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getBooleanv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getBooleanv) {
     NanScope();
     // None
     GLenum arg0;
@@ -4997,7 +5091,7 @@ v8::Handle<v8::Value> EXPORT_getBooleanv(const v8::Arguments& args) {
         arg1_nonconst = new GLboolean[arg1_array->Length()];
         arg1 = (GLboolean*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (GLboolean*)node::Buffer::Data(args[1]);
+        arg1 = (GLboolean*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (GLboolean*)(args[1]->IntegerValue());
     } else {
@@ -5007,7 +5101,7 @@ v8::Handle<v8::Value> EXPORT_getBooleanv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getDoublev(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getDoublev) {
     NanScope();
     // None
     GLenum arg0;
@@ -5022,7 +5116,7 @@ v8::Handle<v8::Value> EXPORT_getDoublev(const v8::Arguments& args) {
         arg1_nonconst = new GLdouble[arg1_array->Length()];
         arg1 = (GLdouble*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (GLdouble*)node::Buffer::Data(args[1]);
+        arg1 = (GLdouble*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (GLdouble*)(args[1]->IntegerValue());
     } else {
@@ -5032,15 +5126,15 @@ v8::Handle<v8::Value> EXPORT_getDoublev(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getError(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getError) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a16c8>
+    // <gltypes.Type instance at 0x108b07098>
     GLenum result;
     result = glGetError();
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getFloatv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getFloatv) {
     NanScope();
     // None
     GLenum arg0;
@@ -5055,7 +5149,7 @@ v8::Handle<v8::Value> EXPORT_getFloatv(const v8::Arguments& args) {
         arg1_nonconst = new GLfloat[arg1_array->Length()];
         arg1 = (GLfloat*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (GLfloat*)node::Buffer::Data(args[1]);
+        arg1 = (GLfloat*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (GLfloat*)(args[1]->IntegerValue());
     } else {
@@ -5065,7 +5159,7 @@ v8::Handle<v8::Value> EXPORT_getFloatv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getIntegerv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getIntegerv) {
     NanScope();
     // None
     GLenum arg0;
@@ -5080,7 +5174,7 @@ v8::Handle<v8::Value> EXPORT_getIntegerv(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (GLint*)node::Buffer::Data(args[1]);
+        arg1 = (GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (GLint*)(args[1]->IntegerValue());
     } else {
@@ -5090,22 +5184,22 @@ v8::Handle<v8::Value> EXPORT_getIntegerv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getString(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getString) {
     NanScope();
-    // <gltypes.UStringType instance at 0x1036a1b90>
+    // <gltypes.UStringType instance at 0x108b07560>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     const GLubyte* result;
     result = glGetString(arg0);
     v8::Handle<v8::Value> result_js;
     if(result) {
-        result_js = v8::String::New((const char*)result, strlen((const char*)result));
+        result_js = NanNew<v8::String>((const char*)result, strlen((const char*)result));
     } else {
-        result_js = v8::Undefined();
+        result_js = NanUndefined();
     }
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getTexImage(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getTexImage) {
     NanScope();
     // None
     GLenum arg0;
@@ -5126,7 +5220,7 @@ v8::Handle<v8::Value> EXPORT_getTexImage(const v8::Arguments& args) {
         arg4_nonconst = new GLubyte[arg4_array->Length()];
         arg4 = (GLvoid*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLvoid*)node::Buffer::Data(args[4]);
+        arg4 = (GLvoid*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLvoid*)(args[4]->IntegerValue());
     } else {
@@ -5136,7 +5230,7 @@ v8::Handle<v8::Value> EXPORT_getTexImage(const v8::Arguments& args) {
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getTexParameterfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getTexParameterfv) {
     NanScope();
     // None
     GLenum arg0;
@@ -5153,7 +5247,7 @@ v8::Handle<v8::Value> EXPORT_getTexParameterfv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -5163,7 +5257,7 @@ v8::Handle<v8::Value> EXPORT_getTexParameterfv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getTexParameteriv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getTexParameteriv) {
     NanScope();
     // None
     GLenum arg0;
@@ -5180,7 +5274,7 @@ v8::Handle<v8::Value> EXPORT_getTexParameteriv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -5190,7 +5284,7 @@ v8::Handle<v8::Value> EXPORT_getTexParameteriv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getTexLevelParameterfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getTexLevelParameterfv) {
     NanScope();
     // None
     GLenum arg0;
@@ -5209,7 +5303,7 @@ v8::Handle<v8::Value> EXPORT_getTexLevelParameterfv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -5219,7 +5313,7 @@ v8::Handle<v8::Value> EXPORT_getTexLevelParameterfv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getTexLevelParameteriv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getTexLevelParameteriv) {
     NanScope();
     // None
     GLenum arg0;
@@ -5238,7 +5332,7 @@ v8::Handle<v8::Value> EXPORT_getTexLevelParameteriv(const v8::Arguments& args) {
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLint*)node::Buffer::Data(args[3]);
+        arg3 = (GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLint*)(args[3]->IntegerValue());
     } else {
@@ -5248,17 +5342,17 @@ v8::Handle<v8::Value> EXPORT_getTexLevelParameteriv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isEnabled(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isEnabled) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLboolean result;
     result = glIsEnabled(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_depthRange(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_depthRange) {
     NanScope();
     // None
     GLclampd arg0;
@@ -5268,7 +5362,7 @@ v8::Handle<v8::Value> EXPORT_depthRange(const v8::Arguments& args) {
     glDepthRange(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_viewport(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_viewport) {
     NanScope();
     // None
     GLint arg0;
@@ -5282,7 +5376,7 @@ v8::Handle<v8::Value> EXPORT_viewport(const v8::Arguments& args) {
     glViewport(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawArrays(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawArrays) {
     NanScope();
     // None
     GLenum arg0;
@@ -5294,7 +5388,7 @@ v8::Handle<v8::Value> EXPORT_drawArrays(const v8::Arguments& args) {
     glDrawArrays(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawElements(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawElements) {
     NanScope();
     // None
     GLenum arg0;
@@ -5313,7 +5407,7 @@ v8::Handle<v8::Value> EXPORT_drawElements(const v8::Arguments& args) {
         arg3_nonconst = new GLubyte[arg3_array->Length()];
         arg3 = (const GLvoid*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLvoid*)node::Buffer::Data(args[3]);
+        arg3 = (const GLvoid*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLvoid*)(args[3]->IntegerValue());
     } else {
@@ -5323,7 +5417,7 @@ v8::Handle<v8::Value> EXPORT_drawElements(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_polygonOffset(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_polygonOffset) {
     NanScope();
     // None
     GLfloat arg0;
@@ -5333,7 +5427,7 @@ v8::Handle<v8::Value> EXPORT_polygonOffset(const v8::Arguments& args) {
     glPolygonOffset(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_copyTexImage1D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_copyTexImage1D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5353,7 +5447,7 @@ v8::Handle<v8::Value> EXPORT_copyTexImage1D(const v8::Arguments& args) {
     glCopyTexImage1D(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_copyTexImage2D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_copyTexImage2D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5375,7 +5469,7 @@ v8::Handle<v8::Value> EXPORT_copyTexImage2D(const v8::Arguments& args) {
     glCopyTexImage2D(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_copyTexSubImage1D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_copyTexSubImage1D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5393,7 +5487,7 @@ v8::Handle<v8::Value> EXPORT_copyTexSubImage1D(const v8::Arguments& args) {
     glCopyTexSubImage1D(arg0, arg1, arg2, arg3, arg4, arg5);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_copyTexSubImage2D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_copyTexSubImage2D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5415,7 +5509,7 @@ v8::Handle<v8::Value> EXPORT_copyTexSubImage2D(const v8::Arguments& args) {
     glCopyTexSubImage2D(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texSubImage1D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texSubImage1D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5440,7 +5534,7 @@ v8::Handle<v8::Value> EXPORT_texSubImage1D(const v8::Arguments& args) {
         arg6_nonconst = new GLubyte[arg6_array->Length()];
         arg6 = (const GLvoid*)arg6_nonconst;
     } else if(args[6]->IsObject()) {
-        arg6 = (const GLvoid*)node::Buffer::Data(args[6]);
+        arg6 = (const GLvoid*)glbind_get_buffer_data(args[6]);
     } else if(args[6]->IsNumber()) {
         arg6 = (const GLvoid*)(args[6]->IntegerValue());
     } else {
@@ -5450,7 +5544,7 @@ v8::Handle<v8::Value> EXPORT_texSubImage1D(const v8::Arguments& args) {
     if(arg6_nonconst) delete [] arg6_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texSubImage2D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texSubImage2D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5479,7 +5573,7 @@ v8::Handle<v8::Value> EXPORT_texSubImage2D(const v8::Arguments& args) {
         arg8_nonconst = new GLubyte[arg8_array->Length()];
         arg8 = (const GLvoid*)arg8_nonconst;
     } else if(args[8]->IsObject()) {
-        arg8 = (const GLvoid*)node::Buffer::Data(args[8]);
+        arg8 = (const GLvoid*)glbind_get_buffer_data(args[8]);
     } else if(args[8]->IsNumber()) {
         arg8 = (const GLvoid*)(args[8]->IntegerValue());
     } else {
@@ -5489,17 +5583,21 @@ v8::Handle<v8::Value> EXPORT_texSubImage2D(const v8::Arguments& args) {
     if(arg8_nonconst) delete [] arg8_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindTexture(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindTexture) {
     NanScope();
     // None
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_Texture>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_Texture>(args[1]->ToObject())->gl_handle;
+    }
     glBindTexture(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_genTextures(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_genTextures) {
     NanScope();
     // None
     GLsizei arg0;
@@ -5514,17 +5612,21 @@ v8::Handle<v8::Value> EXPORT_genTextures(const v8::Arguments& args) {
     delete [] arg1;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isTexture(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isTexture) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Texture>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Texture>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsTexture(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_blendColor(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blendColor) {
     NanScope();
     // None
     GLfloat arg0;
@@ -5538,7 +5640,7 @@ v8::Handle<v8::Value> EXPORT_blendColor(const v8::Arguments& args) {
     glBlendColor(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_blendEquation(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blendEquation) {
     NanScope();
     // None
     GLenum arg0;
@@ -5546,7 +5648,7 @@ v8::Handle<v8::Value> EXPORT_blendEquation(const v8::Arguments& args) {
     glBlendEquation(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawRangeElements(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawRangeElements) {
     NanScope();
     // None
     GLenum arg0;
@@ -5569,7 +5671,7 @@ v8::Handle<v8::Value> EXPORT_drawRangeElements(const v8::Arguments& args) {
         arg5_nonconst = new GLubyte[arg5_array->Length()];
         arg5 = (const GLvoid*)arg5_nonconst;
     } else if(args[5]->IsObject()) {
-        arg5 = (const GLvoid*)node::Buffer::Data(args[5]);
+        arg5 = (const GLvoid*)glbind_get_buffer_data(args[5]);
     } else if(args[5]->IsNumber()) {
         arg5 = (const GLvoid*)(args[5]->IntegerValue());
     } else {
@@ -5579,7 +5681,7 @@ v8::Handle<v8::Value> EXPORT_drawRangeElements(const v8::Arguments& args) {
     if(arg5_nonconst) delete [] arg5_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texImage3D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texImage3D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5610,7 +5712,7 @@ v8::Handle<v8::Value> EXPORT_texImage3D(const v8::Arguments& args) {
         arg9_nonconst = new GLubyte[arg9_array->Length()];
         arg9 = (const GLvoid*)arg9_nonconst;
     } else if(args[9]->IsObject()) {
-        arg9 = (const GLvoid*)node::Buffer::Data(args[9]);
+        arg9 = (const GLvoid*)glbind_get_buffer_data(args[9]);
     } else if(args[9]->IsNumber()) {
         arg9 = (const GLvoid*)(args[9]->IntegerValue());
     } else {
@@ -5620,7 +5722,7 @@ v8::Handle<v8::Value> EXPORT_texImage3D(const v8::Arguments& args) {
     if(arg9_nonconst) delete [] arg9_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texSubImage3D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texSubImage3D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5653,7 +5755,7 @@ v8::Handle<v8::Value> EXPORT_texSubImage3D(const v8::Arguments& args) {
         arg10_nonconst = new GLubyte[arg10_array->Length()];
         arg10 = (const GLvoid*)arg10_nonconst;
     } else if(args[10]->IsObject()) {
-        arg10 = (const GLvoid*)node::Buffer::Data(args[10]);
+        arg10 = (const GLvoid*)glbind_get_buffer_data(args[10]);
     } else if(args[10]->IsNumber()) {
         arg10 = (const GLvoid*)(args[10]->IntegerValue());
     } else {
@@ -5663,7 +5765,7 @@ v8::Handle<v8::Value> EXPORT_texSubImage3D(const v8::Arguments& args) {
     if(arg10_nonconst) delete [] arg10_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_copyTexSubImage3D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_copyTexSubImage3D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5687,7 +5789,7 @@ v8::Handle<v8::Value> EXPORT_copyTexSubImage3D(const v8::Arguments& args) {
     glCopyTexSubImage3D(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_activeTexture(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_activeTexture) {
     NanScope();
     // None
     GLenum arg0;
@@ -5695,7 +5797,7 @@ v8::Handle<v8::Value> EXPORT_activeTexture(const v8::Arguments& args) {
     glActiveTexture(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_sampleCoverage(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_sampleCoverage) {
     NanScope();
     // None
     GLclampf arg0;
@@ -5705,7 +5807,7 @@ v8::Handle<v8::Value> EXPORT_sampleCoverage(const v8::Arguments& args) {
     glSampleCoverage(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_compressedTexImage3D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_compressedTexImage3D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5734,7 +5836,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexImage3D(const v8::Arguments& args) {
         arg8_nonconst = new GLubyte[arg8_array->Length()];
         arg8 = (const GLvoid*)arg8_nonconst;
     } else if(args[8]->IsObject()) {
-        arg8 = (const GLvoid*)node::Buffer::Data(args[8]);
+        arg8 = (const GLvoid*)glbind_get_buffer_data(args[8]);
     } else if(args[8]->IsNumber()) {
         arg8 = (const GLvoid*)(args[8]->IntegerValue());
     } else {
@@ -5744,7 +5846,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexImage3D(const v8::Arguments& args) {
     if(arg8_nonconst) delete [] arg8_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_compressedTexImage2D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_compressedTexImage2D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5771,7 +5873,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexImage2D(const v8::Arguments& args) {
         arg7_nonconst = new GLubyte[arg7_array->Length()];
         arg7 = (const GLvoid*)arg7_nonconst;
     } else if(args[7]->IsObject()) {
-        arg7 = (const GLvoid*)node::Buffer::Data(args[7]);
+        arg7 = (const GLvoid*)glbind_get_buffer_data(args[7]);
     } else if(args[7]->IsNumber()) {
         arg7 = (const GLvoid*)(args[7]->IntegerValue());
     } else {
@@ -5781,7 +5883,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexImage2D(const v8::Arguments& args) {
     if(arg7_nonconst) delete [] arg7_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_compressedTexImage1D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_compressedTexImage1D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5806,7 +5908,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexImage1D(const v8::Arguments& args) {
         arg6_nonconst = new GLubyte[arg6_array->Length()];
         arg6 = (const GLvoid*)arg6_nonconst;
     } else if(args[6]->IsObject()) {
-        arg6 = (const GLvoid*)node::Buffer::Data(args[6]);
+        arg6 = (const GLvoid*)glbind_get_buffer_data(args[6]);
     } else if(args[6]->IsNumber()) {
         arg6 = (const GLvoid*)(args[6]->IntegerValue());
     } else {
@@ -5816,7 +5918,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexImage1D(const v8::Arguments& args) {
     if(arg6_nonconst) delete [] arg6_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_compressedTexSubImage3D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_compressedTexSubImage3D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5849,7 +5951,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexSubImage3D(const v8::Arguments& args) 
         arg10_nonconst = new GLubyte[arg10_array->Length()];
         arg10 = (const GLvoid*)arg10_nonconst;
     } else if(args[10]->IsObject()) {
-        arg10 = (const GLvoid*)node::Buffer::Data(args[10]);
+        arg10 = (const GLvoid*)glbind_get_buffer_data(args[10]);
     } else if(args[10]->IsNumber()) {
         arg10 = (const GLvoid*)(args[10]->IntegerValue());
     } else {
@@ -5859,7 +5961,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexSubImage3D(const v8::Arguments& args) 
     if(arg10_nonconst) delete [] arg10_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_compressedTexSubImage2D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_compressedTexSubImage2D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5888,7 +5990,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexSubImage2D(const v8::Arguments& args) 
         arg8_nonconst = new GLubyte[arg8_array->Length()];
         arg8 = (const GLvoid*)arg8_nonconst;
     } else if(args[8]->IsObject()) {
-        arg8 = (const GLvoid*)node::Buffer::Data(args[8]);
+        arg8 = (const GLvoid*)glbind_get_buffer_data(args[8]);
     } else if(args[8]->IsNumber()) {
         arg8 = (const GLvoid*)(args[8]->IntegerValue());
     } else {
@@ -5898,7 +6000,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexSubImage2D(const v8::Arguments& args) 
     if(arg8_nonconst) delete [] arg8_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_compressedTexSubImage1D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_compressedTexSubImage1D) {
     NanScope();
     // None
     GLenum arg0;
@@ -5923,7 +6025,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexSubImage1D(const v8::Arguments& args) 
         arg6_nonconst = new GLubyte[arg6_array->Length()];
         arg6 = (const GLvoid*)arg6_nonconst;
     } else if(args[6]->IsObject()) {
-        arg6 = (const GLvoid*)node::Buffer::Data(args[6]);
+        arg6 = (const GLvoid*)glbind_get_buffer_data(args[6]);
     } else if(args[6]->IsNumber()) {
         arg6 = (const GLvoid*)(args[6]->IntegerValue());
     } else {
@@ -5933,7 +6035,7 @@ v8::Handle<v8::Value> EXPORT_compressedTexSubImage1D(const v8::Arguments& args) 
     if(arg6_nonconst) delete [] arg6_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getCompressedTexImage(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getCompressedTexImage) {
     NanScope();
     // None
     GLenum arg0;
@@ -5950,7 +6052,7 @@ v8::Handle<v8::Value> EXPORT_getCompressedTexImage(const v8::Arguments& args) {
         arg2_nonconst = new GLubyte[arg2_array->Length()];
         arg2 = (GLvoid*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLvoid*)node::Buffer::Data(args[2]);
+        arg2 = (GLvoid*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLvoid*)(args[2]->IntegerValue());
     } else {
@@ -5960,7 +6062,7 @@ v8::Handle<v8::Value> EXPORT_getCompressedTexImage(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_blendFuncSeparate(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blendFuncSeparate) {
     NanScope();
     // None
     GLenum arg0;
@@ -5974,7 +6076,7 @@ v8::Handle<v8::Value> EXPORT_blendFuncSeparate(const v8::Arguments& args) {
     glBlendFuncSeparate(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_multiDrawArrays(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_multiDrawArrays) {
     NanScope();
     // None
     GLenum arg0;
@@ -5989,7 +6091,7 @@ v8::Handle<v8::Value> EXPORT_multiDrawArrays(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (const GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLint*)(args[1]->IntegerValue());
     } else {
@@ -6005,7 +6107,7 @@ v8::Handle<v8::Value> EXPORT_multiDrawArrays(const v8::Arguments& args) {
         arg2_nonconst = new GLsizei[arg2_array->Length()];
         arg2 = (const GLsizei*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLsizei*)node::Buffer::Data(args[2]);
+        arg2 = (const GLsizei*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLsizei*)(args[2]->IntegerValue());
     } else {
@@ -6018,7 +6120,7 @@ v8::Handle<v8::Value> EXPORT_multiDrawArrays(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_pointParameterf(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_pointParameterf) {
     NanScope();
     // None
     GLenum arg0;
@@ -6028,7 +6130,7 @@ v8::Handle<v8::Value> EXPORT_pointParameterf(const v8::Arguments& args) {
     glPointParameterf(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_pointParameterfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_pointParameterfv) {
     NanScope();
     // None
     GLenum arg0;
@@ -6043,7 +6145,7 @@ v8::Handle<v8::Value> EXPORT_pointParameterfv(const v8::Arguments& args) {
         arg1_nonconst = new GLfloat[arg1_array->Length()];
         arg1 = (const GLfloat*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLfloat*)node::Buffer::Data(args[1]);
+        arg1 = (const GLfloat*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLfloat*)(args[1]->IntegerValue());
     } else {
@@ -6053,7 +6155,7 @@ v8::Handle<v8::Value> EXPORT_pointParameterfv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_pointParameteri(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_pointParameteri) {
     NanScope();
     // None
     GLenum arg0;
@@ -6063,7 +6165,7 @@ v8::Handle<v8::Value> EXPORT_pointParameteri(const v8::Arguments& args) {
     glPointParameteri(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_pointParameteriv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_pointParameteriv) {
     NanScope();
     // None
     GLenum arg0;
@@ -6078,7 +6180,7 @@ v8::Handle<v8::Value> EXPORT_pointParameteriv(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (const GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLint*)(args[1]->IntegerValue());
     } else {
@@ -6088,7 +6190,7 @@ v8::Handle<v8::Value> EXPORT_pointParameteriv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_genQueries(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_genQueries) {
     NanScope();
     // None
     GLsizei arg0;
@@ -6103,27 +6205,35 @@ v8::Handle<v8::Value> EXPORT_genQueries(const v8::Arguments& args) {
     delete [] arg1;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isQuery(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isQuery) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Query>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Query>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsQuery(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_beginQuery(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_beginQuery) {
     NanScope();
     // None
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_Query>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_Query>(args[1]->ToObject())->gl_handle;
+    }
     glBeginQuery(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_endQuery(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_endQuery) {
     NanScope();
     // None
     GLenum arg0;
@@ -6131,7 +6241,7 @@ v8::Handle<v8::Value> EXPORT_endQuery(const v8::Arguments& args) {
     glEndQuery(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getQueryiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getQueryiv) {
     NanScope();
     // None
     GLenum arg0;
@@ -6148,7 +6258,7 @@ v8::Handle<v8::Value> EXPORT_getQueryiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -6158,11 +6268,15 @@ v8::Handle<v8::Value> EXPORT_getQueryiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getQueryObjectiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getQueryObjectiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Query>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Query>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLint *arg2;
@@ -6175,7 +6289,7 @@ v8::Handle<v8::Value> EXPORT_getQueryObjectiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -6185,11 +6299,15 @@ v8::Handle<v8::Value> EXPORT_getQueryObjectiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getQueryObjectuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getQueryObjectuiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Query>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Query>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLuint *arg2;
@@ -6202,7 +6320,7 @@ v8::Handle<v8::Value> EXPORT_getQueryObjectuiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLuint*)(args[2]->IntegerValue());
     } else {
@@ -6212,17 +6330,21 @@ v8::Handle<v8::Value> EXPORT_getQueryObjectuiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindBuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindBuffer) {
     NanScope();
     // None
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_Buffer>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_Buffer>(args[1]->ToObject())->gl_handle;
+    }
     glBindBuffer(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_genBuffers(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_genBuffers) {
     NanScope();
     // None
     GLsizei arg0;
@@ -6237,17 +6359,21 @@ v8::Handle<v8::Value> EXPORT_genBuffers(const v8::Arguments& args) {
     delete [] arg1;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isBuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isBuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Buffer>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Buffer>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsBuffer(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_bufferData(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bufferData) {
     NanScope();
     // None
     GLenum arg0;
@@ -6264,7 +6390,7 @@ v8::Handle<v8::Value> EXPORT_bufferData(const v8::Arguments& args) {
         arg2_nonconst = new GLubyte[arg2_array->Length()];
         arg2 = (const GLvoid*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLvoid*)node::Buffer::Data(args[2]);
+        arg2 = (const GLvoid*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLvoid*)(args[2]->IntegerValue());
     } else {
@@ -6276,7 +6402,7 @@ v8::Handle<v8::Value> EXPORT_bufferData(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bufferSubData(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bufferSubData) {
     NanScope();
     // None
     GLenum arg0;
@@ -6295,7 +6421,7 @@ v8::Handle<v8::Value> EXPORT_bufferSubData(const v8::Arguments& args) {
         arg3_nonconst = new GLubyte[arg3_array->Length()];
         arg3 = (const GLvoid*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLvoid*)node::Buffer::Data(args[3]);
+        arg3 = (const GLvoid*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLvoid*)(args[3]->IntegerValue());
     } else {
@@ -6305,7 +6431,7 @@ v8::Handle<v8::Value> EXPORT_bufferSubData(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getBufferSubData(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getBufferSubData) {
     NanScope();
     // None
     GLenum arg0;
@@ -6324,7 +6450,7 @@ v8::Handle<v8::Value> EXPORT_getBufferSubData(const v8::Arguments& args) {
         arg3_nonconst = new GLubyte[arg3_array->Length()];
         arg3 = (GLvoid*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLvoid*)node::Buffer::Data(args[3]);
+        arg3 = (GLvoid*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLvoid*)(args[3]->IntegerValue());
     } else {
@@ -6334,29 +6460,29 @@ v8::Handle<v8::Value> EXPORT_getBufferSubData(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_mapBuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_mapBuffer) {
     NanScope();
-    // <gltypes.PointerType instance at 0x103a6d5f0>
+    // <gltypes.PointerType instance at 0x108ec94d0>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLvoid *result;
     result = glMapBuffer(arg0, arg1);
-    v8::Handle<v8::Value> result_js = node::Buffer::New((char*)result, 0, do_nothing_release_callback, NULL)->handle_;
+    v8::Handle<v8::Value> result_js = NanNewBufferHandle((char*)result, 0, do_nothing_release_callback, NULL);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_unmapBuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_unmapBuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLboolean result;
     result = glUnmapBuffer(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getBufferParameteriv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getBufferParameteriv) {
     NanScope();
     // None
     GLenum arg0;
@@ -6373,7 +6499,7 @@ v8::Handle<v8::Value> EXPORT_getBufferParameteriv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -6383,7 +6509,7 @@ v8::Handle<v8::Value> EXPORT_getBufferParameteriv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_blendEquationSeparate(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blendEquationSeparate) {
     NanScope();
     // None
     GLenum arg0;
@@ -6393,7 +6519,7 @@ v8::Handle<v8::Value> EXPORT_blendEquationSeparate(const v8::Arguments& args) {
     glBlendEquationSeparate(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawBuffers(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawBuffers) {
     NanScope();
     // None
     GLsizei arg0;
@@ -6408,7 +6534,7 @@ v8::Handle<v8::Value> EXPORT_drawBuffers(const v8::Arguments& args) {
         arg1_nonconst = new GLenum[arg1_array->Length()];
         arg1 = (const GLenum*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLenum*)node::Buffer::Data(args[1]);
+        arg1 = (const GLenum*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLenum*)(args[1]->IntegerValue());
     } else {
@@ -6418,7 +6544,7 @@ v8::Handle<v8::Value> EXPORT_drawBuffers(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_stencilOpSeparate(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_stencilOpSeparate) {
     NanScope();
     // None
     GLenum arg0;
@@ -6432,7 +6558,7 @@ v8::Handle<v8::Value> EXPORT_stencilOpSeparate(const v8::Arguments& args) {
     glStencilOpSeparate(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_stencilFuncSeparate(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_stencilFuncSeparate) {
     NanScope();
     // None
     GLenum arg0;
@@ -6446,7 +6572,7 @@ v8::Handle<v8::Value> EXPORT_stencilFuncSeparate(const v8::Arguments& args) {
     glStencilFuncSeparate(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_stencilMaskSeparate(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_stencilMaskSeparate) {
     NanScope();
     // None
     GLenum arg0;
@@ -6456,21 +6582,33 @@ v8::Handle<v8::Value> EXPORT_stencilMaskSeparate(const v8::Arguments& args) {
     glStencilMaskSeparate(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_attachShader(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_attachShader) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_Shader>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_Shader>(args[1]->ToObject())->gl_handle;
+    }
     glAttachShader(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindAttribLocation(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindAttribLocation) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     const GLchar* arg2;
@@ -6479,25 +6617,29 @@ v8::Handle<v8::Value> EXPORT_bindAttribLocation(const v8::Arguments& args) {
     glBindAttribLocation(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_compileShader(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_compileShader) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    }
     glCompileShader(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_createProgram(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_createProgram) {
     NanScope();
-    // <gltypes.ClassType instance at 0x1036a1cb0>
+    // <gltypes.ClassType instance at 0x108b07680>
     GLuint result;
     result = glCreateProgram();
     v8::Handle<v8::Value> result_js = NODE_Program::fromGLHandle(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_createShader(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_createShader) {
     NanScope();
-    // <gltypes.ClassType instance at 0x1036a1cf8>
+    // <gltypes.ClassType instance at 0x108b076c8>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint result;
@@ -6505,17 +6647,25 @@ v8::Handle<v8::Value> EXPORT_createShader(const v8::Arguments& args) {
     v8::Handle<v8::Value> result_js = NODE_Shader::fromGLHandle(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_detachShader(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_detachShader) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_Shader>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_Shader>(args[1]->ToObject())->gl_handle;
+    }
     glDetachShader(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_disableVertexAttribArray(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_disableVertexAttribArray) {
     NanScope();
     // None
     GLuint arg0;
@@ -6523,7 +6673,7 @@ v8::Handle<v8::Value> EXPORT_disableVertexAttribArray(const v8::Arguments& args)
     glDisableVertexAttribArray(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_enableVertexAttribArray(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_enableVertexAttribArray) {
     NanScope();
     // None
     GLuint arg0;
@@ -6531,11 +6681,15 @@ v8::Handle<v8::Value> EXPORT_enableVertexAttribArray(const v8::Arguments& args) 
     glEnableVertexAttribArray(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getActiveAttrib(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getActiveAttrib) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     GLsizei arg2;
@@ -6550,7 +6704,7 @@ v8::Handle<v8::Value> EXPORT_getActiveAttrib(const v8::Arguments& args) {
         arg3_nonconst = new GLsizei[arg3_array->Length()];
         arg3 = (GLsizei*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLsizei*)node::Buffer::Data(args[3]);
+        arg3 = (GLsizei*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLsizei*)(args[3]->IntegerValue());
     } else {
@@ -6566,7 +6720,7 @@ v8::Handle<v8::Value> EXPORT_getActiveAttrib(const v8::Arguments& args) {
         arg4_nonconst = new GLint[arg4_array->Length()];
         arg4 = (GLint*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLint*)node::Buffer::Data(args[4]);
+        arg4 = (GLint*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLint*)(args[4]->IntegerValue());
     } else {
@@ -6582,7 +6736,7 @@ v8::Handle<v8::Value> EXPORT_getActiveAttrib(const v8::Arguments& args) {
         arg5_nonconst = new GLenum[arg5_array->Length()];
         arg5 = (GLenum*)arg5_nonconst;
     } else if(args[5]->IsObject()) {
-        arg5 = (GLenum*)node::Buffer::Data(args[5]);
+        arg5 = (GLenum*)glbind_get_buffer_data(args[5]);
     } else if(args[5]->IsNumber()) {
         arg5 = (GLenum*)(args[5]->IntegerValue());
     } else {
@@ -6598,7 +6752,7 @@ v8::Handle<v8::Value> EXPORT_getActiveAttrib(const v8::Arguments& args) {
         arg6_nonconst = new GLchar[arg6_array->Length()];
         arg6 = (GLchar*)arg6_nonconst;
     } else if(args[6]->IsObject()) {
-        arg6 = (GLchar*)node::Buffer::Data(args[6]);
+        arg6 = (GLchar*)glbind_get_buffer_data(args[6]);
     } else if(args[6]->IsNumber()) {
         arg6 = (GLchar*)(args[6]->IntegerValue());
     } else {
@@ -6611,11 +6765,15 @@ v8::Handle<v8::Value> EXPORT_getActiveAttrib(const v8::Arguments& args) {
     if(arg6_nonconst) delete [] arg6_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getActiveUniform(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getActiveUniform) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     GLsizei arg2;
@@ -6630,7 +6788,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniform(const v8::Arguments& args) {
         arg3_nonconst = new GLsizei[arg3_array->Length()];
         arg3 = (GLsizei*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLsizei*)node::Buffer::Data(args[3]);
+        arg3 = (GLsizei*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLsizei*)(args[3]->IntegerValue());
     } else {
@@ -6646,7 +6804,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniform(const v8::Arguments& args) {
         arg4_nonconst = new GLint[arg4_array->Length()];
         arg4 = (GLint*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLint*)node::Buffer::Data(args[4]);
+        arg4 = (GLint*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLint*)(args[4]->IntegerValue());
     } else {
@@ -6662,7 +6820,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniform(const v8::Arguments& args) {
         arg5_nonconst = new GLenum[arg5_array->Length()];
         arg5 = (GLenum*)arg5_nonconst;
     } else if(args[5]->IsObject()) {
-        arg5 = (GLenum*)node::Buffer::Data(args[5]);
+        arg5 = (GLenum*)glbind_get_buffer_data(args[5]);
     } else if(args[5]->IsNumber()) {
         arg5 = (GLenum*)(args[5]->IntegerValue());
     } else {
@@ -6678,7 +6836,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniform(const v8::Arguments& args) {
         arg6_nonconst = new GLchar[arg6_array->Length()];
         arg6 = (GLchar*)arg6_nonconst;
     } else if(args[6]->IsObject()) {
-        arg6 = (GLchar*)node::Buffer::Data(args[6]);
+        arg6 = (GLchar*)glbind_get_buffer_data(args[6]);
     } else if(args[6]->IsNumber()) {
         arg6 = (GLchar*)(args[6]->IntegerValue());
     } else {
@@ -6691,11 +6849,15 @@ v8::Handle<v8::Value> EXPORT_getActiveUniform(const v8::Arguments& args) {
     if(arg6_nonconst) delete [] arg6_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getAttachedShaders(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getAttachedShaders) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLsizei arg1;
     arg1 = args[1]->Int32Value();
     GLsizei *arg2;
@@ -6708,7 +6870,7 @@ v8::Handle<v8::Value> EXPORT_getAttachedShaders(const v8::Arguments& args) {
         arg2_nonconst = new GLsizei[arg2_array->Length()];
         arg2 = (GLsizei*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLsizei*)node::Buffer::Data(args[2]);
+        arg2 = (GLsizei*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLsizei*)(args[2]->IntegerValue());
     } else {
@@ -6725,24 +6887,32 @@ v8::Handle<v8::Value> EXPORT_getAttachedShaders(const v8::Arguments& args) {
     delete [] arg3;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getAttribLocation(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getAttribLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a1758>
+    // <gltypes.Type instance at 0x108b07128>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     const GLchar* arg1;
     NanUtf8String arg1_utf8(args[1]);
     arg1 = (GLchar*)*arg1_utf8;
     GLint result;
     result = glGetAttribLocation(arg0, arg1);
-    v8::Handle<v8::Value> result_js = v8::Int32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Int32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getProgramiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getProgramiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLint *arg2;
@@ -6755,7 +6925,7 @@ v8::Handle<v8::Value> EXPORT_getProgramiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -6765,11 +6935,15 @@ v8::Handle<v8::Value> EXPORT_getProgramiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getProgramInfoLog(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getProgramInfoLog) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLsizei arg1;
     arg1 = args[1]->Int32Value();
     GLsizei *arg2;
@@ -6782,7 +6956,7 @@ v8::Handle<v8::Value> EXPORT_getProgramInfoLog(const v8::Arguments& args) {
         arg2_nonconst = new GLsizei[arg2_array->Length()];
         arg2 = (GLsizei*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLsizei*)node::Buffer::Data(args[2]);
+        arg2 = (GLsizei*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLsizei*)(args[2]->IntegerValue());
     } else {
@@ -6798,7 +6972,7 @@ v8::Handle<v8::Value> EXPORT_getProgramInfoLog(const v8::Arguments& args) {
         arg3_nonconst = new GLchar[arg3_array->Length()];
         arg3 = (GLchar*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLchar*)node::Buffer::Data(args[3]);
+        arg3 = (GLchar*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLchar*)(args[3]->IntegerValue());
     } else {
@@ -6809,11 +6983,15 @@ v8::Handle<v8::Value> EXPORT_getProgramInfoLog(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getShaderiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getShaderiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLint *arg2;
@@ -6826,7 +7004,7 @@ v8::Handle<v8::Value> EXPORT_getShaderiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -6836,11 +7014,15 @@ v8::Handle<v8::Value> EXPORT_getShaderiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getShaderInfoLog(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getShaderInfoLog) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    }
     GLsizei arg1;
     arg1 = args[1]->Int32Value();
     GLsizei *arg2;
@@ -6853,7 +7035,7 @@ v8::Handle<v8::Value> EXPORT_getShaderInfoLog(const v8::Arguments& args) {
         arg2_nonconst = new GLsizei[arg2_array->Length()];
         arg2 = (GLsizei*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLsizei*)node::Buffer::Data(args[2]);
+        arg2 = (GLsizei*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLsizei*)(args[2]->IntegerValue());
     } else {
@@ -6869,7 +7051,7 @@ v8::Handle<v8::Value> EXPORT_getShaderInfoLog(const v8::Arguments& args) {
         arg3_nonconst = new GLchar[arg3_array->Length()];
         arg3 = (GLchar*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLchar*)node::Buffer::Data(args[3]);
+        arg3 = (GLchar*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLchar*)(args[3]->IntegerValue());
     } else {
@@ -6880,11 +7062,15 @@ v8::Handle<v8::Value> EXPORT_getShaderInfoLog(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getShaderSource(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getShaderSource) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    }
     GLsizei arg1;
     arg1 = args[1]->Int32Value();
     GLsizei *arg2;
@@ -6897,7 +7083,7 @@ v8::Handle<v8::Value> EXPORT_getShaderSource(const v8::Arguments& args) {
         arg2_nonconst = new GLsizei[arg2_array->Length()];
         arg2 = (GLsizei*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLsizei*)node::Buffer::Data(args[2]);
+        arg2 = (GLsizei*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLsizei*)(args[2]->IntegerValue());
     } else {
@@ -6913,7 +7099,7 @@ v8::Handle<v8::Value> EXPORT_getShaderSource(const v8::Arguments& args) {
         arg3_nonconst = new GLchar[arg3_array->Length()];
         arg3 = (GLchar*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLchar*)node::Buffer::Data(args[3]);
+        arg3 = (GLchar*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLchar*)(args[3]->IntegerValue());
     } else {
@@ -6924,24 +7110,32 @@ v8::Handle<v8::Value> EXPORT_getShaderSource(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getUniformLocation(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getUniformLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a1758>
+    // <gltypes.Type instance at 0x108b07128>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     const GLchar* arg1;
     NanUtf8String arg1_utf8(args[1]);
     arg1 = (GLchar*)*arg1_utf8;
     GLint result;
     result = glGetUniformLocation(arg0, arg1);
-    v8::Handle<v8::Value> result_js = v8::Int32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Int32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getUniformfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getUniformfv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLfloat *arg2;
@@ -6954,7 +7148,7 @@ v8::Handle<v8::Value> EXPORT_getUniformfv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -6964,11 +7158,15 @@ v8::Handle<v8::Value> EXPORT_getUniformfv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getUniformiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getUniformiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLint *arg2;
@@ -6981,7 +7179,7 @@ v8::Handle<v8::Value> EXPORT_getUniformiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -6991,7 +7189,7 @@ v8::Handle<v8::Value> EXPORT_getUniformiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getVertexAttribdv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getVertexAttribdv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7008,7 +7206,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribdv(const v8::Arguments& args) {
         arg2_nonconst = new GLdouble[arg2_array->Length()];
         arg2 = (GLdouble*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLdouble*)node::Buffer::Data(args[2]);
+        arg2 = (GLdouble*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLdouble*)(args[2]->IntegerValue());
     } else {
@@ -7018,7 +7216,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribdv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getVertexAttribfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getVertexAttribfv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7035,7 +7233,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribfv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -7045,7 +7243,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribfv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getVertexAttribiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getVertexAttribiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7062,7 +7260,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -7072,43 +7270,59 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isProgram(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isProgram) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsProgram(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_isShader(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isShader) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsShader(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_linkProgram(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_linkProgram) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     glLinkProgram(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_useProgram(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_useProgram) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     glUseProgram(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform1f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform1f) {
     NanScope();
     // None
     GLint arg0;
@@ -7118,7 +7332,7 @@ v8::Handle<v8::Value> EXPORT_uniform1f(const v8::Arguments& args) {
     glUniform1f(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform2f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform2f) {
     NanScope();
     // None
     GLint arg0;
@@ -7130,7 +7344,7 @@ v8::Handle<v8::Value> EXPORT_uniform2f(const v8::Arguments& args) {
     glUniform2f(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform3f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform3f) {
     NanScope();
     // None
     GLint arg0;
@@ -7144,7 +7358,7 @@ v8::Handle<v8::Value> EXPORT_uniform3f(const v8::Arguments& args) {
     glUniform3f(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform4f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform4f) {
     NanScope();
     // None
     GLint arg0;
@@ -7160,7 +7374,7 @@ v8::Handle<v8::Value> EXPORT_uniform4f(const v8::Arguments& args) {
     glUniform4f(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform1i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform1i) {
     NanScope();
     // None
     GLint arg0;
@@ -7170,7 +7384,7 @@ v8::Handle<v8::Value> EXPORT_uniform1i(const v8::Arguments& args) {
     glUniform1i(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform2i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform2i) {
     NanScope();
     // None
     GLint arg0;
@@ -7182,7 +7396,7 @@ v8::Handle<v8::Value> EXPORT_uniform2i(const v8::Arguments& args) {
     glUniform2i(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform3i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform3i) {
     NanScope();
     // None
     GLint arg0;
@@ -7196,7 +7410,7 @@ v8::Handle<v8::Value> EXPORT_uniform3i(const v8::Arguments& args) {
     glUniform3i(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform4i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform4i) {
     NanScope();
     // None
     GLint arg0;
@@ -7212,7 +7426,7 @@ v8::Handle<v8::Value> EXPORT_uniform4i(const v8::Arguments& args) {
     glUniform4i(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform1fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform1fv) {
     NanScope();
     // None
     GLint arg0;
@@ -7229,7 +7443,7 @@ v8::Handle<v8::Value> EXPORT_uniform1fv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (const GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (const GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -7239,7 +7453,7 @@ v8::Handle<v8::Value> EXPORT_uniform1fv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform2fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform2fv) {
     NanScope();
     // None
     GLint arg0;
@@ -7256,7 +7470,7 @@ v8::Handle<v8::Value> EXPORT_uniform2fv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (const GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (const GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -7266,7 +7480,7 @@ v8::Handle<v8::Value> EXPORT_uniform2fv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform3fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform3fv) {
     NanScope();
     // None
     GLint arg0;
@@ -7283,7 +7497,7 @@ v8::Handle<v8::Value> EXPORT_uniform3fv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (const GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (const GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -7293,7 +7507,7 @@ v8::Handle<v8::Value> EXPORT_uniform3fv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform4fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform4fv) {
     NanScope();
     // None
     GLint arg0;
@@ -7310,7 +7524,7 @@ v8::Handle<v8::Value> EXPORT_uniform4fv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (const GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (const GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -7320,7 +7534,7 @@ v8::Handle<v8::Value> EXPORT_uniform4fv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform1iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform1iv) {
     NanScope();
     // None
     GLint arg0;
@@ -7337,7 +7551,7 @@ v8::Handle<v8::Value> EXPORT_uniform1iv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -7347,7 +7561,7 @@ v8::Handle<v8::Value> EXPORT_uniform1iv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform2iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform2iv) {
     NanScope();
     // None
     GLint arg0;
@@ -7364,7 +7578,7 @@ v8::Handle<v8::Value> EXPORT_uniform2iv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -7374,7 +7588,7 @@ v8::Handle<v8::Value> EXPORT_uniform2iv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform3iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform3iv) {
     NanScope();
     // None
     GLint arg0;
@@ -7391,7 +7605,7 @@ v8::Handle<v8::Value> EXPORT_uniform3iv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -7401,7 +7615,7 @@ v8::Handle<v8::Value> EXPORT_uniform3iv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform4iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform4iv) {
     NanScope();
     // None
     GLint arg0;
@@ -7418,7 +7632,7 @@ v8::Handle<v8::Value> EXPORT_uniform4iv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -7428,7 +7642,7 @@ v8::Handle<v8::Value> EXPORT_uniform4iv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix2fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix2fv) {
     NanScope();
     // None
     GLint arg0;
@@ -7447,7 +7661,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -7457,7 +7671,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix3fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix3fv) {
     NanScope();
     // None
     GLint arg0;
@@ -7476,7 +7690,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -7486,7 +7700,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix4fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix4fv) {
     NanScope();
     // None
     GLint arg0;
@@ -7505,7 +7719,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -7515,15 +7729,19 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_validateProgram(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_validateProgram) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     glValidateProgram(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib1d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib1d) {
     NanScope();
     // None
     GLuint arg0;
@@ -7533,7 +7751,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib1d(const v8::Arguments& args) {
     glVertexAttrib1d(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib1dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib1dv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7548,7 +7766,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib1dv(const v8::Arguments& args) {
         arg1_nonconst = new GLdouble[arg1_array->Length()];
         arg1 = (const GLdouble*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLdouble*)node::Buffer::Data(args[1]);
+        arg1 = (const GLdouble*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLdouble*)(args[1]->IntegerValue());
     } else {
@@ -7558,7 +7776,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib1dv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib1f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib1f) {
     NanScope();
     // None
     GLuint arg0;
@@ -7568,7 +7786,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib1f(const v8::Arguments& args) {
     glVertexAttrib1f(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib1fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib1fv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7583,7 +7801,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib1fv(const v8::Arguments& args) {
         arg1_nonconst = new GLfloat[arg1_array->Length()];
         arg1 = (const GLfloat*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLfloat*)node::Buffer::Data(args[1]);
+        arg1 = (const GLfloat*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLfloat*)(args[1]->IntegerValue());
     } else {
@@ -7593,7 +7811,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib1fv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib1s(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib1s) {
     NanScope();
     // None
     GLuint arg0;
@@ -7603,7 +7821,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib1s(const v8::Arguments& args) {
     glVertexAttrib1s(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib1sv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib1sv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7618,7 +7836,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib1sv(const v8::Arguments& args) {
         arg1_nonconst = new GLshort[arg1_array->Length()];
         arg1 = (const GLshort*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLshort*)node::Buffer::Data(args[1]);
+        arg1 = (const GLshort*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLshort*)(args[1]->IntegerValue());
     } else {
@@ -7628,7 +7846,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib1sv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib2d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib2d) {
     NanScope();
     // None
     GLuint arg0;
@@ -7640,7 +7858,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib2d(const v8::Arguments& args) {
     glVertexAttrib2d(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib2dv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7655,7 +7873,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib2dv(const v8::Arguments& args) {
         arg1_nonconst = new GLdouble[arg1_array->Length()];
         arg1 = (const GLdouble*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLdouble*)node::Buffer::Data(args[1]);
+        arg1 = (const GLdouble*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLdouble*)(args[1]->IntegerValue());
     } else {
@@ -7665,7 +7883,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib2dv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib2f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib2f) {
     NanScope();
     // None
     GLuint arg0;
@@ -7677,7 +7895,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib2f(const v8::Arguments& args) {
     glVertexAttrib2f(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib2fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib2fv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7692,7 +7910,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib2fv(const v8::Arguments& args) {
         arg1_nonconst = new GLfloat[arg1_array->Length()];
         arg1 = (const GLfloat*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLfloat*)node::Buffer::Data(args[1]);
+        arg1 = (const GLfloat*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLfloat*)(args[1]->IntegerValue());
     } else {
@@ -7702,7 +7920,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib2fv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib2s(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib2s) {
     NanScope();
     // None
     GLuint arg0;
@@ -7714,7 +7932,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib2s(const v8::Arguments& args) {
     glVertexAttrib2s(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib2sv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib2sv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7729,7 +7947,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib2sv(const v8::Arguments& args) {
         arg1_nonconst = new GLshort[arg1_array->Length()];
         arg1 = (const GLshort*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLshort*)node::Buffer::Data(args[1]);
+        arg1 = (const GLshort*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLshort*)(args[1]->IntegerValue());
     } else {
@@ -7739,7 +7957,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib2sv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib3d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib3d) {
     NanScope();
     // None
     GLuint arg0;
@@ -7753,7 +7971,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib3d(const v8::Arguments& args) {
     glVertexAttrib3d(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib3dv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7768,7 +7986,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib3dv(const v8::Arguments& args) {
         arg1_nonconst = new GLdouble[arg1_array->Length()];
         arg1 = (const GLdouble*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLdouble*)node::Buffer::Data(args[1]);
+        arg1 = (const GLdouble*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLdouble*)(args[1]->IntegerValue());
     } else {
@@ -7778,7 +7996,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib3dv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib3f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib3f) {
     NanScope();
     // None
     GLuint arg0;
@@ -7792,7 +8010,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib3f(const v8::Arguments& args) {
     glVertexAttrib3f(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib3fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib3fv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7807,7 +8025,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib3fv(const v8::Arguments& args) {
         arg1_nonconst = new GLfloat[arg1_array->Length()];
         arg1 = (const GLfloat*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLfloat*)node::Buffer::Data(args[1]);
+        arg1 = (const GLfloat*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLfloat*)(args[1]->IntegerValue());
     } else {
@@ -7817,7 +8035,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib3fv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib3s(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib3s) {
     NanScope();
     // None
     GLuint arg0;
@@ -7831,7 +8049,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib3s(const v8::Arguments& args) {
     glVertexAttrib3s(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib3sv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib3sv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7846,7 +8064,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib3sv(const v8::Arguments& args) {
         arg1_nonconst = new GLshort[arg1_array->Length()];
         arg1 = (const GLshort*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLshort*)node::Buffer::Data(args[1]);
+        arg1 = (const GLshort*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLshort*)(args[1]->IntegerValue());
     } else {
@@ -7856,7 +8074,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib3sv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4Nbv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4Nbv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7871,7 +8089,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nbv(const v8::Arguments& args) {
         arg1_nonconst = new GLbyte[arg1_array->Length()];
         arg1 = (const GLbyte*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLbyte*)node::Buffer::Data(args[1]);
+        arg1 = (const GLbyte*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLbyte*)(args[1]->IntegerValue());
     } else {
@@ -7881,7 +8099,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nbv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4Niv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4Niv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7896,7 +8114,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Niv(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (const GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLint*)(args[1]->IntegerValue());
     } else {
@@ -7906,7 +8124,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Niv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4Nsv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4Nsv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7921,7 +8139,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nsv(const v8::Arguments& args) {
         arg1_nonconst = new GLshort[arg1_array->Length()];
         arg1 = (const GLshort*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLshort*)node::Buffer::Data(args[1]);
+        arg1 = (const GLshort*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLshort*)(args[1]->IntegerValue());
     } else {
@@ -7931,7 +8149,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nsv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4Nub(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4Nub) {
     NanScope();
     // None
     GLuint arg0;
@@ -7947,7 +8165,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nub(const v8::Arguments& args) {
     glVertexAttrib4Nub(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4Nubv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4Nubv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7962,7 +8180,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nubv(const v8::Arguments& args) {
         arg1_nonconst = new GLubyte[arg1_array->Length()];
         arg1 = (const GLubyte*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLubyte*)node::Buffer::Data(args[1]);
+        arg1 = (const GLubyte*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLubyte*)(args[1]->IntegerValue());
     } else {
@@ -7972,7 +8190,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nubv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4Nuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4Nuiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -7987,7 +8205,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nuiv(const v8::Arguments& args) {
         arg1_nonconst = new GLuint[arg1_array->Length()];
         arg1 = (const GLuint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLuint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLuint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLuint*)(args[1]->IntegerValue());
     } else {
@@ -7997,7 +8215,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nuiv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4Nusv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4Nusv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8012,7 +8230,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nusv(const v8::Arguments& args) {
         arg1_nonconst = new GLushort[arg1_array->Length()];
         arg1 = (const GLushort*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLushort*)node::Buffer::Data(args[1]);
+        arg1 = (const GLushort*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLushort*)(args[1]->IntegerValue());
     } else {
@@ -8022,7 +8240,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4Nusv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4bv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4bv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8037,7 +8255,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4bv(const v8::Arguments& args) {
         arg1_nonconst = new GLbyte[arg1_array->Length()];
         arg1 = (const GLbyte*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLbyte*)node::Buffer::Data(args[1]);
+        arg1 = (const GLbyte*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLbyte*)(args[1]->IntegerValue());
     } else {
@@ -8047,7 +8265,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4bv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4d) {
     NanScope();
     // None
     GLuint arg0;
@@ -8063,7 +8281,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4d(const v8::Arguments& args) {
     glVertexAttrib4d(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4dv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8078,7 +8296,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4dv(const v8::Arguments& args) {
         arg1_nonconst = new GLdouble[arg1_array->Length()];
         arg1 = (const GLdouble*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLdouble*)node::Buffer::Data(args[1]);
+        arg1 = (const GLdouble*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLdouble*)(args[1]->IntegerValue());
     } else {
@@ -8088,7 +8306,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4dv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4f) {
     NanScope();
     // None
     GLuint arg0;
@@ -8104,7 +8322,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4f(const v8::Arguments& args) {
     glVertexAttrib4f(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4fv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8119,7 +8337,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4fv(const v8::Arguments& args) {
         arg1_nonconst = new GLfloat[arg1_array->Length()];
         arg1 = (const GLfloat*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLfloat*)node::Buffer::Data(args[1]);
+        arg1 = (const GLfloat*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLfloat*)(args[1]->IntegerValue());
     } else {
@@ -8129,7 +8347,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4fv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4iv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8144,7 +8362,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4iv(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (const GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLint*)(args[1]->IntegerValue());
     } else {
@@ -8154,7 +8372,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4iv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4s(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4s) {
     NanScope();
     // None
     GLuint arg0;
@@ -8170,7 +8388,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4s(const v8::Arguments& args) {
     glVertexAttrib4s(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4sv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4sv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8185,7 +8403,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4sv(const v8::Arguments& args) {
         arg1_nonconst = new GLshort[arg1_array->Length()];
         arg1 = (const GLshort*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLshort*)node::Buffer::Data(args[1]);
+        arg1 = (const GLshort*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLshort*)(args[1]->IntegerValue());
     } else {
@@ -8195,7 +8413,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4sv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4ubv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4ubv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8210,7 +8428,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4ubv(const v8::Arguments& args) {
         arg1_nonconst = new GLubyte[arg1_array->Length()];
         arg1 = (const GLubyte*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLubyte*)node::Buffer::Data(args[1]);
+        arg1 = (const GLubyte*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLubyte*)(args[1]->IntegerValue());
     } else {
@@ -8220,7 +8438,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4ubv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4uiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8235,7 +8453,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4uiv(const v8::Arguments& args) {
         arg1_nonconst = new GLuint[arg1_array->Length()];
         arg1 = (const GLuint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLuint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLuint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLuint*)(args[1]->IntegerValue());
     } else {
@@ -8245,7 +8463,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4uiv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttrib4usv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttrib4usv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8260,7 +8478,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4usv(const v8::Arguments& args) {
         arg1_nonconst = new GLushort[arg1_array->Length()];
         arg1 = (const GLushort*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLushort*)node::Buffer::Data(args[1]);
+        arg1 = (const GLushort*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLushort*)(args[1]->IntegerValue());
     } else {
@@ -8270,7 +8488,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttrib4usv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribPointer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribPointer) {
     NanScope();
     // None
     GLuint arg0;
@@ -8293,7 +8511,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribPointer(const v8::Arguments& args) {
         arg5_nonconst = new GLubyte[arg5_array->Length()];
         arg5 = (const GLvoid*)arg5_nonconst;
     } else if(args[5]->IsObject()) {
-        arg5 = (const GLvoid*)node::Buffer::Data(args[5]);
+        arg5 = (const GLvoid*)glbind_get_buffer_data(args[5]);
     } else if(args[5]->IsNumber()) {
         arg5 = (const GLvoid*)(args[5]->IntegerValue());
     } else {
@@ -8303,7 +8521,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribPointer(const v8::Arguments& args) {
     if(arg5_nonconst) delete [] arg5_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix2x3fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix2x3fv) {
     NanScope();
     // None
     GLint arg0;
@@ -8322,7 +8540,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2x3fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -8332,7 +8550,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2x3fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix3x2fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix3x2fv) {
     NanScope();
     // None
     GLint arg0;
@@ -8351,7 +8569,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3x2fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -8361,7 +8579,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3x2fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix2x4fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix2x4fv) {
     NanScope();
     // None
     GLint arg0;
@@ -8380,7 +8598,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2x4fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -8390,7 +8608,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2x4fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix4x2fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix4x2fv) {
     NanScope();
     // None
     GLint arg0;
@@ -8409,7 +8627,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4x2fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -8419,7 +8637,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4x2fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix3x4fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix3x4fv) {
     NanScope();
     // None
     GLint arg0;
@@ -8438,7 +8656,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3x4fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -8448,7 +8666,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3x4fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix4x3fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix4x3fv) {
     NanScope();
     // None
     GLint arg0;
@@ -8467,7 +8685,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4x3fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -8477,7 +8695,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4x3fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_colorMaski(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_colorMaski) {
     NanScope();
     // None
     GLuint arg0;
@@ -8493,7 +8711,7 @@ v8::Handle<v8::Value> EXPORT_colorMaski(const v8::Arguments& args) {
     glColorMaski(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getBooleani_v(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getBooleani_v) {
     NanScope();
     // None
     GLenum arg0;
@@ -8510,7 +8728,7 @@ v8::Handle<v8::Value> EXPORT_getBooleani_v(const v8::Arguments& args) {
         arg2_nonconst = new GLboolean[arg2_array->Length()];
         arg2 = (GLboolean*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLboolean*)node::Buffer::Data(args[2]);
+        arg2 = (GLboolean*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLboolean*)(args[2]->IntegerValue());
     } else {
@@ -8520,7 +8738,7 @@ v8::Handle<v8::Value> EXPORT_getBooleani_v(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getIntegeri_v(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getIntegeri_v) {
     NanScope();
     // None
     GLenum arg0;
@@ -8537,7 +8755,7 @@ v8::Handle<v8::Value> EXPORT_getIntegeri_v(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -8547,7 +8765,7 @@ v8::Handle<v8::Value> EXPORT_getIntegeri_v(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_enablei(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_enablei) {
     NanScope();
     // None
     GLenum arg0;
@@ -8557,7 +8775,7 @@ v8::Handle<v8::Value> EXPORT_enablei(const v8::Arguments& args) {
     glEnablei(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_disablei(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_disablei) {
     NanScope();
     // None
     GLenum arg0;
@@ -8567,19 +8785,19 @@ v8::Handle<v8::Value> EXPORT_disablei(const v8::Arguments& args) {
     glDisablei(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isEnabledi(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isEnabledi) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     GLboolean result;
     result = glIsEnabledi(arg0, arg1);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_beginTransformFeedback(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_beginTransformFeedback) {
     NanScope();
     // None
     GLenum arg0;
@@ -8587,13 +8805,13 @@ v8::Handle<v8::Value> EXPORT_beginTransformFeedback(const v8::Arguments& args) {
     glBeginTransformFeedback(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_endTransformFeedback(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_endTransformFeedback) {
     NanScope();
     // None
     glEndTransformFeedback();
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindBufferRange(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindBufferRange) {
     NanScope();
     // None
     GLenum arg0;
@@ -8609,7 +8827,7 @@ v8::Handle<v8::Value> EXPORT_bindBufferRange(const v8::Arguments& args) {
     glBindBufferRange(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindBufferBase(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindBufferBase) {
     NanScope();
     // None
     GLenum arg0;
@@ -8621,7 +8839,7 @@ v8::Handle<v8::Value> EXPORT_bindBufferBase(const v8::Arguments& args) {
     glBindBufferBase(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getTransformFeedbackVarying(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getTransformFeedbackVarying) {
     NanScope();
     // None
     GLuint arg0;
@@ -8640,7 +8858,7 @@ v8::Handle<v8::Value> EXPORT_getTransformFeedbackVarying(const v8::Arguments& ar
         arg3_nonconst = new GLsizei[arg3_array->Length()];
         arg3 = (GLsizei*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLsizei*)node::Buffer::Data(args[3]);
+        arg3 = (GLsizei*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLsizei*)(args[3]->IntegerValue());
     } else {
@@ -8656,7 +8874,7 @@ v8::Handle<v8::Value> EXPORT_getTransformFeedbackVarying(const v8::Arguments& ar
         arg4_nonconst = new GLsizei[arg4_array->Length()];
         arg4 = (GLsizei*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLsizei*)node::Buffer::Data(args[4]);
+        arg4 = (GLsizei*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLsizei*)(args[4]->IntegerValue());
     } else {
@@ -8672,7 +8890,7 @@ v8::Handle<v8::Value> EXPORT_getTransformFeedbackVarying(const v8::Arguments& ar
         arg5_nonconst = new GLenum[arg5_array->Length()];
         arg5 = (GLenum*)arg5_nonconst;
     } else if(args[5]->IsObject()) {
-        arg5 = (GLenum*)node::Buffer::Data(args[5]);
+        arg5 = (GLenum*)glbind_get_buffer_data(args[5]);
     } else if(args[5]->IsNumber()) {
         arg5 = (GLenum*)(args[5]->IntegerValue());
     } else {
@@ -8688,7 +8906,7 @@ v8::Handle<v8::Value> EXPORT_getTransformFeedbackVarying(const v8::Arguments& ar
         arg6_nonconst = new GLchar[arg6_array->Length()];
         arg6 = (GLchar*)arg6_nonconst;
     } else if(args[6]->IsObject()) {
-        arg6 = (GLchar*)node::Buffer::Data(args[6]);
+        arg6 = (GLchar*)glbind_get_buffer_data(args[6]);
     } else if(args[6]->IsNumber()) {
         arg6 = (GLchar*)(args[6]->IntegerValue());
     } else {
@@ -8701,7 +8919,7 @@ v8::Handle<v8::Value> EXPORT_getTransformFeedbackVarying(const v8::Arguments& ar
     if(arg6_nonconst) delete [] arg6_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clampColor(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clampColor) {
     NanScope();
     // None
     GLenum arg0;
@@ -8711,7 +8929,7 @@ v8::Handle<v8::Value> EXPORT_clampColor(const v8::Arguments& args) {
     glClampColor(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_beginConditionalRender(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_beginConditionalRender) {
     NanScope();
     // None
     GLuint arg0;
@@ -8721,13 +8939,13 @@ v8::Handle<v8::Value> EXPORT_beginConditionalRender(const v8::Arguments& args) {
     glBeginConditionalRender(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_endConditionalRender(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_endConditionalRender) {
     NanScope();
     // None
     glEndConditionalRender();
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribIPointer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribIPointer) {
     NanScope();
     // None
     GLuint arg0;
@@ -8748,7 +8966,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribIPointer(const v8::Arguments& args) {
         arg4_nonconst = new GLubyte[arg4_array->Length()];
         arg4 = (const GLvoid*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLvoid*)node::Buffer::Data(args[4]);
+        arg4 = (const GLvoid*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLvoid*)(args[4]->IntegerValue());
     } else {
@@ -8758,7 +8976,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribIPointer(const v8::Arguments& args) {
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getVertexAttribIiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getVertexAttribIiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8775,7 +8993,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribIiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -8785,7 +9003,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribIiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getVertexAttribIuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getVertexAttribIuiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8802,7 +9020,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribIuiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLuint*)(args[2]->IntegerValue());
     } else {
@@ -8812,7 +9030,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribIuiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI1i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI1i) {
     NanScope();
     // None
     GLuint arg0;
@@ -8822,7 +9040,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI1i(const v8::Arguments& args) {
     glVertexAttribI1i(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI2i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI2i) {
     NanScope();
     // None
     GLuint arg0;
@@ -8834,7 +9052,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI2i(const v8::Arguments& args) {
     glVertexAttribI2i(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI3i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI3i) {
     NanScope();
     // None
     GLuint arg0;
@@ -8848,7 +9066,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI3i(const v8::Arguments& args) {
     glVertexAttribI3i(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI4i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI4i) {
     NanScope();
     // None
     GLuint arg0;
@@ -8864,7 +9082,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4i(const v8::Arguments& args) {
     glVertexAttribI4i(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI1ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI1ui) {
     NanScope();
     // None
     GLuint arg0;
@@ -8874,7 +9092,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI1ui(const v8::Arguments& args) {
     glVertexAttribI1ui(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI2ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI2ui) {
     NanScope();
     // None
     GLuint arg0;
@@ -8886,7 +9104,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI2ui(const v8::Arguments& args) {
     glVertexAttribI2ui(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI3ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI3ui) {
     NanScope();
     // None
     GLuint arg0;
@@ -8900,7 +9118,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI3ui(const v8::Arguments& args) {
     glVertexAttribI3ui(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI4ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI4ui) {
     NanScope();
     // None
     GLuint arg0;
@@ -8916,7 +9134,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4ui(const v8::Arguments& args) {
     glVertexAttribI4ui(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI1iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI1iv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8931,7 +9149,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI1iv(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (const GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLint*)(args[1]->IntegerValue());
     } else {
@@ -8941,7 +9159,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI1iv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI2iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI2iv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8956,7 +9174,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI2iv(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (const GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLint*)(args[1]->IntegerValue());
     } else {
@@ -8966,7 +9184,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI2iv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI3iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI3iv) {
     NanScope();
     // None
     GLuint arg0;
@@ -8981,7 +9199,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI3iv(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (const GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLint*)(args[1]->IntegerValue());
     } else {
@@ -8991,7 +9209,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI3iv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI4iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI4iv) {
     NanScope();
     // None
     GLuint arg0;
@@ -9006,7 +9224,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4iv(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (const GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLint*)(args[1]->IntegerValue());
     } else {
@@ -9016,7 +9234,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4iv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI1uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI1uiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -9031,7 +9249,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI1uiv(const v8::Arguments& args) {
         arg1_nonconst = new GLuint[arg1_array->Length()];
         arg1 = (const GLuint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLuint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLuint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLuint*)(args[1]->IntegerValue());
     } else {
@@ -9041,7 +9259,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI1uiv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI2uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI2uiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -9056,7 +9274,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI2uiv(const v8::Arguments& args) {
         arg1_nonconst = new GLuint[arg1_array->Length()];
         arg1 = (const GLuint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLuint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLuint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLuint*)(args[1]->IntegerValue());
     } else {
@@ -9066,7 +9284,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI2uiv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI3uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI3uiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -9081,7 +9299,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI3uiv(const v8::Arguments& args) {
         arg1_nonconst = new GLuint[arg1_array->Length()];
         arg1 = (const GLuint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLuint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLuint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLuint*)(args[1]->IntegerValue());
     } else {
@@ -9091,7 +9309,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI3uiv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI4uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI4uiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -9106,7 +9324,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4uiv(const v8::Arguments& args) {
         arg1_nonconst = new GLuint[arg1_array->Length()];
         arg1 = (const GLuint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLuint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLuint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLuint*)(args[1]->IntegerValue());
     } else {
@@ -9116,7 +9334,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4uiv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI4bv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI4bv) {
     NanScope();
     // None
     GLuint arg0;
@@ -9131,7 +9349,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4bv(const v8::Arguments& args) {
         arg1_nonconst = new GLbyte[arg1_array->Length()];
         arg1 = (const GLbyte*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLbyte*)node::Buffer::Data(args[1]);
+        arg1 = (const GLbyte*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLbyte*)(args[1]->IntegerValue());
     } else {
@@ -9141,7 +9359,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4bv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI4sv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI4sv) {
     NanScope();
     // None
     GLuint arg0;
@@ -9156,7 +9374,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4sv(const v8::Arguments& args) {
         arg1_nonconst = new GLshort[arg1_array->Length()];
         arg1 = (const GLshort*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLshort*)node::Buffer::Data(args[1]);
+        arg1 = (const GLshort*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLshort*)(args[1]->IntegerValue());
     } else {
@@ -9166,7 +9384,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4sv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI4ubv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI4ubv) {
     NanScope();
     // None
     GLuint arg0;
@@ -9181,7 +9399,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4ubv(const v8::Arguments& args) {
         arg1_nonconst = new GLubyte[arg1_array->Length()];
         arg1 = (const GLubyte*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLubyte*)node::Buffer::Data(args[1]);
+        arg1 = (const GLubyte*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLubyte*)(args[1]->IntegerValue());
     } else {
@@ -9191,7 +9409,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4ubv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribI4usv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribI4usv) {
     NanScope();
     // None
     GLuint arg0;
@@ -9206,7 +9424,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4usv(const v8::Arguments& args) {
         arg1_nonconst = new GLushort[arg1_array->Length()];
         arg1 = (const GLushort*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLushort*)node::Buffer::Data(args[1]);
+        arg1 = (const GLushort*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLushort*)(args[1]->IntegerValue());
     } else {
@@ -9216,11 +9434,15 @@ v8::Handle<v8::Value> EXPORT_vertexAttribI4usv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getUniformuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getUniformuiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLuint *arg2;
@@ -9233,7 +9455,7 @@ v8::Handle<v8::Value> EXPORT_getUniformuiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLuint*)(args[2]->IntegerValue());
     } else {
@@ -9243,11 +9465,15 @@ v8::Handle<v8::Value> EXPORT_getUniformuiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindFragDataLocation(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindFragDataLocation) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     const GLchar* arg2;
@@ -9256,20 +9482,24 @@ v8::Handle<v8::Value> EXPORT_bindFragDataLocation(const v8::Arguments& args) {
     glBindFragDataLocation(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getFragDataLocation(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getFragDataLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a1758>
+    // <gltypes.Type instance at 0x108b07128>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     const GLchar* arg1;
     NanUtf8String arg1_utf8(args[1]);
     arg1 = (GLchar*)*arg1_utf8;
     GLint result;
     result = glGetFragDataLocation(arg0, arg1);
-    v8::Handle<v8::Value> result_js = v8::Int32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Int32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_uniform1ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform1ui) {
     NanScope();
     // None
     GLint arg0;
@@ -9279,7 +9509,7 @@ v8::Handle<v8::Value> EXPORT_uniform1ui(const v8::Arguments& args) {
     glUniform1ui(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform2ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform2ui) {
     NanScope();
     // None
     GLint arg0;
@@ -9291,7 +9521,7 @@ v8::Handle<v8::Value> EXPORT_uniform2ui(const v8::Arguments& args) {
     glUniform2ui(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform3ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform3ui) {
     NanScope();
     // None
     GLint arg0;
@@ -9305,7 +9535,7 @@ v8::Handle<v8::Value> EXPORT_uniform3ui(const v8::Arguments& args) {
     glUniform3ui(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform4ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform4ui) {
     NanScope();
     // None
     GLint arg0;
@@ -9321,7 +9551,7 @@ v8::Handle<v8::Value> EXPORT_uniform4ui(const v8::Arguments& args) {
     glUniform4ui(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform1uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform1uiv) {
     NanScope();
     // None
     GLint arg0;
@@ -9338,7 +9568,7 @@ v8::Handle<v8::Value> EXPORT_uniform1uiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (const GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLuint*)(args[2]->IntegerValue());
     } else {
@@ -9348,7 +9578,7 @@ v8::Handle<v8::Value> EXPORT_uniform1uiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform2uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform2uiv) {
     NanScope();
     // None
     GLint arg0;
@@ -9365,7 +9595,7 @@ v8::Handle<v8::Value> EXPORT_uniform2uiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (const GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLuint*)(args[2]->IntegerValue());
     } else {
@@ -9375,7 +9605,7 @@ v8::Handle<v8::Value> EXPORT_uniform2uiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform3uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform3uiv) {
     NanScope();
     // None
     GLint arg0;
@@ -9392,7 +9622,7 @@ v8::Handle<v8::Value> EXPORT_uniform3uiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (const GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLuint*)(args[2]->IntegerValue());
     } else {
@@ -9402,7 +9632,7 @@ v8::Handle<v8::Value> EXPORT_uniform3uiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform4uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform4uiv) {
     NanScope();
     // None
     GLint arg0;
@@ -9419,7 +9649,7 @@ v8::Handle<v8::Value> EXPORT_uniform4uiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (const GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLuint*)(args[2]->IntegerValue());
     } else {
@@ -9429,7 +9659,7 @@ v8::Handle<v8::Value> EXPORT_uniform4uiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texParameterIiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texParameterIiv) {
     NanScope();
     // None
     GLenum arg0;
@@ -9446,7 +9676,7 @@ v8::Handle<v8::Value> EXPORT_texParameterIiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -9456,7 +9686,7 @@ v8::Handle<v8::Value> EXPORT_texParameterIiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texParameterIuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texParameterIuiv) {
     NanScope();
     // None
     GLenum arg0;
@@ -9473,7 +9703,7 @@ v8::Handle<v8::Value> EXPORT_texParameterIuiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (const GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLuint*)(args[2]->IntegerValue());
     } else {
@@ -9483,7 +9713,7 @@ v8::Handle<v8::Value> EXPORT_texParameterIuiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getTexParameterIiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getTexParameterIiv) {
     NanScope();
     // None
     GLenum arg0;
@@ -9500,7 +9730,7 @@ v8::Handle<v8::Value> EXPORT_getTexParameterIiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -9510,7 +9740,7 @@ v8::Handle<v8::Value> EXPORT_getTexParameterIiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getTexParameterIuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getTexParameterIuiv) {
     NanScope();
     // None
     GLenum arg0;
@@ -9527,7 +9757,7 @@ v8::Handle<v8::Value> EXPORT_getTexParameterIuiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLuint*)(args[2]->IntegerValue());
     } else {
@@ -9537,7 +9767,7 @@ v8::Handle<v8::Value> EXPORT_getTexParameterIuiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clearBufferiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clearBufferiv) {
     NanScope();
     // None
     GLenum arg0;
@@ -9554,7 +9784,7 @@ v8::Handle<v8::Value> EXPORT_clearBufferiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -9564,7 +9794,7 @@ v8::Handle<v8::Value> EXPORT_clearBufferiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clearBufferuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clearBufferuiv) {
     NanScope();
     // None
     GLenum arg0;
@@ -9581,7 +9811,7 @@ v8::Handle<v8::Value> EXPORT_clearBufferuiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (const GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLuint*)(args[2]->IntegerValue());
     } else {
@@ -9591,7 +9821,7 @@ v8::Handle<v8::Value> EXPORT_clearBufferuiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clearBufferfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clearBufferfv) {
     NanScope();
     // None
     GLenum arg0;
@@ -9608,7 +9838,7 @@ v8::Handle<v8::Value> EXPORT_clearBufferfv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (const GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (const GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -9618,7 +9848,7 @@ v8::Handle<v8::Value> EXPORT_clearBufferfv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clearBufferfi(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clearBufferfi) {
     NanScope();
     // None
     GLenum arg0;
@@ -9632,9 +9862,9 @@ v8::Handle<v8::Value> EXPORT_clearBufferfi(const v8::Arguments& args) {
     glClearBufferfi(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getStringi(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getStringi) {
     NanScope();
-    // <gltypes.UStringType instance at 0x1036a1b90>
+    // <gltypes.UStringType instance at 0x108b07560>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
@@ -9643,13 +9873,13 @@ v8::Handle<v8::Value> EXPORT_getStringi(const v8::Arguments& args) {
     result = glGetStringi(arg0, arg1);
     v8::Handle<v8::Value> result_js;
     if(result) {
-        result_js = v8::String::New((const char*)result, strlen((const char*)result));
+        result_js = NanNew<v8::String>((const char*)result, strlen((const char*)result));
     } else {
-        result_js = v8::Undefined();
+        result_js = NanUndefined();
     }
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_drawArraysInstanced(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawArraysInstanced) {
     NanScope();
     // None
     GLenum arg0;
@@ -9663,7 +9893,7 @@ v8::Handle<v8::Value> EXPORT_drawArraysInstanced(const v8::Arguments& args) {
     glDrawArraysInstanced(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawElementsInstanced(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawElementsInstanced) {
     NanScope();
     // None
     GLenum arg0;
@@ -9682,7 +9912,7 @@ v8::Handle<v8::Value> EXPORT_drawElementsInstanced(const v8::Arguments& args) {
         arg3_nonconst = new GLubyte[arg3_array->Length()];
         arg3 = (const GLvoid*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLvoid*)node::Buffer::Data(args[3]);
+        arg3 = (const GLvoid*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLvoid*)(args[3]->IntegerValue());
     } else {
@@ -9694,7 +9924,7 @@ v8::Handle<v8::Value> EXPORT_drawElementsInstanced(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texBuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texBuffer) {
     NanScope();
     // None
     GLenum arg0;
@@ -9702,11 +9932,15 @@ v8::Handle<v8::Value> EXPORT_texBuffer(const v8::Arguments& args) {
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLuint arg2;
-    arg2 = node::ObjectWrap::Unwrap<NODE_Buffer>(args[2]->ToObject())->gl_handle;
+    if(args[2]->IsNumber()) {
+        arg2 = args[2]->IntegerValue();
+    } else {
+        arg2 = node::ObjectWrap::Unwrap<NODE_Buffer>(args[2]->ToObject())->gl_handle;
+    }
     glTexBuffer(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_primitiveRestartIndex(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_primitiveRestartIndex) {
     NanScope();
     // None
     GLuint arg0;
@@ -9714,7 +9948,7 @@ v8::Handle<v8::Value> EXPORT_primitiveRestartIndex(const v8::Arguments& args) {
     glPrimitiveRestartIndex(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getInteger64i_v(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getInteger64i_v) {
     NanScope();
     // None
     GLenum arg0;
@@ -9731,7 +9965,7 @@ v8::Handle<v8::Value> EXPORT_getInteger64i_v(const v8::Arguments& args) {
         arg2_nonconst = new GLint64[arg2_array->Length()];
         arg2 = (GLint64*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint64*)node::Buffer::Data(args[2]);
+        arg2 = (GLint64*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint64*)(args[2]->IntegerValue());
     } else {
@@ -9741,7 +9975,7 @@ v8::Handle<v8::Value> EXPORT_getInteger64i_v(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getBufferParameteri64v(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getBufferParameteri64v) {
     NanScope();
     // None
     GLenum arg0;
@@ -9758,7 +9992,7 @@ v8::Handle<v8::Value> EXPORT_getBufferParameteri64v(const v8::Arguments& args) {
         arg2_nonconst = new GLint64[arg2_array->Length()];
         arg2 = (GLint64*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint64*)node::Buffer::Data(args[2]);
+        arg2 = (GLint64*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint64*)(args[2]->IntegerValue());
     } else {
@@ -9768,7 +10002,7 @@ v8::Handle<v8::Value> EXPORT_getBufferParameteri64v(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_framebufferTexture(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_framebufferTexture) {
     NanScope();
     // None
     GLenum arg0;
@@ -9776,13 +10010,17 @@ v8::Handle<v8::Value> EXPORT_framebufferTexture(const v8::Arguments& args) {
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLuint arg2;
-    arg2 = node::ObjectWrap::Unwrap<NODE_Texture>(args[2]->ToObject())->gl_handle;
+    if(args[2]->IsNumber()) {
+        arg2 = args[2]->IntegerValue();
+    } else {
+        arg2 = node::ObjectWrap::Unwrap<NODE_Texture>(args[2]->ToObject())->gl_handle;
+    }
     GLint arg3;
     arg3 = args[3]->Int32Value();
     glFramebufferTexture(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribDivisor(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribDivisor) {
     NanScope();
     // None
     GLuint arg0;
@@ -9792,7 +10030,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribDivisor(const v8::Arguments& args) {
     glVertexAttribDivisor(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_minSampleShading(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_minSampleShading) {
     NanScope();
     // None
     GLfloat arg0;
@@ -9800,7 +10038,7 @@ v8::Handle<v8::Value> EXPORT_minSampleShading(const v8::Arguments& args) {
     glMinSampleShading(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_blendEquationi(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blendEquationi) {
     NanScope();
     // None
     GLuint arg0;
@@ -9810,7 +10048,7 @@ v8::Handle<v8::Value> EXPORT_blendEquationi(const v8::Arguments& args) {
     glBlendEquationi(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_blendEquationSeparatei(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blendEquationSeparatei) {
     NanScope();
     // None
     GLuint arg0;
@@ -9822,7 +10060,7 @@ v8::Handle<v8::Value> EXPORT_blendEquationSeparatei(const v8::Arguments& args) {
     glBlendEquationSeparatei(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_blendFunci(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blendFunci) {
     NanScope();
     // None
     GLuint arg0;
@@ -9834,7 +10072,7 @@ v8::Handle<v8::Value> EXPORT_blendFunci(const v8::Arguments& args) {
     glBlendFunci(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_blendFuncSeparatei(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blendFuncSeparatei) {
     NanScope();
     // None
     GLuint arg0;
@@ -9850,27 +10088,35 @@ v8::Handle<v8::Value> EXPORT_blendFuncSeparatei(const v8::Arguments& args) {
     glBlendFuncSeparatei(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isRenderbuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isRenderbuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Renderbuffer>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Renderbuffer>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsRenderbuffer(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_bindRenderbuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindRenderbuffer) {
     NanScope();
     // None
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_Renderbuffer>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_Renderbuffer>(args[1]->ToObject())->gl_handle;
+    }
     glBindRenderbuffer(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_genRenderbuffers(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_genRenderbuffers) {
     NanScope();
     // None
     GLsizei arg0;
@@ -9885,7 +10131,7 @@ v8::Handle<v8::Value> EXPORT_genRenderbuffers(const v8::Arguments& args) {
     delete [] arg1;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_renderbufferStorage(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_renderbufferStorage) {
     NanScope();
     // None
     GLenum arg0;
@@ -9899,7 +10145,7 @@ v8::Handle<v8::Value> EXPORT_renderbufferStorage(const v8::Arguments& args) {
     glRenderbufferStorage(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getRenderbufferParameteriv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getRenderbufferParameteriv) {
     NanScope();
     // None
     GLenum arg0;
@@ -9916,7 +10162,7 @@ v8::Handle<v8::Value> EXPORT_getRenderbufferParameteriv(const v8::Arguments& arg
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -9926,27 +10172,35 @@ v8::Handle<v8::Value> EXPORT_getRenderbufferParameteriv(const v8::Arguments& arg
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isFramebuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isFramebuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Framebuffer>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Framebuffer>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsFramebuffer(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_bindFramebuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindFramebuffer) {
     NanScope();
     // None
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_Framebuffer>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_Framebuffer>(args[1]->ToObject())->gl_handle;
+    }
     glBindFramebuffer(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_genFramebuffers(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_genFramebuffers) {
     NanScope();
     // None
     GLsizei arg0;
@@ -9961,17 +10215,17 @@ v8::Handle<v8::Value> EXPORT_genFramebuffers(const v8::Arguments& args) {
     delete [] arg1;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_checkFramebufferStatus(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_checkFramebufferStatus) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a16c8>
+    // <gltypes.Type instance at 0x108b07098>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLenum result;
     result = glCheckFramebufferStatus(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_framebufferTexture1D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_framebufferTexture1D) {
     NanScope();
     // None
     GLenum arg0;
@@ -9981,13 +10235,17 @@ v8::Handle<v8::Value> EXPORT_framebufferTexture1D(const v8::Arguments& args) {
     GLenum arg2;
     arg2 = args[2]->Uint32Value();
     GLuint arg3;
-    arg3 = node::ObjectWrap::Unwrap<NODE_Texture>(args[3]->ToObject())->gl_handle;
+    if(args[3]->IsNumber()) {
+        arg3 = args[3]->IntegerValue();
+    } else {
+        arg3 = node::ObjectWrap::Unwrap<NODE_Texture>(args[3]->ToObject())->gl_handle;
+    }
     GLint arg4;
     arg4 = args[4]->Int32Value();
     glFramebufferTexture1D(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_framebufferTexture2D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_framebufferTexture2D) {
     NanScope();
     // None
     GLenum arg0;
@@ -9997,13 +10255,17 @@ v8::Handle<v8::Value> EXPORT_framebufferTexture2D(const v8::Arguments& args) {
     GLenum arg2;
     arg2 = args[2]->Uint32Value();
     GLuint arg3;
-    arg3 = node::ObjectWrap::Unwrap<NODE_Texture>(args[3]->ToObject())->gl_handle;
+    if(args[3]->IsNumber()) {
+        arg3 = args[3]->IntegerValue();
+    } else {
+        arg3 = node::ObjectWrap::Unwrap<NODE_Texture>(args[3]->ToObject())->gl_handle;
+    }
     GLint arg4;
     arg4 = args[4]->Int32Value();
     glFramebufferTexture2D(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_framebufferTexture3D(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_framebufferTexture3D) {
     NanScope();
     // None
     GLenum arg0;
@@ -10013,7 +10275,11 @@ v8::Handle<v8::Value> EXPORT_framebufferTexture3D(const v8::Arguments& args) {
     GLenum arg2;
     arg2 = args[2]->Uint32Value();
     GLuint arg3;
-    arg3 = node::ObjectWrap::Unwrap<NODE_Texture>(args[3]->ToObject())->gl_handle;
+    if(args[3]->IsNumber()) {
+        arg3 = args[3]->IntegerValue();
+    } else {
+        arg3 = node::ObjectWrap::Unwrap<NODE_Texture>(args[3]->ToObject())->gl_handle;
+    }
     GLint arg4;
     arg4 = args[4]->Int32Value();
     GLint arg5;
@@ -10021,7 +10287,7 @@ v8::Handle<v8::Value> EXPORT_framebufferTexture3D(const v8::Arguments& args) {
     glFramebufferTexture3D(arg0, arg1, arg2, arg3, arg4, arg5);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_framebufferRenderbuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_framebufferRenderbuffer) {
     NanScope();
     // None
     GLenum arg0;
@@ -10031,11 +10297,15 @@ v8::Handle<v8::Value> EXPORT_framebufferRenderbuffer(const v8::Arguments& args) 
     GLenum arg2;
     arg2 = args[2]->Uint32Value();
     GLuint arg3;
-    arg3 = node::ObjectWrap::Unwrap<NODE_Renderbuffer>(args[3]->ToObject())->gl_handle;
+    if(args[3]->IsNumber()) {
+        arg3 = args[3]->IntegerValue();
+    } else {
+        arg3 = node::ObjectWrap::Unwrap<NODE_Renderbuffer>(args[3]->ToObject())->gl_handle;
+    }
     glFramebufferRenderbuffer(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getFramebufferAttachmentParameteriv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getFramebufferAttachmentParameteriv) {
     NanScope();
     // None
     GLenum arg0;
@@ -10054,7 +10324,7 @@ v8::Handle<v8::Value> EXPORT_getFramebufferAttachmentParameteriv(const v8::Argum
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLint*)node::Buffer::Data(args[3]);
+        arg3 = (GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLint*)(args[3]->IntegerValue());
     } else {
@@ -10064,7 +10334,7 @@ v8::Handle<v8::Value> EXPORT_getFramebufferAttachmentParameteriv(const v8::Argum
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_generateMipmap(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_generateMipmap) {
     NanScope();
     // None
     GLenum arg0;
@@ -10072,7 +10342,7 @@ v8::Handle<v8::Value> EXPORT_generateMipmap(const v8::Arguments& args) {
     glGenerateMipmap(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_blitFramebuffer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_blitFramebuffer) {
     NanScope();
     // None
     GLint arg0;
@@ -10098,7 +10368,7 @@ v8::Handle<v8::Value> EXPORT_blitFramebuffer(const v8::Arguments& args) {
     glBlitFramebuffer(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_renderbufferStorageMultisample(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_renderbufferStorageMultisample) {
     NanScope();
     // None
     GLenum arg0;
@@ -10114,7 +10384,7 @@ v8::Handle<v8::Value> EXPORT_renderbufferStorageMultisample(const v8::Arguments&
     glRenderbufferStorageMultisample(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_framebufferTextureLayer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_framebufferTextureLayer) {
     NanScope();
     // None
     GLenum arg0;
@@ -10122,7 +10392,11 @@ v8::Handle<v8::Value> EXPORT_framebufferTextureLayer(const v8::Arguments& args) 
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLuint arg2;
-    arg2 = node::ObjectWrap::Unwrap<NODE_Texture>(args[2]->ToObject())->gl_handle;
+    if(args[2]->IsNumber()) {
+        arg2 = args[2]->IntegerValue();
+    } else {
+        arg2 = node::ObjectWrap::Unwrap<NODE_Texture>(args[2]->ToObject())->gl_handle;
+    }
     GLint arg3;
     arg3 = args[3]->Int32Value();
     GLint arg4;
@@ -10130,9 +10404,9 @@ v8::Handle<v8::Value> EXPORT_framebufferTextureLayer(const v8::Arguments& args) 
     glFramebufferTextureLayer(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_mapBufferRange(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_mapBufferRange) {
     NanScope();
-    // <gltypes.PointerType instance at 0x103a6def0>
+    // <gltypes.PointerType instance at 0x108f46e18>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLintptr arg1;
@@ -10143,10 +10417,10 @@ v8::Handle<v8::Value> EXPORT_mapBufferRange(const v8::Arguments& args) {
     arg3 = args[3]->Uint32Value();
     GLvoid *result;
     result = glMapBufferRange(arg0, arg1, arg2, arg3);
-    v8::Handle<v8::Value> result_js = node::Buffer::New((char*)result, 0, do_nothing_release_callback, NULL)->handle_;
+    v8::Handle<v8::Value> result_js = NanNewBufferHandle((char*)result, 0, do_nothing_release_callback, NULL);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_flushMappedBufferRange(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_flushMappedBufferRange) {
     NanScope();
     // None
     GLenum arg0;
@@ -10158,15 +10432,19 @@ v8::Handle<v8::Value> EXPORT_flushMappedBufferRange(const v8::Arguments& args) {
     glFlushMappedBufferRange(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindVertexArray(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindVertexArray) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_VertexArray>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_VertexArray>(args[0]->ToObject())->gl_handle;
+    }
     glBindVertexArray(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_genVertexArrays(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_genVertexArrays) {
     NanScope();
     // None
     GLsizei arg0;
@@ -10181,21 +10459,29 @@ v8::Handle<v8::Value> EXPORT_genVertexArrays(const v8::Arguments& args) {
     delete [] arg1;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isVertexArray(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isVertexArray) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_VertexArray>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_VertexArray>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsVertexArray(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getActiveUniformsiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getActiveUniformsiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLsizei arg1;
     arg1 = args[1]->Int32Value();
     const GLuint *arg2;
@@ -10208,7 +10494,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformsiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (const GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLuint*)(args[2]->IntegerValue());
     } else {
@@ -10226,7 +10512,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformsiv(const v8::Arguments& args) {
         arg4_nonconst = new GLint[arg4_array->Length()];
         arg4 = (GLint*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLint*)node::Buffer::Data(args[4]);
+        arg4 = (GLint*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLint*)(args[4]->IntegerValue());
     } else {
@@ -10237,11 +10523,15 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformsiv(const v8::Arguments& args) {
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getActiveUniformName(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getActiveUniformName) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     GLsizei arg2;
@@ -10256,7 +10546,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformName(const v8::Arguments& args) {
         arg3_nonconst = new GLsizei[arg3_array->Length()];
         arg3 = (GLsizei*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLsizei*)node::Buffer::Data(args[3]);
+        arg3 = (GLsizei*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLsizei*)(args[3]->IntegerValue());
     } else {
@@ -10272,7 +10562,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformName(const v8::Arguments& args) {
         arg4_nonconst = new GLchar[arg4_array->Length()];
         arg4 = (GLchar*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLchar*)node::Buffer::Data(args[4]);
+        arg4 = (GLchar*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLchar*)(args[4]->IntegerValue());
     } else {
@@ -10283,11 +10573,15 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformName(const v8::Arguments& args) {
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getUniformBlockIndex(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getUniformBlockIndex) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a1878>
+    // <gltypes.Type instance at 0x108b07248>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     const GLchar *arg1;
     GLchar* arg1_nonconst = NULL;
     if(args[1]->IsString()) {
@@ -10298,7 +10592,7 @@ v8::Handle<v8::Value> EXPORT_getUniformBlockIndex(const v8::Arguments& args) {
         arg1_nonconst = new GLchar[arg1_array->Length()];
         arg1 = (const GLchar*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLchar*)node::Buffer::Data(args[1]);
+        arg1 = (const GLchar*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLchar*)(args[1]->IntegerValue());
     } else {
@@ -10306,15 +10600,19 @@ v8::Handle<v8::Value> EXPORT_getUniformBlockIndex(const v8::Arguments& args) {
     }
     GLuint result;
     result = glGetUniformBlockIndex(arg0, arg1);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getActiveUniformBlockiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getActiveUniformBlockiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     GLenum arg2;
@@ -10329,7 +10627,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformBlockiv(const v8::Arguments& args) 
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLint*)node::Buffer::Data(args[3]);
+        arg3 = (GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLint*)(args[3]->IntegerValue());
     } else {
@@ -10339,11 +10637,15 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformBlockiv(const v8::Arguments& args) 
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getActiveUniformBlockName(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getActiveUniformBlockName) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     GLsizei arg2;
@@ -10358,7 +10660,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformBlockName(const v8::Arguments& args
         arg3_nonconst = new GLsizei[arg3_array->Length()];
         arg3 = (GLsizei*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLsizei*)node::Buffer::Data(args[3]);
+        arg3 = (GLsizei*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLsizei*)(args[3]->IntegerValue());
     } else {
@@ -10374,7 +10676,7 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformBlockName(const v8::Arguments& args
         arg4_nonconst = new GLchar[arg4_array->Length()];
         arg4 = (GLchar*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLchar*)node::Buffer::Data(args[4]);
+        arg4 = (GLchar*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLchar*)(args[4]->IntegerValue());
     } else {
@@ -10385,11 +10687,15 @@ v8::Handle<v8::Value> EXPORT_getActiveUniformBlockName(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformBlockBinding(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformBlockBinding) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     GLuint arg2;
@@ -10397,7 +10703,7 @@ v8::Handle<v8::Value> EXPORT_uniformBlockBinding(const v8::Arguments& args) {
     glUniformBlockBinding(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_copyBufferSubData(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_copyBufferSubData) {
     NanScope();
     // None
     GLenum arg0;
@@ -10413,7 +10719,7 @@ v8::Handle<v8::Value> EXPORT_copyBufferSubData(const v8::Arguments& args) {
     glCopyBufferSubData(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawElementsBaseVertex(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawElementsBaseVertex) {
     NanScope();
     // None
     GLenum arg0;
@@ -10432,7 +10738,7 @@ v8::Handle<v8::Value> EXPORT_drawElementsBaseVertex(const v8::Arguments& args) {
         arg3_nonconst = new GLubyte[arg3_array->Length()];
         arg3 = (const GLvoid*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLvoid*)node::Buffer::Data(args[3]);
+        arg3 = (const GLvoid*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLvoid*)(args[3]->IntegerValue());
     } else {
@@ -10444,7 +10750,7 @@ v8::Handle<v8::Value> EXPORT_drawElementsBaseVertex(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawRangeElementsBaseVertex(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawRangeElementsBaseVertex) {
     NanScope();
     // None
     GLenum arg0;
@@ -10467,7 +10773,7 @@ v8::Handle<v8::Value> EXPORT_drawRangeElementsBaseVertex(const v8::Arguments& ar
         arg5_nonconst = new GLubyte[arg5_array->Length()];
         arg5 = (const GLvoid*)arg5_nonconst;
     } else if(args[5]->IsObject()) {
-        arg5 = (const GLvoid*)node::Buffer::Data(args[5]);
+        arg5 = (const GLvoid*)glbind_get_buffer_data(args[5]);
     } else if(args[5]->IsNumber()) {
         arg5 = (const GLvoid*)(args[5]->IntegerValue());
     } else {
@@ -10479,7 +10785,7 @@ v8::Handle<v8::Value> EXPORT_drawRangeElementsBaseVertex(const v8::Arguments& ar
     if(arg5_nonconst) delete [] arg5_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawElementsInstancedBaseVertex(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawElementsInstancedBaseVertex) {
     NanScope();
     // None
     GLenum arg0;
@@ -10498,7 +10804,7 @@ v8::Handle<v8::Value> EXPORT_drawElementsInstancedBaseVertex(const v8::Arguments
         arg3_nonconst = new GLubyte[arg3_array->Length()];
         arg3 = (const GLvoid*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLvoid*)node::Buffer::Data(args[3]);
+        arg3 = (const GLvoid*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLvoid*)(args[3]->IntegerValue());
     } else {
@@ -10512,7 +10818,7 @@ v8::Handle<v8::Value> EXPORT_drawElementsInstancedBaseVertex(const v8::Arguments
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_provokingVertex(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_provokingVertex) {
     NanScope();
     // None
     GLenum arg0;
@@ -10520,7 +10826,7 @@ v8::Handle<v8::Value> EXPORT_provokingVertex(const v8::Arguments& args) {
     glProvokingVertex(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texImage2DMultisample(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texImage2DMultisample) {
     NanScope();
     // None
     GLenum arg0;
@@ -10538,7 +10844,7 @@ v8::Handle<v8::Value> EXPORT_texImage2DMultisample(const v8::Arguments& args) {
     glTexImage2DMultisample(arg0, arg1, arg2, arg3, arg4, arg5);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_texImage3DMultisample(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_texImage3DMultisample) {
     NanScope();
     // None
     GLenum arg0;
@@ -10558,7 +10864,7 @@ v8::Handle<v8::Value> EXPORT_texImage3DMultisample(const v8::Arguments& args) {
     glTexImage3DMultisample(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getMultisamplefv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getMultisamplefv) {
     NanScope();
     // None
     GLenum arg0;
@@ -10575,7 +10881,7 @@ v8::Handle<v8::Value> EXPORT_getMultisamplefv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -10585,7 +10891,7 @@ v8::Handle<v8::Value> EXPORT_getMultisamplefv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_sampleMaski(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_sampleMaski) {
     NanScope();
     // None
     GLuint arg0;
@@ -10595,11 +10901,15 @@ v8::Handle<v8::Value> EXPORT_sampleMaski(const v8::Arguments& args) {
     glSampleMaski(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindFragDataLocationIndexed(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindFragDataLocationIndexed) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
     arg1 = args[1]->Uint32Value();
     GLuint arg2;
@@ -10614,7 +10924,7 @@ v8::Handle<v8::Value> EXPORT_bindFragDataLocationIndexed(const v8::Arguments& ar
         arg3_nonconst = new GLchar[arg3_array->Length()];
         arg3 = (const GLchar*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLchar*)node::Buffer::Data(args[3]);
+        arg3 = (const GLchar*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLchar*)(args[3]->IntegerValue());
     } else {
@@ -10624,11 +10934,15 @@ v8::Handle<v8::Value> EXPORT_bindFragDataLocationIndexed(const v8::Arguments& ar
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getFragDataIndex(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getFragDataIndex) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a1758>
+    // <gltypes.Type instance at 0x108b07128>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     const GLchar *arg1;
     GLchar* arg1_nonconst = NULL;
     if(args[1]->IsString()) {
@@ -10639,7 +10953,7 @@ v8::Handle<v8::Value> EXPORT_getFragDataIndex(const v8::Arguments& args) {
         arg1_nonconst = new GLchar[arg1_array->Length()];
         arg1 = (const GLchar*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLchar*)node::Buffer::Data(args[1]);
+        arg1 = (const GLchar*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLchar*)(args[1]->IntegerValue());
     } else {
@@ -10647,11 +10961,11 @@ v8::Handle<v8::Value> EXPORT_getFragDataIndex(const v8::Arguments& args) {
     }
     GLint result;
     result = glGetFragDataIndex(arg0, arg1);
-    v8::Handle<v8::Value> result_js = v8::Int32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Int32>(result);
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_genSamplers(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_genSamplers) {
     NanScope();
     // None
     GLsizei arg0;
@@ -10666,31 +10980,43 @@ v8::Handle<v8::Value> EXPORT_genSamplers(const v8::Arguments& args) {
     delete [] arg1;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isSampler(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isSampler) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsSampler(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_bindSampler(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindSampler) {
     NanScope();
     // None
     GLuint arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[1]->ToObject())->gl_handle;
+    }
     glBindSampler(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_samplerParameteri(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_samplerParameteri) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLint arg2;
@@ -10698,11 +11024,15 @@ v8::Handle<v8::Value> EXPORT_samplerParameteri(const v8::Arguments& args) {
     glSamplerParameteri(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_samplerParameteriv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_samplerParameteriv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     const GLint *arg2;
@@ -10715,7 +11045,7 @@ v8::Handle<v8::Value> EXPORT_samplerParameteriv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -10725,11 +11055,15 @@ v8::Handle<v8::Value> EXPORT_samplerParameteriv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_samplerParameterf(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_samplerParameterf) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLfloat arg2;
@@ -10737,11 +11071,15 @@ v8::Handle<v8::Value> EXPORT_samplerParameterf(const v8::Arguments& args) {
     glSamplerParameterf(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_samplerParameterfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_samplerParameterfv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     const GLfloat *arg2;
@@ -10754,7 +11092,7 @@ v8::Handle<v8::Value> EXPORT_samplerParameterfv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (const GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (const GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -10764,11 +11102,15 @@ v8::Handle<v8::Value> EXPORT_samplerParameterfv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_samplerParameterIiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_samplerParameterIiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     const GLint *arg2;
@@ -10781,7 +11123,7 @@ v8::Handle<v8::Value> EXPORT_samplerParameterIiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -10791,11 +11133,15 @@ v8::Handle<v8::Value> EXPORT_samplerParameterIiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_samplerParameterIuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_samplerParameterIuiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     const GLuint *arg2;
@@ -10808,7 +11154,7 @@ v8::Handle<v8::Value> EXPORT_samplerParameterIuiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (const GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLuint*)(args[2]->IntegerValue());
     } else {
@@ -10818,11 +11164,15 @@ v8::Handle<v8::Value> EXPORT_samplerParameterIuiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getSamplerParameteriv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getSamplerParameteriv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLint *arg2;
@@ -10835,7 +11185,7 @@ v8::Handle<v8::Value> EXPORT_getSamplerParameteriv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -10845,11 +11195,15 @@ v8::Handle<v8::Value> EXPORT_getSamplerParameteriv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getSamplerParameterIiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getSamplerParameterIiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLint *arg2;
@@ -10862,7 +11216,7 @@ v8::Handle<v8::Value> EXPORT_getSamplerParameterIiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -10872,11 +11226,15 @@ v8::Handle<v8::Value> EXPORT_getSamplerParameterIiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getSamplerParameterfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getSamplerParameterfv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLfloat *arg2;
@@ -10889,7 +11247,7 @@ v8::Handle<v8::Value> EXPORT_getSamplerParameterfv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -10899,11 +11257,15 @@ v8::Handle<v8::Value> EXPORT_getSamplerParameterfv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getSamplerParameterIuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getSamplerParameterIuiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Sampler>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLuint *arg2;
@@ -10916,7 +11278,7 @@ v8::Handle<v8::Value> EXPORT_getSamplerParameterIuiv(const v8::Arguments& args) 
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLuint*)(args[2]->IntegerValue());
     } else {
@@ -10926,7 +11288,7 @@ v8::Handle<v8::Value> EXPORT_getSamplerParameterIuiv(const v8::Arguments& args) 
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_queryCounter(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_queryCounter) {
     NanScope();
     // None
     GLuint arg0;
@@ -10936,7 +11298,7 @@ v8::Handle<v8::Value> EXPORT_queryCounter(const v8::Arguments& args) {
     glQueryCounter(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getQueryObjecti64v(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getQueryObjecti64v) {
     NanScope();
     // None
     GLuint arg0;
@@ -10953,7 +11315,7 @@ v8::Handle<v8::Value> EXPORT_getQueryObjecti64v(const v8::Arguments& args) {
         arg2_nonconst = new GLint64[arg2_array->Length()];
         arg2 = (GLint64*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint64*)node::Buffer::Data(args[2]);
+        arg2 = (GLint64*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint64*)(args[2]->IntegerValue());
     } else {
@@ -10963,7 +11325,7 @@ v8::Handle<v8::Value> EXPORT_getQueryObjecti64v(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getQueryObjectui64v(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getQueryObjectui64v) {
     NanScope();
     // None
     GLuint arg0;
@@ -10980,7 +11342,7 @@ v8::Handle<v8::Value> EXPORT_getQueryObjectui64v(const v8::Arguments& args) {
         arg2_nonconst = new GLuint64[arg2_array->Length()];
         arg2 = (GLuint64*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLuint64*)node::Buffer::Data(args[2]);
+        arg2 = (GLuint64*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLuint64*)(args[2]->IntegerValue());
     } else {
@@ -10990,7 +11352,7 @@ v8::Handle<v8::Value> EXPORT_getQueryObjectui64v(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribP1ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribP1ui) {
     NanScope();
     // None
     GLuint arg0;
@@ -11004,7 +11366,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP1ui(const v8::Arguments& args) {
     glVertexAttribP1ui(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribP1uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribP1uiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -11023,7 +11385,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP1uiv(const v8::Arguments& args) {
         arg3_nonconst = new GLuint[arg3_array->Length()];
         arg3 = (const GLuint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLuint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLuint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLuint*)(args[3]->IntegerValue());
     } else {
@@ -11033,7 +11395,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP1uiv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribP2ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribP2ui) {
     NanScope();
     // None
     GLuint arg0;
@@ -11047,7 +11409,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP2ui(const v8::Arguments& args) {
     glVertexAttribP2ui(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribP2uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribP2uiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -11066,7 +11428,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP2uiv(const v8::Arguments& args) {
         arg3_nonconst = new GLuint[arg3_array->Length()];
         arg3 = (const GLuint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLuint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLuint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLuint*)(args[3]->IntegerValue());
     } else {
@@ -11076,7 +11438,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP2uiv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribP3ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribP3ui) {
     NanScope();
     // None
     GLuint arg0;
@@ -11090,7 +11452,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP3ui(const v8::Arguments& args) {
     glVertexAttribP3ui(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribP3uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribP3uiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -11109,7 +11471,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP3uiv(const v8::Arguments& args) {
         arg3_nonconst = new GLuint[arg3_array->Length()];
         arg3 = (const GLuint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLuint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLuint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLuint*)(args[3]->IntegerValue());
     } else {
@@ -11119,7 +11481,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP3uiv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribP4ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribP4ui) {
     NanScope();
     // None
     GLuint arg0;
@@ -11133,7 +11495,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP4ui(const v8::Arguments& args) {
     glVertexAttribP4ui(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribP4uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribP4uiv) {
     NanScope();
     // None
     GLuint arg0;
@@ -11152,7 +11514,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP4uiv(const v8::Arguments& args) {
         arg3_nonconst = new GLuint[arg3_array->Length()];
         arg3 = (const GLuint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLuint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLuint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLuint*)(args[3]->IntegerValue());
     } else {
@@ -11162,7 +11524,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribP4uiv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawArraysIndirect(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawArraysIndirect) {
     NanScope();
     // None
     GLenum arg0;
@@ -11177,7 +11539,7 @@ v8::Handle<v8::Value> EXPORT_drawArraysIndirect(const v8::Arguments& args) {
         arg1_nonconst = new GLubyte[arg1_array->Length()];
         arg1 = (const GLvoid*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLvoid*)node::Buffer::Data(args[1]);
+        arg1 = (const GLvoid*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLvoid*)(args[1]->IntegerValue());
     } else {
@@ -11187,7 +11549,7 @@ v8::Handle<v8::Value> EXPORT_drawArraysIndirect(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawElementsIndirect(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawElementsIndirect) {
     NanScope();
     // None
     GLenum arg0;
@@ -11204,7 +11566,7 @@ v8::Handle<v8::Value> EXPORT_drawElementsIndirect(const v8::Arguments& args) {
         arg2_nonconst = new GLubyte[arg2_array->Length()];
         arg2 = (const GLvoid*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLvoid*)node::Buffer::Data(args[2]);
+        arg2 = (const GLvoid*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLvoid*)(args[2]->IntegerValue());
     } else {
@@ -11214,7 +11576,7 @@ v8::Handle<v8::Value> EXPORT_drawElementsIndirect(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform1d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform1d) {
     NanScope();
     // None
     GLint arg0;
@@ -11224,7 +11586,7 @@ v8::Handle<v8::Value> EXPORT_uniform1d(const v8::Arguments& args) {
     glUniform1d(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform2d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform2d) {
     NanScope();
     // None
     GLint arg0;
@@ -11236,7 +11598,7 @@ v8::Handle<v8::Value> EXPORT_uniform2d(const v8::Arguments& args) {
     glUniform2d(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform3d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform3d) {
     NanScope();
     // None
     GLint arg0;
@@ -11250,7 +11612,7 @@ v8::Handle<v8::Value> EXPORT_uniform3d(const v8::Arguments& args) {
     glUniform3d(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform4d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform4d) {
     NanScope();
     // None
     GLint arg0;
@@ -11266,7 +11628,7 @@ v8::Handle<v8::Value> EXPORT_uniform4d(const v8::Arguments& args) {
     glUniform4d(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform1dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform1dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11283,7 +11645,7 @@ v8::Handle<v8::Value> EXPORT_uniform1dv(const v8::Arguments& args) {
         arg2_nonconst = new GLdouble[arg2_array->Length()];
         arg2 = (const GLdouble*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLdouble*)node::Buffer::Data(args[2]);
+        arg2 = (const GLdouble*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLdouble*)(args[2]->IntegerValue());
     } else {
@@ -11293,7 +11655,7 @@ v8::Handle<v8::Value> EXPORT_uniform1dv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform2dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11310,7 +11672,7 @@ v8::Handle<v8::Value> EXPORT_uniform2dv(const v8::Arguments& args) {
         arg2_nonconst = new GLdouble[arg2_array->Length()];
         arg2 = (const GLdouble*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLdouble*)node::Buffer::Data(args[2]);
+        arg2 = (const GLdouble*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLdouble*)(args[2]->IntegerValue());
     } else {
@@ -11320,7 +11682,7 @@ v8::Handle<v8::Value> EXPORT_uniform2dv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform3dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11337,7 +11699,7 @@ v8::Handle<v8::Value> EXPORT_uniform3dv(const v8::Arguments& args) {
         arg2_nonconst = new GLdouble[arg2_array->Length()];
         arg2 = (const GLdouble*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLdouble*)node::Buffer::Data(args[2]);
+        arg2 = (const GLdouble*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLdouble*)(args[2]->IntegerValue());
     } else {
@@ -11347,7 +11709,7 @@ v8::Handle<v8::Value> EXPORT_uniform3dv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniform4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniform4dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11364,7 +11726,7 @@ v8::Handle<v8::Value> EXPORT_uniform4dv(const v8::Arguments& args) {
         arg2_nonconst = new GLdouble[arg2_array->Length()];
         arg2 = (const GLdouble*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLdouble*)node::Buffer::Data(args[2]);
+        arg2 = (const GLdouble*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLdouble*)(args[2]->IntegerValue());
     } else {
@@ -11374,7 +11736,7 @@ v8::Handle<v8::Value> EXPORT_uniform4dv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix2dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11393,7 +11755,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -11403,7 +11765,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix3dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11422,7 +11784,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -11432,7 +11794,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix4dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11451,7 +11813,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -11461,7 +11823,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix2x3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix2x3dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11480,7 +11842,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2x3dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -11490,7 +11852,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2x3dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix2x4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix2x4dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11509,7 +11871,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2x4dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -11519,7 +11881,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix2x4dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix3x2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix3x2dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11538,7 +11900,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3x2dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -11548,7 +11910,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3x2dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix3x4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix3x4dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11567,7 +11929,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3x4dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -11577,7 +11939,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix3x4dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix4x2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix4x2dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11596,7 +11958,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4x2dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -11606,7 +11968,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4x2dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformMatrix4x3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformMatrix4x3dv) {
     NanScope();
     // None
     GLint arg0;
@@ -11625,7 +11987,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4x3dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -11635,7 +11997,7 @@ v8::Handle<v8::Value> EXPORT_uniformMatrix4x3dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getUniformdv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getUniformdv) {
     NanScope();
     // None
     GLuint arg0;
@@ -11652,7 +12014,7 @@ v8::Handle<v8::Value> EXPORT_getUniformdv(const v8::Arguments& args) {
         arg2_nonconst = new GLdouble[arg2_array->Length()];
         arg2 = (GLdouble*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLdouble*)node::Buffer::Data(args[2]);
+        arg2 = (GLdouble*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLdouble*)(args[2]->IntegerValue());
     } else {
@@ -11662,11 +12024,15 @@ v8::Handle<v8::Value> EXPORT_getUniformdv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getSubroutineUniformLocation(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getSubroutineUniformLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a1758>
+    // <gltypes.Type instance at 0x108b07128>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     const GLchar *arg2;
@@ -11679,7 +12045,7 @@ v8::Handle<v8::Value> EXPORT_getSubroutineUniformLocation(const v8::Arguments& a
         arg2_nonconst = new GLchar[arg2_array->Length()];
         arg2 = (const GLchar*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLchar*)node::Buffer::Data(args[2]);
+        arg2 = (const GLchar*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLchar*)(args[2]->IntegerValue());
     } else {
@@ -11687,15 +12053,19 @@ v8::Handle<v8::Value> EXPORT_getSubroutineUniformLocation(const v8::Arguments& a
     }
     GLint result;
     result = glGetSubroutineUniformLocation(arg0, arg1, arg2);
-    v8::Handle<v8::Value> result_js = v8::Int32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Int32>(result);
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getSubroutineIndex(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getSubroutineIndex) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a1878>
+    // <gltypes.Type instance at 0x108b07248>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     const GLchar *arg2;
@@ -11708,7 +12078,7 @@ v8::Handle<v8::Value> EXPORT_getSubroutineIndex(const v8::Arguments& args) {
         arg2_nonconst = new GLchar[arg2_array->Length()];
         arg2 = (const GLchar*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLchar*)node::Buffer::Data(args[2]);
+        arg2 = (const GLchar*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLchar*)(args[2]->IntegerValue());
     } else {
@@ -11716,15 +12086,19 @@ v8::Handle<v8::Value> EXPORT_getSubroutineIndex(const v8::Arguments& args) {
     }
     GLuint result;
     result = glGetSubroutineIndex(arg0, arg1, arg2);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getActiveSubroutineUniformiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getActiveSubroutineUniformiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLuint arg2;
@@ -11741,7 +12115,7 @@ v8::Handle<v8::Value> EXPORT_getActiveSubroutineUniformiv(const v8::Arguments& a
         arg4_nonconst = new GLint[arg4_array->Length()];
         arg4 = (GLint*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLint*)node::Buffer::Data(args[4]);
+        arg4 = (GLint*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLint*)(args[4]->IntegerValue());
     } else {
@@ -11751,11 +12125,15 @@ v8::Handle<v8::Value> EXPORT_getActiveSubroutineUniformiv(const v8::Arguments& a
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getActiveSubroutineUniformName(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getActiveSubroutineUniformName) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLuint arg2;
@@ -11772,7 +12150,7 @@ v8::Handle<v8::Value> EXPORT_getActiveSubroutineUniformName(const v8::Arguments&
         arg4_nonconst = new GLsizei[arg4_array->Length()];
         arg4 = (GLsizei*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLsizei*)node::Buffer::Data(args[4]);
+        arg4 = (GLsizei*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLsizei*)(args[4]->IntegerValue());
     } else {
@@ -11788,7 +12166,7 @@ v8::Handle<v8::Value> EXPORT_getActiveSubroutineUniformName(const v8::Arguments&
         arg5_nonconst = new GLchar[arg5_array->Length()];
         arg5 = (GLchar*)arg5_nonconst;
     } else if(args[5]->IsObject()) {
-        arg5 = (GLchar*)node::Buffer::Data(args[5]);
+        arg5 = (GLchar*)glbind_get_buffer_data(args[5]);
     } else if(args[5]->IsNumber()) {
         arg5 = (GLchar*)(args[5]->IntegerValue());
     } else {
@@ -11799,11 +12177,15 @@ v8::Handle<v8::Value> EXPORT_getActiveSubroutineUniformName(const v8::Arguments&
     if(arg5_nonconst) delete [] arg5_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getActiveSubroutineName(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getActiveSubroutineName) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLuint arg2;
@@ -11820,7 +12202,7 @@ v8::Handle<v8::Value> EXPORT_getActiveSubroutineName(const v8::Arguments& args) 
         arg4_nonconst = new GLsizei[arg4_array->Length()];
         arg4 = (GLsizei*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLsizei*)node::Buffer::Data(args[4]);
+        arg4 = (GLsizei*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLsizei*)(args[4]->IntegerValue());
     } else {
@@ -11836,7 +12218,7 @@ v8::Handle<v8::Value> EXPORT_getActiveSubroutineName(const v8::Arguments& args) 
         arg5_nonconst = new GLchar[arg5_array->Length()];
         arg5 = (GLchar*)arg5_nonconst;
     } else if(args[5]->IsObject()) {
-        arg5 = (GLchar*)node::Buffer::Data(args[5]);
+        arg5 = (GLchar*)glbind_get_buffer_data(args[5]);
     } else if(args[5]->IsNumber()) {
         arg5 = (GLchar*)(args[5]->IntegerValue());
     } else {
@@ -11847,7 +12229,7 @@ v8::Handle<v8::Value> EXPORT_getActiveSubroutineName(const v8::Arguments& args) 
     if(arg5_nonconst) delete [] arg5_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_uniformSubroutinesuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_uniformSubroutinesuiv) {
     NanScope();
     // None
     GLenum arg0;
@@ -11864,7 +12246,7 @@ v8::Handle<v8::Value> EXPORT_uniformSubroutinesuiv(const v8::Arguments& args) {
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (const GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLuint*)(args[2]->IntegerValue());
     } else {
@@ -11874,7 +12256,7 @@ v8::Handle<v8::Value> EXPORT_uniformSubroutinesuiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getUniformSubroutineuiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getUniformSubroutineuiv) {
     NanScope();
     // None
     GLenum arg0;
@@ -11891,7 +12273,7 @@ v8::Handle<v8::Value> EXPORT_getUniformSubroutineuiv(const v8::Arguments& args) 
         arg2_nonconst = new GLuint[arg2_array->Length()];
         arg2 = (GLuint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLuint*)node::Buffer::Data(args[2]);
+        arg2 = (GLuint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLuint*)(args[2]->IntegerValue());
     } else {
@@ -11901,11 +12283,15 @@ v8::Handle<v8::Value> EXPORT_getUniformSubroutineuiv(const v8::Arguments& args) 
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getProgramStageiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getProgramStageiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLenum arg2;
@@ -11920,7 +12306,7 @@ v8::Handle<v8::Value> EXPORT_getProgramStageiv(const v8::Arguments& args) {
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLint*)node::Buffer::Data(args[3]);
+        arg3 = (GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLint*)(args[3]->IntegerValue());
     } else {
@@ -11930,7 +12316,7 @@ v8::Handle<v8::Value> EXPORT_getProgramStageiv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_patchParameteri(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_patchParameteri) {
     NanScope();
     // None
     GLenum arg0;
@@ -11940,7 +12326,7 @@ v8::Handle<v8::Value> EXPORT_patchParameteri(const v8::Arguments& args) {
     glPatchParameteri(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_patchParameterfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_patchParameterfv) {
     NanScope();
     // None
     GLenum arg0;
@@ -11955,7 +12341,7 @@ v8::Handle<v8::Value> EXPORT_patchParameterfv(const v8::Arguments& args) {
         arg1_nonconst = new GLfloat[arg1_array->Length()];
         arg1 = (const GLfloat*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLfloat*)node::Buffer::Data(args[1]);
+        arg1 = (const GLfloat*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLfloat*)(args[1]->IntegerValue());
     } else {
@@ -11965,17 +12351,21 @@ v8::Handle<v8::Value> EXPORT_patchParameterfv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindTransformFeedback(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindTransformFeedback) {
     NanScope();
     // None
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_TransformFeedback>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_TransformFeedback>(args[1]->ToObject())->gl_handle;
+    }
     glBindTransformFeedback(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_genTransformFeedbacks(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_genTransformFeedbacks) {
     NanScope();
     // None
     GLsizei arg0;
@@ -11990,39 +12380,47 @@ v8::Handle<v8::Value> EXPORT_genTransformFeedbacks(const v8::Arguments& args) {
     delete [] arg1;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isTransformFeedback(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isTransformFeedback) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_TransformFeedback>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_TransformFeedback>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsTransformFeedback(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_pauseTransformFeedback(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_pauseTransformFeedback) {
     NanScope();
     // None
     glPauseTransformFeedback();
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_resumeTransformFeedback(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_resumeTransformFeedback) {
     NanScope();
     // None
     glResumeTransformFeedback();
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawTransformFeedback(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawTransformFeedback) {
     NanScope();
     // None
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_TransformFeedback>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_TransformFeedback>(args[1]->ToObject())->gl_handle;
+    }
     glDrawTransformFeedback(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_drawTransformFeedbackStream(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_drawTransformFeedbackStream) {
     NanScope();
     // None
     GLenum arg0;
@@ -12034,7 +12432,7 @@ v8::Handle<v8::Value> EXPORT_drawTransformFeedbackStream(const v8::Arguments& ar
     glDrawTransformFeedbackStream(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_beginQueryIndexed(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_beginQueryIndexed) {
     NanScope();
     // None
     GLenum arg0;
@@ -12046,7 +12444,7 @@ v8::Handle<v8::Value> EXPORT_beginQueryIndexed(const v8::Arguments& args) {
     glBeginQueryIndexed(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_endQueryIndexed(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_endQueryIndexed) {
     NanScope();
     // None
     GLenum arg0;
@@ -12056,7 +12454,7 @@ v8::Handle<v8::Value> EXPORT_endQueryIndexed(const v8::Arguments& args) {
     glEndQueryIndexed(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getQueryIndexediv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getQueryIndexediv) {
     NanScope();
     // None
     GLenum arg0;
@@ -12075,7 +12473,7 @@ v8::Handle<v8::Value> EXPORT_getQueryIndexediv(const v8::Arguments& args) {
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLint*)node::Buffer::Data(args[3]);
+        arg3 = (GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLint*)(args[3]->IntegerValue());
     } else {
@@ -12085,13 +12483,13 @@ v8::Handle<v8::Value> EXPORT_getQueryIndexediv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_releaseShaderCompiler(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_releaseShaderCompiler) {
     NanScope();
     // None
     glReleaseShaderCompiler();
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_shaderBinary(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_shaderBinary) {
     NanScope();
     // None
     GLsizei arg0;
@@ -12113,7 +12511,7 @@ v8::Handle<v8::Value> EXPORT_shaderBinary(const v8::Arguments& args) {
         arg3_nonconst = new GLubyte[arg3_array->Length()];
         arg3 = (const GLvoid*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLvoid*)node::Buffer::Data(args[3]);
+        arg3 = (const GLvoid*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLvoid*)(args[3]->IntegerValue());
     } else {
@@ -12126,7 +12524,7 @@ v8::Handle<v8::Value> EXPORT_shaderBinary(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getShaderPrecisionFormat(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getShaderPrecisionFormat) {
     NanScope();
     // None
     GLenum arg0;
@@ -12143,7 +12541,7 @@ v8::Handle<v8::Value> EXPORT_getShaderPrecisionFormat(const v8::Arguments& args)
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -12159,7 +12557,7 @@ v8::Handle<v8::Value> EXPORT_getShaderPrecisionFormat(const v8::Arguments& args)
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLint*)node::Buffer::Data(args[3]);
+        arg3 = (GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLint*)(args[3]->IntegerValue());
     } else {
@@ -12170,7 +12568,7 @@ v8::Handle<v8::Value> EXPORT_getShaderPrecisionFormat(const v8::Arguments& args)
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_depthRangef(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_depthRangef) {
     NanScope();
     // None
     GLclampf arg0;
@@ -12180,7 +12578,7 @@ v8::Handle<v8::Value> EXPORT_depthRangef(const v8::Arguments& args) {
     glDepthRangef(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_clearDepthf(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_clearDepthf) {
     NanScope();
     // None
     GLclampf arg0;
@@ -12188,11 +12586,15 @@ v8::Handle<v8::Value> EXPORT_clearDepthf(const v8::Arguments& args) {
     glClearDepthf(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getProgramBinary(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getProgramBinary) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLsizei arg1;
     arg1 = args[1]->Int32Value();
     GLsizei *arg2;
@@ -12205,7 +12607,7 @@ v8::Handle<v8::Value> EXPORT_getProgramBinary(const v8::Arguments& args) {
         arg2_nonconst = new GLsizei[arg2_array->Length()];
         arg2 = (GLsizei*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLsizei*)node::Buffer::Data(args[2]);
+        arg2 = (GLsizei*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLsizei*)(args[2]->IntegerValue());
     } else {
@@ -12221,7 +12623,7 @@ v8::Handle<v8::Value> EXPORT_getProgramBinary(const v8::Arguments& args) {
         arg3_nonconst = new GLenum[arg3_array->Length()];
         arg3 = (GLenum*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLenum*)node::Buffer::Data(args[3]);
+        arg3 = (GLenum*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLenum*)(args[3]->IntegerValue());
     } else {
@@ -12237,7 +12639,7 @@ v8::Handle<v8::Value> EXPORT_getProgramBinary(const v8::Arguments& args) {
         arg4_nonconst = new GLubyte[arg4_array->Length()];
         arg4 = (GLvoid*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (GLvoid*)node::Buffer::Data(args[4]);
+        arg4 = (GLvoid*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (GLvoid*)(args[4]->IntegerValue());
     } else {
@@ -12249,11 +12651,15 @@ v8::Handle<v8::Value> EXPORT_getProgramBinary(const v8::Arguments& args) {
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programBinary(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programBinary) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     const GLvoid *arg2;
@@ -12266,7 +12672,7 @@ v8::Handle<v8::Value> EXPORT_programBinary(const v8::Arguments& args) {
         arg2_nonconst = new GLubyte[arg2_array->Length()];
         arg2 = (const GLvoid*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLvoid*)node::Buffer::Data(args[2]);
+        arg2 = (const GLvoid*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLvoid*)(args[2]->IntegerValue());
     } else {
@@ -12278,11 +12684,15 @@ v8::Handle<v8::Value> EXPORT_programBinary(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programParameteri(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programParameteri) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLint arg2;
@@ -12290,37 +12700,57 @@ v8::Handle<v8::Value> EXPORT_programParameteri(const v8::Arguments& args) {
     glProgramParameteri(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_useProgramStages(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_useProgramStages) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    }
     GLbitfield arg1;
     arg1 = args[1]->Uint32Value();
     GLuint arg2;
-    arg2 = node::ObjectWrap::Unwrap<NODE_Program>(args[2]->ToObject())->gl_handle;
+    if(args[2]->IsNumber()) {
+        arg2 = args[2]->IntegerValue();
+    } else {
+        arg2 = node::ObjectWrap::Unwrap<NODE_Program>(args[2]->ToObject())->gl_handle;
+    }
     glUseProgramStages(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_activeShaderProgram(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_activeShaderProgram) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    }
     GLuint arg1;
-    arg1 = node::ObjectWrap::Unwrap<NODE_Program>(args[1]->ToObject())->gl_handle;
+    if(args[1]->IsNumber()) {
+        arg1 = args[1]->IntegerValue();
+    } else {
+        arg1 = node::ObjectWrap::Unwrap<NODE_Program>(args[1]->ToObject())->gl_handle;
+    }
     glActiveShaderProgram(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_bindProgramPipeline(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_bindProgramPipeline) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    }
     glBindProgramPipeline(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_genProgramPipelines(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_genProgramPipelines) {
     NanScope();
     // None
     GLsizei arg0;
@@ -12335,21 +12765,29 @@ v8::Handle<v8::Value> EXPORT_genProgramPipelines(const v8::Arguments& args) {
     delete [] arg1;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_isProgramPipeline(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_isProgramPipeline) {
     NanScope();
-    // <gltypes.Type instance at 0x1036a15f0>
+    // <gltypes.Type instance at 0x108af5f80>
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    }
     GLboolean result;
     result = glIsProgramPipeline(arg0);
-    v8::Handle<v8::Value> result_js = v8::Uint32::New(result);
+    v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
     NanReturnValue(result_js);
 }
-v8::Handle<v8::Value> EXPORT_getProgramPipelineiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getProgramPipelineiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    }
     GLenum arg1;
     arg1 = args[1]->Uint32Value();
     GLint *arg2;
@@ -12362,7 +12800,7 @@ v8::Handle<v8::Value> EXPORT_getProgramPipelineiv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLint*)node::Buffer::Data(args[2]);
+        arg2 = (GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLint*)(args[2]->IntegerValue());
     } else {
@@ -12372,11 +12810,15 @@ v8::Handle<v8::Value> EXPORT_getProgramPipelineiv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform1i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform1i) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLint arg2;
@@ -12384,11 +12826,15 @@ v8::Handle<v8::Value> EXPORT_programUniform1i(const v8::Arguments& args) {
     glProgramUniform1i(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform1iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform1iv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12403,7 +12849,7 @@ v8::Handle<v8::Value> EXPORT_programUniform1iv(const v8::Arguments& args) {
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (const GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLint*)(args[3]->IntegerValue());
     } else {
@@ -12413,11 +12859,15 @@ v8::Handle<v8::Value> EXPORT_programUniform1iv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform1f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform1f) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLfloat arg2;
@@ -12425,11 +12875,15 @@ v8::Handle<v8::Value> EXPORT_programUniform1f(const v8::Arguments& args) {
     glProgramUniform1f(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform1fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform1fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12444,7 +12898,7 @@ v8::Handle<v8::Value> EXPORT_programUniform1fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -12454,11 +12908,15 @@ v8::Handle<v8::Value> EXPORT_programUniform1fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform1d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform1d) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLdouble arg2;
@@ -12466,11 +12924,15 @@ v8::Handle<v8::Value> EXPORT_programUniform1d(const v8::Arguments& args) {
     glProgramUniform1d(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform1dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform1dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12485,7 +12947,7 @@ v8::Handle<v8::Value> EXPORT_programUniform1dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -12495,11 +12957,15 @@ v8::Handle<v8::Value> EXPORT_programUniform1dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform1ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform1ui) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLuint arg2;
@@ -12507,11 +12973,15 @@ v8::Handle<v8::Value> EXPORT_programUniform1ui(const v8::Arguments& args) {
     glProgramUniform1ui(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform1uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform1uiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12526,7 +12996,7 @@ v8::Handle<v8::Value> EXPORT_programUniform1uiv(const v8::Arguments& args) {
         arg3_nonconst = new GLuint[arg3_array->Length()];
         arg3 = (const GLuint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLuint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLuint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLuint*)(args[3]->IntegerValue());
     } else {
@@ -12536,11 +13006,15 @@ v8::Handle<v8::Value> EXPORT_programUniform1uiv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform2i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform2i) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLint arg2;
@@ -12550,11 +13024,15 @@ v8::Handle<v8::Value> EXPORT_programUniform2i(const v8::Arguments& args) {
     glProgramUniform2i(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform2iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform2iv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12569,7 +13047,7 @@ v8::Handle<v8::Value> EXPORT_programUniform2iv(const v8::Arguments& args) {
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (const GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLint*)(args[3]->IntegerValue());
     } else {
@@ -12579,11 +13057,15 @@ v8::Handle<v8::Value> EXPORT_programUniform2iv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform2f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform2f) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLfloat arg2;
@@ -12593,11 +13075,15 @@ v8::Handle<v8::Value> EXPORT_programUniform2f(const v8::Arguments& args) {
     glProgramUniform2f(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform2fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform2fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12612,7 +13098,7 @@ v8::Handle<v8::Value> EXPORT_programUniform2fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -12622,11 +13108,15 @@ v8::Handle<v8::Value> EXPORT_programUniform2fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform2d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform2d) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLdouble arg2;
@@ -12636,11 +13126,15 @@ v8::Handle<v8::Value> EXPORT_programUniform2d(const v8::Arguments& args) {
     glProgramUniform2d(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform2dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12655,7 +13149,7 @@ v8::Handle<v8::Value> EXPORT_programUniform2dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -12665,11 +13159,15 @@ v8::Handle<v8::Value> EXPORT_programUniform2dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform2ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform2ui) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLuint arg2;
@@ -12679,11 +13177,15 @@ v8::Handle<v8::Value> EXPORT_programUniform2ui(const v8::Arguments& args) {
     glProgramUniform2ui(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform2uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform2uiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12698,7 +13200,7 @@ v8::Handle<v8::Value> EXPORT_programUniform2uiv(const v8::Arguments& args) {
         arg3_nonconst = new GLuint[arg3_array->Length()];
         arg3 = (const GLuint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLuint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLuint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLuint*)(args[3]->IntegerValue());
     } else {
@@ -12708,11 +13210,15 @@ v8::Handle<v8::Value> EXPORT_programUniform2uiv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform3i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform3i) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLint arg2;
@@ -12724,11 +13230,15 @@ v8::Handle<v8::Value> EXPORT_programUniform3i(const v8::Arguments& args) {
     glProgramUniform3i(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform3iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform3iv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12743,7 +13253,7 @@ v8::Handle<v8::Value> EXPORT_programUniform3iv(const v8::Arguments& args) {
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (const GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLint*)(args[3]->IntegerValue());
     } else {
@@ -12753,11 +13263,15 @@ v8::Handle<v8::Value> EXPORT_programUniform3iv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform3f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform3f) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLfloat arg2;
@@ -12769,11 +13283,15 @@ v8::Handle<v8::Value> EXPORT_programUniform3f(const v8::Arguments& args) {
     glProgramUniform3f(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform3fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform3fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12788,7 +13306,7 @@ v8::Handle<v8::Value> EXPORT_programUniform3fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -12798,11 +13316,15 @@ v8::Handle<v8::Value> EXPORT_programUniform3fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform3d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform3d) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLdouble arg2;
@@ -12814,11 +13336,15 @@ v8::Handle<v8::Value> EXPORT_programUniform3d(const v8::Arguments& args) {
     glProgramUniform3d(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform3dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12833,7 +13359,7 @@ v8::Handle<v8::Value> EXPORT_programUniform3dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -12843,11 +13369,15 @@ v8::Handle<v8::Value> EXPORT_programUniform3dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform3ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform3ui) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLuint arg2;
@@ -12859,11 +13389,15 @@ v8::Handle<v8::Value> EXPORT_programUniform3ui(const v8::Arguments& args) {
     glProgramUniform3ui(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform3uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform3uiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12878,7 +13412,7 @@ v8::Handle<v8::Value> EXPORT_programUniform3uiv(const v8::Arguments& args) {
         arg3_nonconst = new GLuint[arg3_array->Length()];
         arg3 = (const GLuint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLuint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLuint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLuint*)(args[3]->IntegerValue());
     } else {
@@ -12888,11 +13422,15 @@ v8::Handle<v8::Value> EXPORT_programUniform3uiv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform4i(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform4i) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLint arg2;
@@ -12906,11 +13444,15 @@ v8::Handle<v8::Value> EXPORT_programUniform4i(const v8::Arguments& args) {
     glProgramUniform4i(arg0, arg1, arg2, arg3, arg4, arg5);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform4iv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform4iv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12925,7 +13467,7 @@ v8::Handle<v8::Value> EXPORT_programUniform4iv(const v8::Arguments& args) {
         arg3_nonconst = new GLint[arg3_array->Length()];
         arg3 = (const GLint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLint*)(args[3]->IntegerValue());
     } else {
@@ -12935,11 +13477,15 @@ v8::Handle<v8::Value> EXPORT_programUniform4iv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform4f(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform4f) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLfloat arg2;
@@ -12953,11 +13499,15 @@ v8::Handle<v8::Value> EXPORT_programUniform4f(const v8::Arguments& args) {
     glProgramUniform4f(arg0, arg1, arg2, arg3, arg4, arg5);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform4fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform4fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -12972,7 +13522,7 @@ v8::Handle<v8::Value> EXPORT_programUniform4fv(const v8::Arguments& args) {
         arg3_nonconst = new GLfloat[arg3_array->Length()];
         arg3 = (const GLfloat*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLfloat*)node::Buffer::Data(args[3]);
+        arg3 = (const GLfloat*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLfloat*)(args[3]->IntegerValue());
     } else {
@@ -12982,11 +13532,15 @@ v8::Handle<v8::Value> EXPORT_programUniform4fv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform4d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform4d) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLdouble arg2;
@@ -13000,11 +13554,15 @@ v8::Handle<v8::Value> EXPORT_programUniform4d(const v8::Arguments& args) {
     glProgramUniform4d(arg0, arg1, arg2, arg3, arg4, arg5);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform4dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13019,7 +13577,7 @@ v8::Handle<v8::Value> EXPORT_programUniform4dv(const v8::Arguments& args) {
         arg3_nonconst = new GLdouble[arg3_array->Length()];
         arg3 = (const GLdouble*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLdouble*)node::Buffer::Data(args[3]);
+        arg3 = (const GLdouble*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLdouble*)(args[3]->IntegerValue());
     } else {
@@ -13029,11 +13587,15 @@ v8::Handle<v8::Value> EXPORT_programUniform4dv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform4ui(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform4ui) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLuint arg2;
@@ -13047,11 +13609,15 @@ v8::Handle<v8::Value> EXPORT_programUniform4ui(const v8::Arguments& args) {
     glProgramUniform4ui(arg0, arg1, arg2, arg3, arg4, arg5);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniform4uiv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniform4uiv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13066,7 +13632,7 @@ v8::Handle<v8::Value> EXPORT_programUniform4uiv(const v8::Arguments& args) {
         arg3_nonconst = new GLuint[arg3_array->Length()];
         arg3 = (const GLuint*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (const GLuint*)node::Buffer::Data(args[3]);
+        arg3 = (const GLuint*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (const GLuint*)(args[3]->IntegerValue());
     } else {
@@ -13076,11 +13642,15 @@ v8::Handle<v8::Value> EXPORT_programUniform4uiv(const v8::Arguments& args) {
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix2fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix2fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13097,7 +13667,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2fv(const v8::Arguments& args) 
         arg4_nonconst = new GLfloat[arg4_array->Length()];
         arg4 = (const GLfloat*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLfloat*)node::Buffer::Data(args[4]);
+        arg4 = (const GLfloat*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLfloat*)(args[4]->IntegerValue());
     } else {
@@ -13107,11 +13677,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2fv(const v8::Arguments& args) 
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix3fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix3fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13128,7 +13702,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3fv(const v8::Arguments& args) 
         arg4_nonconst = new GLfloat[arg4_array->Length()];
         arg4 = (const GLfloat*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLfloat*)node::Buffer::Data(args[4]);
+        arg4 = (const GLfloat*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLfloat*)(args[4]->IntegerValue());
     } else {
@@ -13138,11 +13712,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3fv(const v8::Arguments& args) 
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix4fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix4fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13159,7 +13737,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4fv(const v8::Arguments& args) 
         arg4_nonconst = new GLfloat[arg4_array->Length()];
         arg4 = (const GLfloat*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLfloat*)node::Buffer::Data(args[4]);
+        arg4 = (const GLfloat*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLfloat*)(args[4]->IntegerValue());
     } else {
@@ -13169,11 +13747,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4fv(const v8::Arguments& args) 
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix2dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13190,7 +13772,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2dv(const v8::Arguments& args) 
         arg4_nonconst = new GLdouble[arg4_array->Length()];
         arg4 = (const GLdouble*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLdouble*)node::Buffer::Data(args[4]);
+        arg4 = (const GLdouble*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLdouble*)(args[4]->IntegerValue());
     } else {
@@ -13200,11 +13782,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2dv(const v8::Arguments& args) 
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix3dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13221,7 +13807,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3dv(const v8::Arguments& args) 
         arg4_nonconst = new GLdouble[arg4_array->Length()];
         arg4 = (const GLdouble*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLdouble*)node::Buffer::Data(args[4]);
+        arg4 = (const GLdouble*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLdouble*)(args[4]->IntegerValue());
     } else {
@@ -13231,11 +13817,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3dv(const v8::Arguments& args) 
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix4dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13252,7 +13842,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4dv(const v8::Arguments& args) 
         arg4_nonconst = new GLdouble[arg4_array->Length()];
         arg4 = (const GLdouble*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLdouble*)node::Buffer::Data(args[4]);
+        arg4 = (const GLdouble*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLdouble*)(args[4]->IntegerValue());
     } else {
@@ -13262,11 +13852,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4dv(const v8::Arguments& args) 
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix2x3fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix2x3fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13283,7 +13877,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2x3fv(const v8::Arguments& args
         arg4_nonconst = new GLfloat[arg4_array->Length()];
         arg4 = (const GLfloat*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLfloat*)node::Buffer::Data(args[4]);
+        arg4 = (const GLfloat*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLfloat*)(args[4]->IntegerValue());
     } else {
@@ -13293,11 +13887,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2x3fv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix3x2fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix3x2fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13314,7 +13912,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3x2fv(const v8::Arguments& args
         arg4_nonconst = new GLfloat[arg4_array->Length()];
         arg4 = (const GLfloat*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLfloat*)node::Buffer::Data(args[4]);
+        arg4 = (const GLfloat*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLfloat*)(args[4]->IntegerValue());
     } else {
@@ -13324,11 +13922,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3x2fv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix2x4fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix2x4fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13345,7 +13947,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2x4fv(const v8::Arguments& args
         arg4_nonconst = new GLfloat[arg4_array->Length()];
         arg4 = (const GLfloat*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLfloat*)node::Buffer::Data(args[4]);
+        arg4 = (const GLfloat*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLfloat*)(args[4]->IntegerValue());
     } else {
@@ -13355,11 +13957,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2x4fv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix4x2fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix4x2fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13376,7 +13982,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4x2fv(const v8::Arguments& args
         arg4_nonconst = new GLfloat[arg4_array->Length()];
         arg4 = (const GLfloat*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLfloat*)node::Buffer::Data(args[4]);
+        arg4 = (const GLfloat*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLfloat*)(args[4]->IntegerValue());
     } else {
@@ -13386,11 +13992,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4x2fv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix3x4fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix3x4fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13407,7 +14017,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3x4fv(const v8::Arguments& args
         arg4_nonconst = new GLfloat[arg4_array->Length()];
         arg4 = (const GLfloat*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLfloat*)node::Buffer::Data(args[4]);
+        arg4 = (const GLfloat*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLfloat*)(args[4]->IntegerValue());
     } else {
@@ -13417,11 +14027,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3x4fv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix4x3fv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix4x3fv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13438,7 +14052,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4x3fv(const v8::Arguments& args
         arg4_nonconst = new GLfloat[arg4_array->Length()];
         arg4 = (const GLfloat*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLfloat*)node::Buffer::Data(args[4]);
+        arg4 = (const GLfloat*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLfloat*)(args[4]->IntegerValue());
     } else {
@@ -13448,11 +14062,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4x3fv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix2x3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix2x3dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13469,7 +14087,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2x3dv(const v8::Arguments& args
         arg4_nonconst = new GLdouble[arg4_array->Length()];
         arg4 = (const GLdouble*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLdouble*)node::Buffer::Data(args[4]);
+        arg4 = (const GLdouble*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLdouble*)(args[4]->IntegerValue());
     } else {
@@ -13479,11 +14097,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2x3dv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix3x2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix3x2dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13500,7 +14122,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3x2dv(const v8::Arguments& args
         arg4_nonconst = new GLdouble[arg4_array->Length()];
         arg4 = (const GLdouble*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLdouble*)node::Buffer::Data(args[4]);
+        arg4 = (const GLdouble*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLdouble*)(args[4]->IntegerValue());
     } else {
@@ -13510,11 +14132,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3x2dv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix2x4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix2x4dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13531,7 +14157,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2x4dv(const v8::Arguments& args
         arg4_nonconst = new GLdouble[arg4_array->Length()];
         arg4 = (const GLdouble*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLdouble*)node::Buffer::Data(args[4]);
+        arg4 = (const GLdouble*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLdouble*)(args[4]->IntegerValue());
     } else {
@@ -13541,11 +14167,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix2x4dv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix4x2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix4x2dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13562,7 +14192,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4x2dv(const v8::Arguments& args
         arg4_nonconst = new GLdouble[arg4_array->Length()];
         arg4 = (const GLdouble*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLdouble*)node::Buffer::Data(args[4]);
+        arg4 = (const GLdouble*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLdouble*)(args[4]->IntegerValue());
     } else {
@@ -13572,11 +14202,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4x2dv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix3x4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix3x4dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13593,7 +14227,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3x4dv(const v8::Arguments& args
         arg4_nonconst = new GLdouble[arg4_array->Length()];
         arg4 = (const GLdouble*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLdouble*)node::Buffer::Data(args[4]);
+        arg4 = (const GLdouble*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLdouble*)(args[4]->IntegerValue());
     } else {
@@ -13603,11 +14237,15 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix3x4dv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_programUniformMatrix4x3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_programUniformMatrix4x3dv) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_Program>(args[0]->ToObject())->gl_handle;
+    }
     GLint arg1;
     arg1 = args[1]->Int32Value();
     GLsizei arg2;
@@ -13624,7 +14262,7 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4x3dv(const v8::Arguments& args
         arg4_nonconst = new GLdouble[arg4_array->Length()];
         arg4 = (const GLdouble*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLdouble*)node::Buffer::Data(args[4]);
+        arg4 = (const GLdouble*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLdouble*)(args[4]->IntegerValue());
     } else {
@@ -13634,19 +14272,27 @@ v8::Handle<v8::Value> EXPORT_programUniformMatrix4x3dv(const v8::Arguments& args
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_validateProgramPipeline(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_validateProgramPipeline) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    }
     glValidateProgramPipeline(arg0);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getProgramPipelineInfoLog(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getProgramPipelineInfoLog) {
     NanScope();
     // None
     GLuint arg0;
-    arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    if(args[0]->IsNumber()) {
+        arg0 = args[0]->IntegerValue();
+    } else {
+        arg0 = node::ObjectWrap::Unwrap<NODE_ProgramPipeline>(args[0]->ToObject())->gl_handle;
+    }
     GLsizei arg1;
     arg1 = args[1]->Int32Value();
     GLsizei *arg2;
@@ -13659,7 +14305,7 @@ v8::Handle<v8::Value> EXPORT_getProgramPipelineInfoLog(const v8::Arguments& args
         arg2_nonconst = new GLsizei[arg2_array->Length()];
         arg2 = (GLsizei*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLsizei*)node::Buffer::Data(args[2]);
+        arg2 = (GLsizei*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLsizei*)(args[2]->IntegerValue());
     } else {
@@ -13675,7 +14321,7 @@ v8::Handle<v8::Value> EXPORT_getProgramPipelineInfoLog(const v8::Arguments& args
         arg3_nonconst = new GLchar[arg3_array->Length()];
         arg3 = (GLchar*)arg3_nonconst;
     } else if(args[3]->IsObject()) {
-        arg3 = (GLchar*)node::Buffer::Data(args[3]);
+        arg3 = (GLchar*)glbind_get_buffer_data(args[3]);
     } else if(args[3]->IsNumber()) {
         arg3 = (GLchar*)(args[3]->IntegerValue());
     } else {
@@ -13686,7 +14332,7 @@ v8::Handle<v8::Value> EXPORT_getProgramPipelineInfoLog(const v8::Arguments& args
     if(arg3_nonconst) delete [] arg3_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribL1d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribL1d) {
     NanScope();
     // None
     GLuint arg0;
@@ -13696,7 +14342,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL1d(const v8::Arguments& args) {
     glVertexAttribL1d(arg0, arg1);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribL2d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribL2d) {
     NanScope();
     // None
     GLuint arg0;
@@ -13708,7 +14354,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL2d(const v8::Arguments& args) {
     glVertexAttribL2d(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribL3d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribL3d) {
     NanScope();
     // None
     GLuint arg0;
@@ -13722,7 +14368,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL3d(const v8::Arguments& args) {
     glVertexAttribL3d(arg0, arg1, arg2, arg3);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribL4d(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribL4d) {
     NanScope();
     // None
     GLuint arg0;
@@ -13738,7 +14384,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL4d(const v8::Arguments& args) {
     glVertexAttribL4d(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribL1dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribL1dv) {
     NanScope();
     // None
     GLuint arg0;
@@ -13753,7 +14399,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL1dv(const v8::Arguments& args) {
         arg1_nonconst = new GLdouble[arg1_array->Length()];
         arg1 = (const GLdouble*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLdouble*)node::Buffer::Data(args[1]);
+        arg1 = (const GLdouble*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLdouble*)(args[1]->IntegerValue());
     } else {
@@ -13763,7 +14409,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL1dv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribL2dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribL2dv) {
     NanScope();
     // None
     GLuint arg0;
@@ -13778,7 +14424,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL2dv(const v8::Arguments& args) {
         arg1_nonconst = new GLdouble[arg1_array->Length()];
         arg1 = (const GLdouble*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLdouble*)node::Buffer::Data(args[1]);
+        arg1 = (const GLdouble*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLdouble*)(args[1]->IntegerValue());
     } else {
@@ -13788,7 +14434,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL2dv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribL3dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribL3dv) {
     NanScope();
     // None
     GLuint arg0;
@@ -13803,7 +14449,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL3dv(const v8::Arguments& args) {
         arg1_nonconst = new GLdouble[arg1_array->Length()];
         arg1 = (const GLdouble*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLdouble*)node::Buffer::Data(args[1]);
+        arg1 = (const GLdouble*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLdouble*)(args[1]->IntegerValue());
     } else {
@@ -13813,7 +14459,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL3dv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribL4dv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribL4dv) {
     NanScope();
     // None
     GLuint arg0;
@@ -13828,7 +14474,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL4dv(const v8::Arguments& args) {
         arg1_nonconst = new GLdouble[arg1_array->Length()];
         arg1 = (const GLdouble*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLdouble*)node::Buffer::Data(args[1]);
+        arg1 = (const GLdouble*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLdouble*)(args[1]->IntegerValue());
     } else {
@@ -13838,7 +14484,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribL4dv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_vertexAttribLPointer(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_vertexAttribLPointer) {
     NanScope();
     // None
     GLuint arg0;
@@ -13859,7 +14505,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribLPointer(const v8::Arguments& args) {
         arg4_nonconst = new GLubyte[arg4_array->Length()];
         arg4 = (const GLvoid*)arg4_nonconst;
     } else if(args[4]->IsObject()) {
-        arg4 = (const GLvoid*)node::Buffer::Data(args[4]);
+        arg4 = (const GLvoid*)glbind_get_buffer_data(args[4]);
     } else if(args[4]->IsNumber()) {
         arg4 = (const GLvoid*)(args[4]->IntegerValue());
     } else {
@@ -13869,7 +14515,7 @@ v8::Handle<v8::Value> EXPORT_vertexAttribLPointer(const v8::Arguments& args) {
     if(arg4_nonconst) delete [] arg4_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getVertexAttribLdv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getVertexAttribLdv) {
     NanScope();
     // None
     GLuint arg0;
@@ -13886,7 +14532,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribLdv(const v8::Arguments& args) {
         arg2_nonconst = new GLdouble[arg2_array->Length()];
         arg2 = (GLdouble*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLdouble*)node::Buffer::Data(args[2]);
+        arg2 = (GLdouble*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLdouble*)(args[2]->IntegerValue());
     } else {
@@ -13896,7 +14542,7 @@ v8::Handle<v8::Value> EXPORT_getVertexAttribLdv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_viewportArrayv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_viewportArrayv) {
     NanScope();
     // None
     GLuint arg0;
@@ -13913,7 +14559,7 @@ v8::Handle<v8::Value> EXPORT_viewportArrayv(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (const GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (const GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -13923,7 +14569,7 @@ v8::Handle<v8::Value> EXPORT_viewportArrayv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_viewportIndexedf(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_viewportIndexedf) {
     NanScope();
     // None
     GLuint arg0;
@@ -13939,7 +14585,7 @@ v8::Handle<v8::Value> EXPORT_viewportIndexedf(const v8::Arguments& args) {
     glViewportIndexedf(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_viewportIndexedfv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_viewportIndexedfv) {
     NanScope();
     // None
     GLuint arg0;
@@ -13954,7 +14600,7 @@ v8::Handle<v8::Value> EXPORT_viewportIndexedfv(const v8::Arguments& args) {
         arg1_nonconst = new GLfloat[arg1_array->Length()];
         arg1 = (const GLfloat*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLfloat*)node::Buffer::Data(args[1]);
+        arg1 = (const GLfloat*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLfloat*)(args[1]->IntegerValue());
     } else {
@@ -13964,7 +14610,7 @@ v8::Handle<v8::Value> EXPORT_viewportIndexedfv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_scissorArrayv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_scissorArrayv) {
     NanScope();
     // None
     GLuint arg0;
@@ -13981,7 +14627,7 @@ v8::Handle<v8::Value> EXPORT_scissorArrayv(const v8::Arguments& args) {
         arg2_nonconst = new GLint[arg2_array->Length()];
         arg2 = (const GLint*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLint*)node::Buffer::Data(args[2]);
+        arg2 = (const GLint*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLint*)(args[2]->IntegerValue());
     } else {
@@ -13991,7 +14637,7 @@ v8::Handle<v8::Value> EXPORT_scissorArrayv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_scissorIndexed(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_scissorIndexed) {
     NanScope();
     // None
     GLuint arg0;
@@ -14007,7 +14653,7 @@ v8::Handle<v8::Value> EXPORT_scissorIndexed(const v8::Arguments& args) {
     glScissorIndexed(arg0, arg1, arg2, arg3, arg4);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_scissorIndexedv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_scissorIndexedv) {
     NanScope();
     // None
     GLuint arg0;
@@ -14022,7 +14668,7 @@ v8::Handle<v8::Value> EXPORT_scissorIndexedv(const v8::Arguments& args) {
         arg1_nonconst = new GLint[arg1_array->Length()];
         arg1 = (const GLint*)arg1_nonconst;
     } else if(args[1]->IsObject()) {
-        arg1 = (const GLint*)node::Buffer::Data(args[1]);
+        arg1 = (const GLint*)glbind_get_buffer_data(args[1]);
     } else if(args[1]->IsNumber()) {
         arg1 = (const GLint*)(args[1]->IntegerValue());
     } else {
@@ -14032,7 +14678,7 @@ v8::Handle<v8::Value> EXPORT_scissorIndexedv(const v8::Arguments& args) {
     if(arg1_nonconst) delete [] arg1_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_depthRangeArrayv(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_depthRangeArrayv) {
     NanScope();
     // None
     GLuint arg0;
@@ -14049,7 +14695,7 @@ v8::Handle<v8::Value> EXPORT_depthRangeArrayv(const v8::Arguments& args) {
         arg2_nonconst = new GLclampd[arg2_array->Length()];
         arg2 = (const GLclampd*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (const GLclampd*)node::Buffer::Data(args[2]);
+        arg2 = (const GLclampd*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (const GLclampd*)(args[2]->IntegerValue());
     } else {
@@ -14059,7 +14705,7 @@ v8::Handle<v8::Value> EXPORT_depthRangeArrayv(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_depthRangeIndexed(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_depthRangeIndexed) {
     NanScope();
     // None
     GLuint arg0;
@@ -14071,7 +14717,7 @@ v8::Handle<v8::Value> EXPORT_depthRangeIndexed(const v8::Arguments& args) {
     glDepthRangeIndexed(arg0, arg1, arg2);
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getFloati_v(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getFloati_v) {
     NanScope();
     // None
     GLenum arg0;
@@ -14088,7 +14734,7 @@ v8::Handle<v8::Value> EXPORT_getFloati_v(const v8::Arguments& args) {
         arg2_nonconst = new GLfloat[arg2_array->Length()];
         arg2 = (GLfloat*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLfloat*)node::Buffer::Data(args[2]);
+        arg2 = (GLfloat*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLfloat*)(args[2]->IntegerValue());
     } else {
@@ -14098,7 +14744,7 @@ v8::Handle<v8::Value> EXPORT_getFloati_v(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_getDoublei_v(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_getDoublei_v) {
     NanScope();
     // None
     GLenum arg0;
@@ -14115,7 +14761,7 @@ v8::Handle<v8::Value> EXPORT_getDoublei_v(const v8::Arguments& args) {
         arg2_nonconst = new GLdouble[arg2_array->Length()];
         arg2 = (GLdouble*)arg2_nonconst;
     } else if(args[2]->IsObject()) {
-        arg2 = (GLdouble*)node::Buffer::Data(args[2]);
+        arg2 = (GLdouble*)glbind_get_buffer_data(args[2]);
     } else if(args[2]->IsNumber()) {
         arg2 = (GLdouble*)(args[2]->IntegerValue());
     } else {
@@ -14125,7 +14771,7 @@ v8::Handle<v8::Value> EXPORT_getDoublei_v(const v8::Arguments& args) {
     if(arg2_nonconst) delete [] arg2_nonconst;
     NanReturnUndefined();
 }
-v8::Handle<v8::Value> EXPORT_shaderSource(const v8::Arguments& args) {
+NAN_METHOD(EXPORT_shaderSource) {
 
     GLuint shader = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
     v8::Handle<v8::Array> sources = v8::Handle<v8::Array>::Cast(args[1]);
@@ -14149,468 +14795,468 @@ v8::Handle<v8::Value> EXPORT_shaderSource(const v8::Arguments& args) {
 
 }
 void defineFunctions(v8::Handle<v8::ObjectTemplate> exports) {
-    exports->Set(v8::String::NewSymbol("cullFace"), v8::FunctionTemplate::New(EXPORT_cullFace));
-    exports->Set(v8::String::NewSymbol("frontFace"), v8::FunctionTemplate::New(EXPORT_frontFace));
-    exports->Set(v8::String::NewSymbol("hint"), v8::FunctionTemplate::New(EXPORT_hint));
-    exports->Set(v8::String::NewSymbol("lineWidth"), v8::FunctionTemplate::New(EXPORT_lineWidth));
-    exports->Set(v8::String::NewSymbol("pointSize"), v8::FunctionTemplate::New(EXPORT_pointSize));
-    exports->Set(v8::String::NewSymbol("polygonMode"), v8::FunctionTemplate::New(EXPORT_polygonMode));
-    exports->Set(v8::String::NewSymbol("scissor"), v8::FunctionTemplate::New(EXPORT_scissor));
-    exports->Set(v8::String::NewSymbol("texParameterf"), v8::FunctionTemplate::New(EXPORT_texParameterf));
-    exports->Set(v8::String::NewSymbol("texParameterfv"), v8::FunctionTemplate::New(EXPORT_texParameterfv));
-    exports->Set(v8::String::NewSymbol("texParameteri"), v8::FunctionTemplate::New(EXPORT_texParameteri));
-    exports->Set(v8::String::NewSymbol("texParameteriv"), v8::FunctionTemplate::New(EXPORT_texParameteriv));
-    exports->Set(v8::String::NewSymbol("texImage1D"), v8::FunctionTemplate::New(EXPORT_texImage1D));
-    exports->Set(v8::String::NewSymbol("texImage2D"), v8::FunctionTemplate::New(EXPORT_texImage2D));
-    exports->Set(v8::String::NewSymbol("drawBuffer"), v8::FunctionTemplate::New(EXPORT_drawBuffer));
-    exports->Set(v8::String::NewSymbol("clear"), v8::FunctionTemplate::New(EXPORT_clear));
-    exports->Set(v8::String::NewSymbol("clearColor"), v8::FunctionTemplate::New(EXPORT_clearColor));
-    exports->Set(v8::String::NewSymbol("clearStencil"), v8::FunctionTemplate::New(EXPORT_clearStencil));
-    exports->Set(v8::String::NewSymbol("clearDepth"), v8::FunctionTemplate::New(EXPORT_clearDepth));
-    exports->Set(v8::String::NewSymbol("stencilMask"), v8::FunctionTemplate::New(EXPORT_stencilMask));
-    exports->Set(v8::String::NewSymbol("colorMask"), v8::FunctionTemplate::New(EXPORT_colorMask));
-    exports->Set(v8::String::NewSymbol("depthMask"), v8::FunctionTemplate::New(EXPORT_depthMask));
-    exports->Set(v8::String::NewSymbol("disable"), v8::FunctionTemplate::New(EXPORT_disable));
-    exports->Set(v8::String::NewSymbol("enable"), v8::FunctionTemplate::New(EXPORT_enable));
-    exports->Set(v8::String::NewSymbol("finish"), v8::FunctionTemplate::New(EXPORT_finish));
-    exports->Set(v8::String::NewSymbol("flush"), v8::FunctionTemplate::New(EXPORT_flush));
-    exports->Set(v8::String::NewSymbol("blendFunc"), v8::FunctionTemplate::New(EXPORT_blendFunc));
-    exports->Set(v8::String::NewSymbol("logicOp"), v8::FunctionTemplate::New(EXPORT_logicOp));
-    exports->Set(v8::String::NewSymbol("stencilFunc"), v8::FunctionTemplate::New(EXPORT_stencilFunc));
-    exports->Set(v8::String::NewSymbol("stencilOp"), v8::FunctionTemplate::New(EXPORT_stencilOp));
-    exports->Set(v8::String::NewSymbol("depthFunc"), v8::FunctionTemplate::New(EXPORT_depthFunc));
-    exports->Set(v8::String::NewSymbol("pixelStoref"), v8::FunctionTemplate::New(EXPORT_pixelStoref));
-    exports->Set(v8::String::NewSymbol("pixelStorei"), v8::FunctionTemplate::New(EXPORT_pixelStorei));
-    exports->Set(v8::String::NewSymbol("readBuffer"), v8::FunctionTemplate::New(EXPORT_readBuffer));
-    exports->Set(v8::String::NewSymbol("readPixels"), v8::FunctionTemplate::New(EXPORT_readPixels));
-    exports->Set(v8::String::NewSymbol("getBooleanv"), v8::FunctionTemplate::New(EXPORT_getBooleanv));
-    exports->Set(v8::String::NewSymbol("getDoublev"), v8::FunctionTemplate::New(EXPORT_getDoublev));
-    exports->Set(v8::String::NewSymbol("getError"), v8::FunctionTemplate::New(EXPORT_getError));
-    exports->Set(v8::String::NewSymbol("getFloatv"), v8::FunctionTemplate::New(EXPORT_getFloatv));
-    exports->Set(v8::String::NewSymbol("getIntegerv"), v8::FunctionTemplate::New(EXPORT_getIntegerv));
-    exports->Set(v8::String::NewSymbol("getString"), v8::FunctionTemplate::New(EXPORT_getString));
-    exports->Set(v8::String::NewSymbol("getTexImage"), v8::FunctionTemplate::New(EXPORT_getTexImage));
-    exports->Set(v8::String::NewSymbol("getTexParameterfv"), v8::FunctionTemplate::New(EXPORT_getTexParameterfv));
-    exports->Set(v8::String::NewSymbol("getTexParameteriv"), v8::FunctionTemplate::New(EXPORT_getTexParameteriv));
-    exports->Set(v8::String::NewSymbol("getTexLevelParameterfv"), v8::FunctionTemplate::New(EXPORT_getTexLevelParameterfv));
-    exports->Set(v8::String::NewSymbol("getTexLevelParameteriv"), v8::FunctionTemplate::New(EXPORT_getTexLevelParameteriv));
-    exports->Set(v8::String::NewSymbol("isEnabled"), v8::FunctionTemplate::New(EXPORT_isEnabled));
-    exports->Set(v8::String::NewSymbol("depthRange"), v8::FunctionTemplate::New(EXPORT_depthRange));
-    exports->Set(v8::String::NewSymbol("viewport"), v8::FunctionTemplate::New(EXPORT_viewport));
-    exports->Set(v8::String::NewSymbol("drawArrays"), v8::FunctionTemplate::New(EXPORT_drawArrays));
-    exports->Set(v8::String::NewSymbol("drawElements"), v8::FunctionTemplate::New(EXPORT_drawElements));
-    exports->Set(v8::String::NewSymbol("polygonOffset"), v8::FunctionTemplate::New(EXPORT_polygonOffset));
-    exports->Set(v8::String::NewSymbol("copyTexImage1D"), v8::FunctionTemplate::New(EXPORT_copyTexImage1D));
-    exports->Set(v8::String::NewSymbol("copyTexImage2D"), v8::FunctionTemplate::New(EXPORT_copyTexImage2D));
-    exports->Set(v8::String::NewSymbol("copyTexSubImage1D"), v8::FunctionTemplate::New(EXPORT_copyTexSubImage1D));
-    exports->Set(v8::String::NewSymbol("copyTexSubImage2D"), v8::FunctionTemplate::New(EXPORT_copyTexSubImage2D));
-    exports->Set(v8::String::NewSymbol("texSubImage1D"), v8::FunctionTemplate::New(EXPORT_texSubImage1D));
-    exports->Set(v8::String::NewSymbol("texSubImage2D"), v8::FunctionTemplate::New(EXPORT_texSubImage2D));
-    exports->Set(v8::String::NewSymbol("bindTexture"), v8::FunctionTemplate::New(EXPORT_bindTexture));
-    exports->Set(v8::String::NewSymbol("genTextures"), v8::FunctionTemplate::New(EXPORT_genTextures));
-    exports->Set(v8::String::NewSymbol("isTexture"), v8::FunctionTemplate::New(EXPORT_isTexture));
-    exports->Set(v8::String::NewSymbol("blendColor"), v8::FunctionTemplate::New(EXPORT_blendColor));
-    exports->Set(v8::String::NewSymbol("blendEquation"), v8::FunctionTemplate::New(EXPORT_blendEquation));
-    exports->Set(v8::String::NewSymbol("drawRangeElements"), v8::FunctionTemplate::New(EXPORT_drawRangeElements));
-    exports->Set(v8::String::NewSymbol("texImage3D"), v8::FunctionTemplate::New(EXPORT_texImage3D));
-    exports->Set(v8::String::NewSymbol("texSubImage3D"), v8::FunctionTemplate::New(EXPORT_texSubImage3D));
-    exports->Set(v8::String::NewSymbol("copyTexSubImage3D"), v8::FunctionTemplate::New(EXPORT_copyTexSubImage3D));
-    exports->Set(v8::String::NewSymbol("activeTexture"), v8::FunctionTemplate::New(EXPORT_activeTexture));
-    exports->Set(v8::String::NewSymbol("sampleCoverage"), v8::FunctionTemplate::New(EXPORT_sampleCoverage));
-    exports->Set(v8::String::NewSymbol("compressedTexImage3D"), v8::FunctionTemplate::New(EXPORT_compressedTexImage3D));
-    exports->Set(v8::String::NewSymbol("compressedTexImage2D"), v8::FunctionTemplate::New(EXPORT_compressedTexImage2D));
-    exports->Set(v8::String::NewSymbol("compressedTexImage1D"), v8::FunctionTemplate::New(EXPORT_compressedTexImage1D));
-    exports->Set(v8::String::NewSymbol("compressedTexSubImage3D"), v8::FunctionTemplate::New(EXPORT_compressedTexSubImage3D));
-    exports->Set(v8::String::NewSymbol("compressedTexSubImage2D"), v8::FunctionTemplate::New(EXPORT_compressedTexSubImage2D));
-    exports->Set(v8::String::NewSymbol("compressedTexSubImage1D"), v8::FunctionTemplate::New(EXPORT_compressedTexSubImage1D));
-    exports->Set(v8::String::NewSymbol("getCompressedTexImage"), v8::FunctionTemplate::New(EXPORT_getCompressedTexImage));
-    exports->Set(v8::String::NewSymbol("blendFuncSeparate"), v8::FunctionTemplate::New(EXPORT_blendFuncSeparate));
-    exports->Set(v8::String::NewSymbol("multiDrawArrays"), v8::FunctionTemplate::New(EXPORT_multiDrawArrays));
-    exports->Set(v8::String::NewSymbol("pointParameterf"), v8::FunctionTemplate::New(EXPORT_pointParameterf));
-    exports->Set(v8::String::NewSymbol("pointParameterfv"), v8::FunctionTemplate::New(EXPORT_pointParameterfv));
-    exports->Set(v8::String::NewSymbol("pointParameteri"), v8::FunctionTemplate::New(EXPORT_pointParameteri));
-    exports->Set(v8::String::NewSymbol("pointParameteriv"), v8::FunctionTemplate::New(EXPORT_pointParameteriv));
-    exports->Set(v8::String::NewSymbol("genQueries"), v8::FunctionTemplate::New(EXPORT_genQueries));
-    exports->Set(v8::String::NewSymbol("isQuery"), v8::FunctionTemplate::New(EXPORT_isQuery));
-    exports->Set(v8::String::NewSymbol("beginQuery"), v8::FunctionTemplate::New(EXPORT_beginQuery));
-    exports->Set(v8::String::NewSymbol("endQuery"), v8::FunctionTemplate::New(EXPORT_endQuery));
-    exports->Set(v8::String::NewSymbol("getQueryiv"), v8::FunctionTemplate::New(EXPORT_getQueryiv));
-    exports->Set(v8::String::NewSymbol("getQueryObjectiv"), v8::FunctionTemplate::New(EXPORT_getQueryObjectiv));
-    exports->Set(v8::String::NewSymbol("getQueryObjectuiv"), v8::FunctionTemplate::New(EXPORT_getQueryObjectuiv));
-    exports->Set(v8::String::NewSymbol("bindBuffer"), v8::FunctionTemplate::New(EXPORT_bindBuffer));
-    exports->Set(v8::String::NewSymbol("genBuffers"), v8::FunctionTemplate::New(EXPORT_genBuffers));
-    exports->Set(v8::String::NewSymbol("isBuffer"), v8::FunctionTemplate::New(EXPORT_isBuffer));
-    exports->Set(v8::String::NewSymbol("bufferData"), v8::FunctionTemplate::New(EXPORT_bufferData));
-    exports->Set(v8::String::NewSymbol("bufferSubData"), v8::FunctionTemplate::New(EXPORT_bufferSubData));
-    exports->Set(v8::String::NewSymbol("getBufferSubData"), v8::FunctionTemplate::New(EXPORT_getBufferSubData));
-    exports->Set(v8::String::NewSymbol("mapBuffer"), v8::FunctionTemplate::New(EXPORT_mapBuffer));
-    exports->Set(v8::String::NewSymbol("unmapBuffer"), v8::FunctionTemplate::New(EXPORT_unmapBuffer));
-    exports->Set(v8::String::NewSymbol("getBufferParameteriv"), v8::FunctionTemplate::New(EXPORT_getBufferParameteriv));
-    exports->Set(v8::String::NewSymbol("blendEquationSeparate"), v8::FunctionTemplate::New(EXPORT_blendEquationSeparate));
-    exports->Set(v8::String::NewSymbol("drawBuffers"), v8::FunctionTemplate::New(EXPORT_drawBuffers));
-    exports->Set(v8::String::NewSymbol("stencilOpSeparate"), v8::FunctionTemplate::New(EXPORT_stencilOpSeparate));
-    exports->Set(v8::String::NewSymbol("stencilFuncSeparate"), v8::FunctionTemplate::New(EXPORT_stencilFuncSeparate));
-    exports->Set(v8::String::NewSymbol("stencilMaskSeparate"), v8::FunctionTemplate::New(EXPORT_stencilMaskSeparate));
-    exports->Set(v8::String::NewSymbol("attachShader"), v8::FunctionTemplate::New(EXPORT_attachShader));
-    exports->Set(v8::String::NewSymbol("bindAttribLocation"), v8::FunctionTemplate::New(EXPORT_bindAttribLocation));
-    exports->Set(v8::String::NewSymbol("compileShader"), v8::FunctionTemplate::New(EXPORT_compileShader));
-    exports->Set(v8::String::NewSymbol("createProgram"), v8::FunctionTemplate::New(EXPORT_createProgram));
-    exports->Set(v8::String::NewSymbol("createShader"), v8::FunctionTemplate::New(EXPORT_createShader));
-    exports->Set(v8::String::NewSymbol("detachShader"), v8::FunctionTemplate::New(EXPORT_detachShader));
-    exports->Set(v8::String::NewSymbol("disableVertexAttribArray"), v8::FunctionTemplate::New(EXPORT_disableVertexAttribArray));
-    exports->Set(v8::String::NewSymbol("enableVertexAttribArray"), v8::FunctionTemplate::New(EXPORT_enableVertexAttribArray));
-    exports->Set(v8::String::NewSymbol("getActiveAttrib"), v8::FunctionTemplate::New(EXPORT_getActiveAttrib));
-    exports->Set(v8::String::NewSymbol("getActiveUniform"), v8::FunctionTemplate::New(EXPORT_getActiveUniform));
-    exports->Set(v8::String::NewSymbol("getAttachedShaders"), v8::FunctionTemplate::New(EXPORT_getAttachedShaders));
-    exports->Set(v8::String::NewSymbol("getAttribLocation"), v8::FunctionTemplate::New(EXPORT_getAttribLocation));
-    exports->Set(v8::String::NewSymbol("getProgramiv"), v8::FunctionTemplate::New(EXPORT_getProgramiv));
-    exports->Set(v8::String::NewSymbol("getProgramInfoLog"), v8::FunctionTemplate::New(EXPORT_getProgramInfoLog));
-    exports->Set(v8::String::NewSymbol("getShaderiv"), v8::FunctionTemplate::New(EXPORT_getShaderiv));
-    exports->Set(v8::String::NewSymbol("getShaderInfoLog"), v8::FunctionTemplate::New(EXPORT_getShaderInfoLog));
-    exports->Set(v8::String::NewSymbol("getShaderSource"), v8::FunctionTemplate::New(EXPORT_getShaderSource));
-    exports->Set(v8::String::NewSymbol("getUniformLocation"), v8::FunctionTemplate::New(EXPORT_getUniformLocation));
-    exports->Set(v8::String::NewSymbol("getUniformfv"), v8::FunctionTemplate::New(EXPORT_getUniformfv));
-    exports->Set(v8::String::NewSymbol("getUniformiv"), v8::FunctionTemplate::New(EXPORT_getUniformiv));
-    exports->Set(v8::String::NewSymbol("getVertexAttribdv"), v8::FunctionTemplate::New(EXPORT_getVertexAttribdv));
-    exports->Set(v8::String::NewSymbol("getVertexAttribfv"), v8::FunctionTemplate::New(EXPORT_getVertexAttribfv));
-    exports->Set(v8::String::NewSymbol("getVertexAttribiv"), v8::FunctionTemplate::New(EXPORT_getVertexAttribiv));
-    exports->Set(v8::String::NewSymbol("isProgram"), v8::FunctionTemplate::New(EXPORT_isProgram));
-    exports->Set(v8::String::NewSymbol("isShader"), v8::FunctionTemplate::New(EXPORT_isShader));
-    exports->Set(v8::String::NewSymbol("linkProgram"), v8::FunctionTemplate::New(EXPORT_linkProgram));
-    exports->Set(v8::String::NewSymbol("useProgram"), v8::FunctionTemplate::New(EXPORT_useProgram));
-    exports->Set(v8::String::NewSymbol("uniform1f"), v8::FunctionTemplate::New(EXPORT_uniform1f));
-    exports->Set(v8::String::NewSymbol("uniform2f"), v8::FunctionTemplate::New(EXPORT_uniform2f));
-    exports->Set(v8::String::NewSymbol("uniform3f"), v8::FunctionTemplate::New(EXPORT_uniform3f));
-    exports->Set(v8::String::NewSymbol("uniform4f"), v8::FunctionTemplate::New(EXPORT_uniform4f));
-    exports->Set(v8::String::NewSymbol("uniform1i"), v8::FunctionTemplate::New(EXPORT_uniform1i));
-    exports->Set(v8::String::NewSymbol("uniform2i"), v8::FunctionTemplate::New(EXPORT_uniform2i));
-    exports->Set(v8::String::NewSymbol("uniform3i"), v8::FunctionTemplate::New(EXPORT_uniform3i));
-    exports->Set(v8::String::NewSymbol("uniform4i"), v8::FunctionTemplate::New(EXPORT_uniform4i));
-    exports->Set(v8::String::NewSymbol("uniform1fv"), v8::FunctionTemplate::New(EXPORT_uniform1fv));
-    exports->Set(v8::String::NewSymbol("uniform2fv"), v8::FunctionTemplate::New(EXPORT_uniform2fv));
-    exports->Set(v8::String::NewSymbol("uniform3fv"), v8::FunctionTemplate::New(EXPORT_uniform3fv));
-    exports->Set(v8::String::NewSymbol("uniform4fv"), v8::FunctionTemplate::New(EXPORT_uniform4fv));
-    exports->Set(v8::String::NewSymbol("uniform1iv"), v8::FunctionTemplate::New(EXPORT_uniform1iv));
-    exports->Set(v8::String::NewSymbol("uniform2iv"), v8::FunctionTemplate::New(EXPORT_uniform2iv));
-    exports->Set(v8::String::NewSymbol("uniform3iv"), v8::FunctionTemplate::New(EXPORT_uniform3iv));
-    exports->Set(v8::String::NewSymbol("uniform4iv"), v8::FunctionTemplate::New(EXPORT_uniform4iv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix2fv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix2fv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix3fv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix3fv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix4fv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix4fv));
-    exports->Set(v8::String::NewSymbol("validateProgram"), v8::FunctionTemplate::New(EXPORT_validateProgram));
-    exports->Set(v8::String::NewSymbol("vertexAttrib1d"), v8::FunctionTemplate::New(EXPORT_vertexAttrib1d));
-    exports->Set(v8::String::NewSymbol("vertexAttrib1dv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib1dv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib1f"), v8::FunctionTemplate::New(EXPORT_vertexAttrib1f));
-    exports->Set(v8::String::NewSymbol("vertexAttrib1fv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib1fv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib1s"), v8::FunctionTemplate::New(EXPORT_vertexAttrib1s));
-    exports->Set(v8::String::NewSymbol("vertexAttrib1sv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib1sv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib2d"), v8::FunctionTemplate::New(EXPORT_vertexAttrib2d));
-    exports->Set(v8::String::NewSymbol("vertexAttrib2dv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib2dv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib2f"), v8::FunctionTemplate::New(EXPORT_vertexAttrib2f));
-    exports->Set(v8::String::NewSymbol("vertexAttrib2fv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib2fv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib2s"), v8::FunctionTemplate::New(EXPORT_vertexAttrib2s));
-    exports->Set(v8::String::NewSymbol("vertexAttrib2sv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib2sv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib3d"), v8::FunctionTemplate::New(EXPORT_vertexAttrib3d));
-    exports->Set(v8::String::NewSymbol("vertexAttrib3dv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib3dv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib3f"), v8::FunctionTemplate::New(EXPORT_vertexAttrib3f));
-    exports->Set(v8::String::NewSymbol("vertexAttrib3fv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib3fv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib3s"), v8::FunctionTemplate::New(EXPORT_vertexAttrib3s));
-    exports->Set(v8::String::NewSymbol("vertexAttrib3sv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib3sv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4Nbv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4Nbv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4Niv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4Niv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4Nsv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4Nsv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4Nub"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4Nub));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4Nubv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4Nubv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4Nuiv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4Nuiv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4Nusv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4Nusv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4bv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4bv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4d"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4d));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4dv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4dv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4f"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4f));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4fv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4fv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4iv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4iv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4s"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4s));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4sv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4sv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4ubv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4ubv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4uiv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4uiv));
-    exports->Set(v8::String::NewSymbol("vertexAttrib4usv"), v8::FunctionTemplate::New(EXPORT_vertexAttrib4usv));
-    exports->Set(v8::String::NewSymbol("vertexAttribPointer"), v8::FunctionTemplate::New(EXPORT_vertexAttribPointer));
-    exports->Set(v8::String::NewSymbol("uniformMatrix2x3fv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix2x3fv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix3x2fv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix3x2fv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix2x4fv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix2x4fv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix4x2fv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix4x2fv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix3x4fv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix3x4fv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix4x3fv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix4x3fv));
-    exports->Set(v8::String::NewSymbol("colorMaski"), v8::FunctionTemplate::New(EXPORT_colorMaski));
-    exports->Set(v8::String::NewSymbol("getBooleani_v"), v8::FunctionTemplate::New(EXPORT_getBooleani_v));
-    exports->Set(v8::String::NewSymbol("getIntegeri_v"), v8::FunctionTemplate::New(EXPORT_getIntegeri_v));
-    exports->Set(v8::String::NewSymbol("enablei"), v8::FunctionTemplate::New(EXPORT_enablei));
-    exports->Set(v8::String::NewSymbol("disablei"), v8::FunctionTemplate::New(EXPORT_disablei));
-    exports->Set(v8::String::NewSymbol("isEnabledi"), v8::FunctionTemplate::New(EXPORT_isEnabledi));
-    exports->Set(v8::String::NewSymbol("beginTransformFeedback"), v8::FunctionTemplate::New(EXPORT_beginTransformFeedback));
-    exports->Set(v8::String::NewSymbol("endTransformFeedback"), v8::FunctionTemplate::New(EXPORT_endTransformFeedback));
-    exports->Set(v8::String::NewSymbol("bindBufferRange"), v8::FunctionTemplate::New(EXPORT_bindBufferRange));
-    exports->Set(v8::String::NewSymbol("bindBufferBase"), v8::FunctionTemplate::New(EXPORT_bindBufferBase));
-    exports->Set(v8::String::NewSymbol("getTransformFeedbackVarying"), v8::FunctionTemplate::New(EXPORT_getTransformFeedbackVarying));
-    exports->Set(v8::String::NewSymbol("clampColor"), v8::FunctionTemplate::New(EXPORT_clampColor));
-    exports->Set(v8::String::NewSymbol("beginConditionalRender"), v8::FunctionTemplate::New(EXPORT_beginConditionalRender));
-    exports->Set(v8::String::NewSymbol("endConditionalRender"), v8::FunctionTemplate::New(EXPORT_endConditionalRender));
-    exports->Set(v8::String::NewSymbol("vertexAttribIPointer"), v8::FunctionTemplate::New(EXPORT_vertexAttribIPointer));
-    exports->Set(v8::String::NewSymbol("getVertexAttribIiv"), v8::FunctionTemplate::New(EXPORT_getVertexAttribIiv));
-    exports->Set(v8::String::NewSymbol("getVertexAttribIuiv"), v8::FunctionTemplate::New(EXPORT_getVertexAttribIuiv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI1i"), v8::FunctionTemplate::New(EXPORT_vertexAttribI1i));
-    exports->Set(v8::String::NewSymbol("vertexAttribI2i"), v8::FunctionTemplate::New(EXPORT_vertexAttribI2i));
-    exports->Set(v8::String::NewSymbol("vertexAttribI3i"), v8::FunctionTemplate::New(EXPORT_vertexAttribI3i));
-    exports->Set(v8::String::NewSymbol("vertexAttribI4i"), v8::FunctionTemplate::New(EXPORT_vertexAttribI4i));
-    exports->Set(v8::String::NewSymbol("vertexAttribI1ui"), v8::FunctionTemplate::New(EXPORT_vertexAttribI1ui));
-    exports->Set(v8::String::NewSymbol("vertexAttribI2ui"), v8::FunctionTemplate::New(EXPORT_vertexAttribI2ui));
-    exports->Set(v8::String::NewSymbol("vertexAttribI3ui"), v8::FunctionTemplate::New(EXPORT_vertexAttribI3ui));
-    exports->Set(v8::String::NewSymbol("vertexAttribI4ui"), v8::FunctionTemplate::New(EXPORT_vertexAttribI4ui));
-    exports->Set(v8::String::NewSymbol("vertexAttribI1iv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI1iv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI2iv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI2iv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI3iv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI3iv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI4iv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI4iv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI1uiv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI1uiv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI2uiv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI2uiv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI3uiv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI3uiv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI4uiv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI4uiv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI4bv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI4bv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI4sv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI4sv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI4ubv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI4ubv));
-    exports->Set(v8::String::NewSymbol("vertexAttribI4usv"), v8::FunctionTemplate::New(EXPORT_vertexAttribI4usv));
-    exports->Set(v8::String::NewSymbol("getUniformuiv"), v8::FunctionTemplate::New(EXPORT_getUniformuiv));
-    exports->Set(v8::String::NewSymbol("bindFragDataLocation"), v8::FunctionTemplate::New(EXPORT_bindFragDataLocation));
-    exports->Set(v8::String::NewSymbol("getFragDataLocation"), v8::FunctionTemplate::New(EXPORT_getFragDataLocation));
-    exports->Set(v8::String::NewSymbol("uniform1ui"), v8::FunctionTemplate::New(EXPORT_uniform1ui));
-    exports->Set(v8::String::NewSymbol("uniform2ui"), v8::FunctionTemplate::New(EXPORT_uniform2ui));
-    exports->Set(v8::String::NewSymbol("uniform3ui"), v8::FunctionTemplate::New(EXPORT_uniform3ui));
-    exports->Set(v8::String::NewSymbol("uniform4ui"), v8::FunctionTemplate::New(EXPORT_uniform4ui));
-    exports->Set(v8::String::NewSymbol("uniform1uiv"), v8::FunctionTemplate::New(EXPORT_uniform1uiv));
-    exports->Set(v8::String::NewSymbol("uniform2uiv"), v8::FunctionTemplate::New(EXPORT_uniform2uiv));
-    exports->Set(v8::String::NewSymbol("uniform3uiv"), v8::FunctionTemplate::New(EXPORT_uniform3uiv));
-    exports->Set(v8::String::NewSymbol("uniform4uiv"), v8::FunctionTemplate::New(EXPORT_uniform4uiv));
-    exports->Set(v8::String::NewSymbol("texParameterIiv"), v8::FunctionTemplate::New(EXPORT_texParameterIiv));
-    exports->Set(v8::String::NewSymbol("texParameterIuiv"), v8::FunctionTemplate::New(EXPORT_texParameterIuiv));
-    exports->Set(v8::String::NewSymbol("getTexParameterIiv"), v8::FunctionTemplate::New(EXPORT_getTexParameterIiv));
-    exports->Set(v8::String::NewSymbol("getTexParameterIuiv"), v8::FunctionTemplate::New(EXPORT_getTexParameterIuiv));
-    exports->Set(v8::String::NewSymbol("clearBufferiv"), v8::FunctionTemplate::New(EXPORT_clearBufferiv));
-    exports->Set(v8::String::NewSymbol("clearBufferuiv"), v8::FunctionTemplate::New(EXPORT_clearBufferuiv));
-    exports->Set(v8::String::NewSymbol("clearBufferfv"), v8::FunctionTemplate::New(EXPORT_clearBufferfv));
-    exports->Set(v8::String::NewSymbol("clearBufferfi"), v8::FunctionTemplate::New(EXPORT_clearBufferfi));
-    exports->Set(v8::String::NewSymbol("getStringi"), v8::FunctionTemplate::New(EXPORT_getStringi));
-    exports->Set(v8::String::NewSymbol("drawArraysInstanced"), v8::FunctionTemplate::New(EXPORT_drawArraysInstanced));
-    exports->Set(v8::String::NewSymbol("drawElementsInstanced"), v8::FunctionTemplate::New(EXPORT_drawElementsInstanced));
-    exports->Set(v8::String::NewSymbol("texBuffer"), v8::FunctionTemplate::New(EXPORT_texBuffer));
-    exports->Set(v8::String::NewSymbol("primitiveRestartIndex"), v8::FunctionTemplate::New(EXPORT_primitiveRestartIndex));
-    exports->Set(v8::String::NewSymbol("getInteger64i_v"), v8::FunctionTemplate::New(EXPORT_getInteger64i_v));
-    exports->Set(v8::String::NewSymbol("getBufferParameteri64v"), v8::FunctionTemplate::New(EXPORT_getBufferParameteri64v));
-    exports->Set(v8::String::NewSymbol("framebufferTexture"), v8::FunctionTemplate::New(EXPORT_framebufferTexture));
-    exports->Set(v8::String::NewSymbol("vertexAttribDivisor"), v8::FunctionTemplate::New(EXPORT_vertexAttribDivisor));
-    exports->Set(v8::String::NewSymbol("minSampleShading"), v8::FunctionTemplate::New(EXPORT_minSampleShading));
-    exports->Set(v8::String::NewSymbol("blendEquationi"), v8::FunctionTemplate::New(EXPORT_blendEquationi));
-    exports->Set(v8::String::NewSymbol("blendEquationSeparatei"), v8::FunctionTemplate::New(EXPORT_blendEquationSeparatei));
-    exports->Set(v8::String::NewSymbol("blendFunci"), v8::FunctionTemplate::New(EXPORT_blendFunci));
-    exports->Set(v8::String::NewSymbol("blendFuncSeparatei"), v8::FunctionTemplate::New(EXPORT_blendFuncSeparatei));
-    exports->Set(v8::String::NewSymbol("isRenderbuffer"), v8::FunctionTemplate::New(EXPORT_isRenderbuffer));
-    exports->Set(v8::String::NewSymbol("bindRenderbuffer"), v8::FunctionTemplate::New(EXPORT_bindRenderbuffer));
-    exports->Set(v8::String::NewSymbol("genRenderbuffers"), v8::FunctionTemplate::New(EXPORT_genRenderbuffers));
-    exports->Set(v8::String::NewSymbol("renderbufferStorage"), v8::FunctionTemplate::New(EXPORT_renderbufferStorage));
-    exports->Set(v8::String::NewSymbol("getRenderbufferParameteriv"), v8::FunctionTemplate::New(EXPORT_getRenderbufferParameteriv));
-    exports->Set(v8::String::NewSymbol("isFramebuffer"), v8::FunctionTemplate::New(EXPORT_isFramebuffer));
-    exports->Set(v8::String::NewSymbol("bindFramebuffer"), v8::FunctionTemplate::New(EXPORT_bindFramebuffer));
-    exports->Set(v8::String::NewSymbol("genFramebuffers"), v8::FunctionTemplate::New(EXPORT_genFramebuffers));
-    exports->Set(v8::String::NewSymbol("checkFramebufferStatus"), v8::FunctionTemplate::New(EXPORT_checkFramebufferStatus));
-    exports->Set(v8::String::NewSymbol("framebufferTexture1D"), v8::FunctionTemplate::New(EXPORT_framebufferTexture1D));
-    exports->Set(v8::String::NewSymbol("framebufferTexture2D"), v8::FunctionTemplate::New(EXPORT_framebufferTexture2D));
-    exports->Set(v8::String::NewSymbol("framebufferTexture3D"), v8::FunctionTemplate::New(EXPORT_framebufferTexture3D));
-    exports->Set(v8::String::NewSymbol("framebufferRenderbuffer"), v8::FunctionTemplate::New(EXPORT_framebufferRenderbuffer));
-    exports->Set(v8::String::NewSymbol("getFramebufferAttachmentParameteriv"), v8::FunctionTemplate::New(EXPORT_getFramebufferAttachmentParameteriv));
-    exports->Set(v8::String::NewSymbol("generateMipmap"), v8::FunctionTemplate::New(EXPORT_generateMipmap));
-    exports->Set(v8::String::NewSymbol("blitFramebuffer"), v8::FunctionTemplate::New(EXPORT_blitFramebuffer));
-    exports->Set(v8::String::NewSymbol("renderbufferStorageMultisample"), v8::FunctionTemplate::New(EXPORT_renderbufferStorageMultisample));
-    exports->Set(v8::String::NewSymbol("framebufferTextureLayer"), v8::FunctionTemplate::New(EXPORT_framebufferTextureLayer));
-    exports->Set(v8::String::NewSymbol("mapBufferRange"), v8::FunctionTemplate::New(EXPORT_mapBufferRange));
-    exports->Set(v8::String::NewSymbol("flushMappedBufferRange"), v8::FunctionTemplate::New(EXPORT_flushMappedBufferRange));
-    exports->Set(v8::String::NewSymbol("bindVertexArray"), v8::FunctionTemplate::New(EXPORT_bindVertexArray));
-    exports->Set(v8::String::NewSymbol("genVertexArrays"), v8::FunctionTemplate::New(EXPORT_genVertexArrays));
-    exports->Set(v8::String::NewSymbol("isVertexArray"), v8::FunctionTemplate::New(EXPORT_isVertexArray));
-    exports->Set(v8::String::NewSymbol("getActiveUniformsiv"), v8::FunctionTemplate::New(EXPORT_getActiveUniformsiv));
-    exports->Set(v8::String::NewSymbol("getActiveUniformName"), v8::FunctionTemplate::New(EXPORT_getActiveUniformName));
-    exports->Set(v8::String::NewSymbol("getUniformBlockIndex"), v8::FunctionTemplate::New(EXPORT_getUniformBlockIndex));
-    exports->Set(v8::String::NewSymbol("getActiveUniformBlockiv"), v8::FunctionTemplate::New(EXPORT_getActiveUniformBlockiv));
-    exports->Set(v8::String::NewSymbol("getActiveUniformBlockName"), v8::FunctionTemplate::New(EXPORT_getActiveUniformBlockName));
-    exports->Set(v8::String::NewSymbol("uniformBlockBinding"), v8::FunctionTemplate::New(EXPORT_uniformBlockBinding));
-    exports->Set(v8::String::NewSymbol("copyBufferSubData"), v8::FunctionTemplate::New(EXPORT_copyBufferSubData));
-    exports->Set(v8::String::NewSymbol("drawElementsBaseVertex"), v8::FunctionTemplate::New(EXPORT_drawElementsBaseVertex));
-    exports->Set(v8::String::NewSymbol("drawRangeElementsBaseVertex"), v8::FunctionTemplate::New(EXPORT_drawRangeElementsBaseVertex));
-    exports->Set(v8::String::NewSymbol("drawElementsInstancedBaseVertex"), v8::FunctionTemplate::New(EXPORT_drawElementsInstancedBaseVertex));
-    exports->Set(v8::String::NewSymbol("provokingVertex"), v8::FunctionTemplate::New(EXPORT_provokingVertex));
-    exports->Set(v8::String::NewSymbol("texImage2DMultisample"), v8::FunctionTemplate::New(EXPORT_texImage2DMultisample));
-    exports->Set(v8::String::NewSymbol("texImage3DMultisample"), v8::FunctionTemplate::New(EXPORT_texImage3DMultisample));
-    exports->Set(v8::String::NewSymbol("getMultisamplefv"), v8::FunctionTemplate::New(EXPORT_getMultisamplefv));
-    exports->Set(v8::String::NewSymbol("sampleMaski"), v8::FunctionTemplate::New(EXPORT_sampleMaski));
-    exports->Set(v8::String::NewSymbol("bindFragDataLocationIndexed"), v8::FunctionTemplate::New(EXPORT_bindFragDataLocationIndexed));
-    exports->Set(v8::String::NewSymbol("getFragDataIndex"), v8::FunctionTemplate::New(EXPORT_getFragDataIndex));
-    exports->Set(v8::String::NewSymbol("genSamplers"), v8::FunctionTemplate::New(EXPORT_genSamplers));
-    exports->Set(v8::String::NewSymbol("isSampler"), v8::FunctionTemplate::New(EXPORT_isSampler));
-    exports->Set(v8::String::NewSymbol("bindSampler"), v8::FunctionTemplate::New(EXPORT_bindSampler));
-    exports->Set(v8::String::NewSymbol("samplerParameteri"), v8::FunctionTemplate::New(EXPORT_samplerParameteri));
-    exports->Set(v8::String::NewSymbol("samplerParameteriv"), v8::FunctionTemplate::New(EXPORT_samplerParameteriv));
-    exports->Set(v8::String::NewSymbol("samplerParameterf"), v8::FunctionTemplate::New(EXPORT_samplerParameterf));
-    exports->Set(v8::String::NewSymbol("samplerParameterfv"), v8::FunctionTemplate::New(EXPORT_samplerParameterfv));
-    exports->Set(v8::String::NewSymbol("samplerParameterIiv"), v8::FunctionTemplate::New(EXPORT_samplerParameterIiv));
-    exports->Set(v8::String::NewSymbol("samplerParameterIuiv"), v8::FunctionTemplate::New(EXPORT_samplerParameterIuiv));
-    exports->Set(v8::String::NewSymbol("getSamplerParameteriv"), v8::FunctionTemplate::New(EXPORT_getSamplerParameteriv));
-    exports->Set(v8::String::NewSymbol("getSamplerParameterIiv"), v8::FunctionTemplate::New(EXPORT_getSamplerParameterIiv));
-    exports->Set(v8::String::NewSymbol("getSamplerParameterfv"), v8::FunctionTemplate::New(EXPORT_getSamplerParameterfv));
-    exports->Set(v8::String::NewSymbol("getSamplerParameterIuiv"), v8::FunctionTemplate::New(EXPORT_getSamplerParameterIuiv));
-    exports->Set(v8::String::NewSymbol("queryCounter"), v8::FunctionTemplate::New(EXPORT_queryCounter));
-    exports->Set(v8::String::NewSymbol("getQueryObjecti64v"), v8::FunctionTemplate::New(EXPORT_getQueryObjecti64v));
-    exports->Set(v8::String::NewSymbol("getQueryObjectui64v"), v8::FunctionTemplate::New(EXPORT_getQueryObjectui64v));
-    exports->Set(v8::String::NewSymbol("vertexAttribP1ui"), v8::FunctionTemplate::New(EXPORT_vertexAttribP1ui));
-    exports->Set(v8::String::NewSymbol("vertexAttribP1uiv"), v8::FunctionTemplate::New(EXPORT_vertexAttribP1uiv));
-    exports->Set(v8::String::NewSymbol("vertexAttribP2ui"), v8::FunctionTemplate::New(EXPORT_vertexAttribP2ui));
-    exports->Set(v8::String::NewSymbol("vertexAttribP2uiv"), v8::FunctionTemplate::New(EXPORT_vertexAttribP2uiv));
-    exports->Set(v8::String::NewSymbol("vertexAttribP3ui"), v8::FunctionTemplate::New(EXPORT_vertexAttribP3ui));
-    exports->Set(v8::String::NewSymbol("vertexAttribP3uiv"), v8::FunctionTemplate::New(EXPORT_vertexAttribP3uiv));
-    exports->Set(v8::String::NewSymbol("vertexAttribP4ui"), v8::FunctionTemplate::New(EXPORT_vertexAttribP4ui));
-    exports->Set(v8::String::NewSymbol("vertexAttribP4uiv"), v8::FunctionTemplate::New(EXPORT_vertexAttribP4uiv));
-    exports->Set(v8::String::NewSymbol("drawArraysIndirect"), v8::FunctionTemplate::New(EXPORT_drawArraysIndirect));
-    exports->Set(v8::String::NewSymbol("drawElementsIndirect"), v8::FunctionTemplate::New(EXPORT_drawElementsIndirect));
-    exports->Set(v8::String::NewSymbol("uniform1d"), v8::FunctionTemplate::New(EXPORT_uniform1d));
-    exports->Set(v8::String::NewSymbol("uniform2d"), v8::FunctionTemplate::New(EXPORT_uniform2d));
-    exports->Set(v8::String::NewSymbol("uniform3d"), v8::FunctionTemplate::New(EXPORT_uniform3d));
-    exports->Set(v8::String::NewSymbol("uniform4d"), v8::FunctionTemplate::New(EXPORT_uniform4d));
-    exports->Set(v8::String::NewSymbol("uniform1dv"), v8::FunctionTemplate::New(EXPORT_uniform1dv));
-    exports->Set(v8::String::NewSymbol("uniform2dv"), v8::FunctionTemplate::New(EXPORT_uniform2dv));
-    exports->Set(v8::String::NewSymbol("uniform3dv"), v8::FunctionTemplate::New(EXPORT_uniform3dv));
-    exports->Set(v8::String::NewSymbol("uniform4dv"), v8::FunctionTemplate::New(EXPORT_uniform4dv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix2dv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix2dv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix3dv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix3dv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix4dv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix4dv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix2x3dv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix2x3dv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix2x4dv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix2x4dv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix3x2dv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix3x2dv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix3x4dv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix3x4dv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix4x2dv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix4x2dv));
-    exports->Set(v8::String::NewSymbol("uniformMatrix4x3dv"), v8::FunctionTemplate::New(EXPORT_uniformMatrix4x3dv));
-    exports->Set(v8::String::NewSymbol("getUniformdv"), v8::FunctionTemplate::New(EXPORT_getUniformdv));
-    exports->Set(v8::String::NewSymbol("getSubroutineUniformLocation"), v8::FunctionTemplate::New(EXPORT_getSubroutineUniformLocation));
-    exports->Set(v8::String::NewSymbol("getSubroutineIndex"), v8::FunctionTemplate::New(EXPORT_getSubroutineIndex));
-    exports->Set(v8::String::NewSymbol("getActiveSubroutineUniformiv"), v8::FunctionTemplate::New(EXPORT_getActiveSubroutineUniformiv));
-    exports->Set(v8::String::NewSymbol("getActiveSubroutineUniformName"), v8::FunctionTemplate::New(EXPORT_getActiveSubroutineUniformName));
-    exports->Set(v8::String::NewSymbol("getActiveSubroutineName"), v8::FunctionTemplate::New(EXPORT_getActiveSubroutineName));
-    exports->Set(v8::String::NewSymbol("uniformSubroutinesuiv"), v8::FunctionTemplate::New(EXPORT_uniformSubroutinesuiv));
-    exports->Set(v8::String::NewSymbol("getUniformSubroutineuiv"), v8::FunctionTemplate::New(EXPORT_getUniformSubroutineuiv));
-    exports->Set(v8::String::NewSymbol("getProgramStageiv"), v8::FunctionTemplate::New(EXPORT_getProgramStageiv));
-    exports->Set(v8::String::NewSymbol("patchParameteri"), v8::FunctionTemplate::New(EXPORT_patchParameteri));
-    exports->Set(v8::String::NewSymbol("patchParameterfv"), v8::FunctionTemplate::New(EXPORT_patchParameterfv));
-    exports->Set(v8::String::NewSymbol("bindTransformFeedback"), v8::FunctionTemplate::New(EXPORT_bindTransformFeedback));
-    exports->Set(v8::String::NewSymbol("genTransformFeedbacks"), v8::FunctionTemplate::New(EXPORT_genTransformFeedbacks));
-    exports->Set(v8::String::NewSymbol("isTransformFeedback"), v8::FunctionTemplate::New(EXPORT_isTransformFeedback));
-    exports->Set(v8::String::NewSymbol("pauseTransformFeedback"), v8::FunctionTemplate::New(EXPORT_pauseTransformFeedback));
-    exports->Set(v8::String::NewSymbol("resumeTransformFeedback"), v8::FunctionTemplate::New(EXPORT_resumeTransformFeedback));
-    exports->Set(v8::String::NewSymbol("drawTransformFeedback"), v8::FunctionTemplate::New(EXPORT_drawTransformFeedback));
-    exports->Set(v8::String::NewSymbol("drawTransformFeedbackStream"), v8::FunctionTemplate::New(EXPORT_drawTransformFeedbackStream));
-    exports->Set(v8::String::NewSymbol("beginQueryIndexed"), v8::FunctionTemplate::New(EXPORT_beginQueryIndexed));
-    exports->Set(v8::String::NewSymbol("endQueryIndexed"), v8::FunctionTemplate::New(EXPORT_endQueryIndexed));
-    exports->Set(v8::String::NewSymbol("getQueryIndexediv"), v8::FunctionTemplate::New(EXPORT_getQueryIndexediv));
-    exports->Set(v8::String::NewSymbol("releaseShaderCompiler"), v8::FunctionTemplate::New(EXPORT_releaseShaderCompiler));
-    exports->Set(v8::String::NewSymbol("shaderBinary"), v8::FunctionTemplate::New(EXPORT_shaderBinary));
-    exports->Set(v8::String::NewSymbol("getShaderPrecisionFormat"), v8::FunctionTemplate::New(EXPORT_getShaderPrecisionFormat));
-    exports->Set(v8::String::NewSymbol("depthRangef"), v8::FunctionTemplate::New(EXPORT_depthRangef));
-    exports->Set(v8::String::NewSymbol("clearDepthf"), v8::FunctionTemplate::New(EXPORT_clearDepthf));
-    exports->Set(v8::String::NewSymbol("getProgramBinary"), v8::FunctionTemplate::New(EXPORT_getProgramBinary));
-    exports->Set(v8::String::NewSymbol("programBinary"), v8::FunctionTemplate::New(EXPORT_programBinary));
-    exports->Set(v8::String::NewSymbol("programParameteri"), v8::FunctionTemplate::New(EXPORT_programParameteri));
-    exports->Set(v8::String::NewSymbol("useProgramStages"), v8::FunctionTemplate::New(EXPORT_useProgramStages));
-    exports->Set(v8::String::NewSymbol("activeShaderProgram"), v8::FunctionTemplate::New(EXPORT_activeShaderProgram));
-    exports->Set(v8::String::NewSymbol("bindProgramPipeline"), v8::FunctionTemplate::New(EXPORT_bindProgramPipeline));
-    exports->Set(v8::String::NewSymbol("genProgramPipelines"), v8::FunctionTemplate::New(EXPORT_genProgramPipelines));
-    exports->Set(v8::String::NewSymbol("isProgramPipeline"), v8::FunctionTemplate::New(EXPORT_isProgramPipeline));
-    exports->Set(v8::String::NewSymbol("getProgramPipelineiv"), v8::FunctionTemplate::New(EXPORT_getProgramPipelineiv));
-    exports->Set(v8::String::NewSymbol("programUniform1i"), v8::FunctionTemplate::New(EXPORT_programUniform1i));
-    exports->Set(v8::String::NewSymbol("programUniform1iv"), v8::FunctionTemplate::New(EXPORT_programUniform1iv));
-    exports->Set(v8::String::NewSymbol("programUniform1f"), v8::FunctionTemplate::New(EXPORT_programUniform1f));
-    exports->Set(v8::String::NewSymbol("programUniform1fv"), v8::FunctionTemplate::New(EXPORT_programUniform1fv));
-    exports->Set(v8::String::NewSymbol("programUniform1d"), v8::FunctionTemplate::New(EXPORT_programUniform1d));
-    exports->Set(v8::String::NewSymbol("programUniform1dv"), v8::FunctionTemplate::New(EXPORT_programUniform1dv));
-    exports->Set(v8::String::NewSymbol("programUniform1ui"), v8::FunctionTemplate::New(EXPORT_programUniform1ui));
-    exports->Set(v8::String::NewSymbol("programUniform1uiv"), v8::FunctionTemplate::New(EXPORT_programUniform1uiv));
-    exports->Set(v8::String::NewSymbol("programUniform2i"), v8::FunctionTemplate::New(EXPORT_programUniform2i));
-    exports->Set(v8::String::NewSymbol("programUniform2iv"), v8::FunctionTemplate::New(EXPORT_programUniform2iv));
-    exports->Set(v8::String::NewSymbol("programUniform2f"), v8::FunctionTemplate::New(EXPORT_programUniform2f));
-    exports->Set(v8::String::NewSymbol("programUniform2fv"), v8::FunctionTemplate::New(EXPORT_programUniform2fv));
-    exports->Set(v8::String::NewSymbol("programUniform2d"), v8::FunctionTemplate::New(EXPORT_programUniform2d));
-    exports->Set(v8::String::NewSymbol("programUniform2dv"), v8::FunctionTemplate::New(EXPORT_programUniform2dv));
-    exports->Set(v8::String::NewSymbol("programUniform2ui"), v8::FunctionTemplate::New(EXPORT_programUniform2ui));
-    exports->Set(v8::String::NewSymbol("programUniform2uiv"), v8::FunctionTemplate::New(EXPORT_programUniform2uiv));
-    exports->Set(v8::String::NewSymbol("programUniform3i"), v8::FunctionTemplate::New(EXPORT_programUniform3i));
-    exports->Set(v8::String::NewSymbol("programUniform3iv"), v8::FunctionTemplate::New(EXPORT_programUniform3iv));
-    exports->Set(v8::String::NewSymbol("programUniform3f"), v8::FunctionTemplate::New(EXPORT_programUniform3f));
-    exports->Set(v8::String::NewSymbol("programUniform3fv"), v8::FunctionTemplate::New(EXPORT_programUniform3fv));
-    exports->Set(v8::String::NewSymbol("programUniform3d"), v8::FunctionTemplate::New(EXPORT_programUniform3d));
-    exports->Set(v8::String::NewSymbol("programUniform3dv"), v8::FunctionTemplate::New(EXPORT_programUniform3dv));
-    exports->Set(v8::String::NewSymbol("programUniform3ui"), v8::FunctionTemplate::New(EXPORT_programUniform3ui));
-    exports->Set(v8::String::NewSymbol("programUniform3uiv"), v8::FunctionTemplate::New(EXPORT_programUniform3uiv));
-    exports->Set(v8::String::NewSymbol("programUniform4i"), v8::FunctionTemplate::New(EXPORT_programUniform4i));
-    exports->Set(v8::String::NewSymbol("programUniform4iv"), v8::FunctionTemplate::New(EXPORT_programUniform4iv));
-    exports->Set(v8::String::NewSymbol("programUniform4f"), v8::FunctionTemplate::New(EXPORT_programUniform4f));
-    exports->Set(v8::String::NewSymbol("programUniform4fv"), v8::FunctionTemplate::New(EXPORT_programUniform4fv));
-    exports->Set(v8::String::NewSymbol("programUniform4d"), v8::FunctionTemplate::New(EXPORT_programUniform4d));
-    exports->Set(v8::String::NewSymbol("programUniform4dv"), v8::FunctionTemplate::New(EXPORT_programUniform4dv));
-    exports->Set(v8::String::NewSymbol("programUniform4ui"), v8::FunctionTemplate::New(EXPORT_programUniform4ui));
-    exports->Set(v8::String::NewSymbol("programUniform4uiv"), v8::FunctionTemplate::New(EXPORT_programUniform4uiv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix2fv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix2fv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix3fv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix3fv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix4fv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix4fv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix2dv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix2dv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix3dv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix3dv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix4dv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix4dv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix2x3fv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix2x3fv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix3x2fv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix3x2fv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix2x4fv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix2x4fv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix4x2fv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix4x2fv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix3x4fv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix3x4fv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix4x3fv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix4x3fv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix2x3dv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix2x3dv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix3x2dv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix3x2dv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix2x4dv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix2x4dv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix4x2dv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix4x2dv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix3x4dv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix3x4dv));
-    exports->Set(v8::String::NewSymbol("programUniformMatrix4x3dv"), v8::FunctionTemplate::New(EXPORT_programUniformMatrix4x3dv));
-    exports->Set(v8::String::NewSymbol("validateProgramPipeline"), v8::FunctionTemplate::New(EXPORT_validateProgramPipeline));
-    exports->Set(v8::String::NewSymbol("getProgramPipelineInfoLog"), v8::FunctionTemplate::New(EXPORT_getProgramPipelineInfoLog));
-    exports->Set(v8::String::NewSymbol("vertexAttribL1d"), v8::FunctionTemplate::New(EXPORT_vertexAttribL1d));
-    exports->Set(v8::String::NewSymbol("vertexAttribL2d"), v8::FunctionTemplate::New(EXPORT_vertexAttribL2d));
-    exports->Set(v8::String::NewSymbol("vertexAttribL3d"), v8::FunctionTemplate::New(EXPORT_vertexAttribL3d));
-    exports->Set(v8::String::NewSymbol("vertexAttribL4d"), v8::FunctionTemplate::New(EXPORT_vertexAttribL4d));
-    exports->Set(v8::String::NewSymbol("vertexAttribL1dv"), v8::FunctionTemplate::New(EXPORT_vertexAttribL1dv));
-    exports->Set(v8::String::NewSymbol("vertexAttribL2dv"), v8::FunctionTemplate::New(EXPORT_vertexAttribL2dv));
-    exports->Set(v8::String::NewSymbol("vertexAttribL3dv"), v8::FunctionTemplate::New(EXPORT_vertexAttribL3dv));
-    exports->Set(v8::String::NewSymbol("vertexAttribL4dv"), v8::FunctionTemplate::New(EXPORT_vertexAttribL4dv));
-    exports->Set(v8::String::NewSymbol("vertexAttribLPointer"), v8::FunctionTemplate::New(EXPORT_vertexAttribLPointer));
-    exports->Set(v8::String::NewSymbol("getVertexAttribLdv"), v8::FunctionTemplate::New(EXPORT_getVertexAttribLdv));
-    exports->Set(v8::String::NewSymbol("viewportArrayv"), v8::FunctionTemplate::New(EXPORT_viewportArrayv));
-    exports->Set(v8::String::NewSymbol("viewportIndexedf"), v8::FunctionTemplate::New(EXPORT_viewportIndexedf));
-    exports->Set(v8::String::NewSymbol("viewportIndexedfv"), v8::FunctionTemplate::New(EXPORT_viewportIndexedfv));
-    exports->Set(v8::String::NewSymbol("scissorArrayv"), v8::FunctionTemplate::New(EXPORT_scissorArrayv));
-    exports->Set(v8::String::NewSymbol("scissorIndexed"), v8::FunctionTemplate::New(EXPORT_scissorIndexed));
-    exports->Set(v8::String::NewSymbol("scissorIndexedv"), v8::FunctionTemplate::New(EXPORT_scissorIndexedv));
-    exports->Set(v8::String::NewSymbol("depthRangeArrayv"), v8::FunctionTemplate::New(EXPORT_depthRangeArrayv));
-    exports->Set(v8::String::NewSymbol("depthRangeIndexed"), v8::FunctionTemplate::New(EXPORT_depthRangeIndexed));
-    exports->Set(v8::String::NewSymbol("getFloati_v"), v8::FunctionTemplate::New(EXPORT_getFloati_v));
-    exports->Set(v8::String::NewSymbol("getDoublei_v"), v8::FunctionTemplate::New(EXPORT_getDoublei_v));
-    exports->Set(v8::String::NewSymbol("shaderSource"), v8::FunctionTemplate::New(EXPORT_shaderSource));
+    exports->Set(NanNew<v8::String>("cullFace"), NanNew<v8::FunctionTemplate>(EXPORT_cullFace));
+    exports->Set(NanNew<v8::String>("frontFace"), NanNew<v8::FunctionTemplate>(EXPORT_frontFace));
+    exports->Set(NanNew<v8::String>("hint"), NanNew<v8::FunctionTemplate>(EXPORT_hint));
+    exports->Set(NanNew<v8::String>("lineWidth"), NanNew<v8::FunctionTemplate>(EXPORT_lineWidth));
+    exports->Set(NanNew<v8::String>("pointSize"), NanNew<v8::FunctionTemplate>(EXPORT_pointSize));
+    exports->Set(NanNew<v8::String>("polygonMode"), NanNew<v8::FunctionTemplate>(EXPORT_polygonMode));
+    exports->Set(NanNew<v8::String>("scissor"), NanNew<v8::FunctionTemplate>(EXPORT_scissor));
+    exports->Set(NanNew<v8::String>("texParameterf"), NanNew<v8::FunctionTemplate>(EXPORT_texParameterf));
+    exports->Set(NanNew<v8::String>("texParameterfv"), NanNew<v8::FunctionTemplate>(EXPORT_texParameterfv));
+    exports->Set(NanNew<v8::String>("texParameteri"), NanNew<v8::FunctionTemplate>(EXPORT_texParameteri));
+    exports->Set(NanNew<v8::String>("texParameteriv"), NanNew<v8::FunctionTemplate>(EXPORT_texParameteriv));
+    exports->Set(NanNew<v8::String>("texImage1D"), NanNew<v8::FunctionTemplate>(EXPORT_texImage1D));
+    exports->Set(NanNew<v8::String>("texImage2D"), NanNew<v8::FunctionTemplate>(EXPORT_texImage2D));
+    exports->Set(NanNew<v8::String>("drawBuffer"), NanNew<v8::FunctionTemplate>(EXPORT_drawBuffer));
+    exports->Set(NanNew<v8::String>("clear"), NanNew<v8::FunctionTemplate>(EXPORT_clear));
+    exports->Set(NanNew<v8::String>("clearColor"), NanNew<v8::FunctionTemplate>(EXPORT_clearColor));
+    exports->Set(NanNew<v8::String>("clearStencil"), NanNew<v8::FunctionTemplate>(EXPORT_clearStencil));
+    exports->Set(NanNew<v8::String>("clearDepth"), NanNew<v8::FunctionTemplate>(EXPORT_clearDepth));
+    exports->Set(NanNew<v8::String>("stencilMask"), NanNew<v8::FunctionTemplate>(EXPORT_stencilMask));
+    exports->Set(NanNew<v8::String>("colorMask"), NanNew<v8::FunctionTemplate>(EXPORT_colorMask));
+    exports->Set(NanNew<v8::String>("depthMask"), NanNew<v8::FunctionTemplate>(EXPORT_depthMask));
+    exports->Set(NanNew<v8::String>("disable"), NanNew<v8::FunctionTemplate>(EXPORT_disable));
+    exports->Set(NanNew<v8::String>("enable"), NanNew<v8::FunctionTemplate>(EXPORT_enable));
+    exports->Set(NanNew<v8::String>("finish"), NanNew<v8::FunctionTemplate>(EXPORT_finish));
+    exports->Set(NanNew<v8::String>("flush"), NanNew<v8::FunctionTemplate>(EXPORT_flush));
+    exports->Set(NanNew<v8::String>("blendFunc"), NanNew<v8::FunctionTemplate>(EXPORT_blendFunc));
+    exports->Set(NanNew<v8::String>("logicOp"), NanNew<v8::FunctionTemplate>(EXPORT_logicOp));
+    exports->Set(NanNew<v8::String>("stencilFunc"), NanNew<v8::FunctionTemplate>(EXPORT_stencilFunc));
+    exports->Set(NanNew<v8::String>("stencilOp"), NanNew<v8::FunctionTemplate>(EXPORT_stencilOp));
+    exports->Set(NanNew<v8::String>("depthFunc"), NanNew<v8::FunctionTemplate>(EXPORT_depthFunc));
+    exports->Set(NanNew<v8::String>("pixelStoref"), NanNew<v8::FunctionTemplate>(EXPORT_pixelStoref));
+    exports->Set(NanNew<v8::String>("pixelStorei"), NanNew<v8::FunctionTemplate>(EXPORT_pixelStorei));
+    exports->Set(NanNew<v8::String>("readBuffer"), NanNew<v8::FunctionTemplate>(EXPORT_readBuffer));
+    exports->Set(NanNew<v8::String>("readPixels"), NanNew<v8::FunctionTemplate>(EXPORT_readPixels));
+    exports->Set(NanNew<v8::String>("getBooleanv"), NanNew<v8::FunctionTemplate>(EXPORT_getBooleanv));
+    exports->Set(NanNew<v8::String>("getDoublev"), NanNew<v8::FunctionTemplate>(EXPORT_getDoublev));
+    exports->Set(NanNew<v8::String>("getError"), NanNew<v8::FunctionTemplate>(EXPORT_getError));
+    exports->Set(NanNew<v8::String>("getFloatv"), NanNew<v8::FunctionTemplate>(EXPORT_getFloatv));
+    exports->Set(NanNew<v8::String>("getIntegerv"), NanNew<v8::FunctionTemplate>(EXPORT_getIntegerv));
+    exports->Set(NanNew<v8::String>("getString"), NanNew<v8::FunctionTemplate>(EXPORT_getString));
+    exports->Set(NanNew<v8::String>("getTexImage"), NanNew<v8::FunctionTemplate>(EXPORT_getTexImage));
+    exports->Set(NanNew<v8::String>("getTexParameterfv"), NanNew<v8::FunctionTemplate>(EXPORT_getTexParameterfv));
+    exports->Set(NanNew<v8::String>("getTexParameteriv"), NanNew<v8::FunctionTemplate>(EXPORT_getTexParameteriv));
+    exports->Set(NanNew<v8::String>("getTexLevelParameterfv"), NanNew<v8::FunctionTemplate>(EXPORT_getTexLevelParameterfv));
+    exports->Set(NanNew<v8::String>("getTexLevelParameteriv"), NanNew<v8::FunctionTemplate>(EXPORT_getTexLevelParameteriv));
+    exports->Set(NanNew<v8::String>("isEnabled"), NanNew<v8::FunctionTemplate>(EXPORT_isEnabled));
+    exports->Set(NanNew<v8::String>("depthRange"), NanNew<v8::FunctionTemplate>(EXPORT_depthRange));
+    exports->Set(NanNew<v8::String>("viewport"), NanNew<v8::FunctionTemplate>(EXPORT_viewport));
+    exports->Set(NanNew<v8::String>("drawArrays"), NanNew<v8::FunctionTemplate>(EXPORT_drawArrays));
+    exports->Set(NanNew<v8::String>("drawElements"), NanNew<v8::FunctionTemplate>(EXPORT_drawElements));
+    exports->Set(NanNew<v8::String>("polygonOffset"), NanNew<v8::FunctionTemplate>(EXPORT_polygonOffset));
+    exports->Set(NanNew<v8::String>("copyTexImage1D"), NanNew<v8::FunctionTemplate>(EXPORT_copyTexImage1D));
+    exports->Set(NanNew<v8::String>("copyTexImage2D"), NanNew<v8::FunctionTemplate>(EXPORT_copyTexImage2D));
+    exports->Set(NanNew<v8::String>("copyTexSubImage1D"), NanNew<v8::FunctionTemplate>(EXPORT_copyTexSubImage1D));
+    exports->Set(NanNew<v8::String>("copyTexSubImage2D"), NanNew<v8::FunctionTemplate>(EXPORT_copyTexSubImage2D));
+    exports->Set(NanNew<v8::String>("texSubImage1D"), NanNew<v8::FunctionTemplate>(EXPORT_texSubImage1D));
+    exports->Set(NanNew<v8::String>("texSubImage2D"), NanNew<v8::FunctionTemplate>(EXPORT_texSubImage2D));
+    exports->Set(NanNew<v8::String>("bindTexture"), NanNew<v8::FunctionTemplate>(EXPORT_bindTexture));
+    exports->Set(NanNew<v8::String>("genTextures"), NanNew<v8::FunctionTemplate>(EXPORT_genTextures));
+    exports->Set(NanNew<v8::String>("isTexture"), NanNew<v8::FunctionTemplate>(EXPORT_isTexture));
+    exports->Set(NanNew<v8::String>("blendColor"), NanNew<v8::FunctionTemplate>(EXPORT_blendColor));
+    exports->Set(NanNew<v8::String>("blendEquation"), NanNew<v8::FunctionTemplate>(EXPORT_blendEquation));
+    exports->Set(NanNew<v8::String>("drawRangeElements"), NanNew<v8::FunctionTemplate>(EXPORT_drawRangeElements));
+    exports->Set(NanNew<v8::String>("texImage3D"), NanNew<v8::FunctionTemplate>(EXPORT_texImage3D));
+    exports->Set(NanNew<v8::String>("texSubImage3D"), NanNew<v8::FunctionTemplate>(EXPORT_texSubImage3D));
+    exports->Set(NanNew<v8::String>("copyTexSubImage3D"), NanNew<v8::FunctionTemplate>(EXPORT_copyTexSubImage3D));
+    exports->Set(NanNew<v8::String>("activeTexture"), NanNew<v8::FunctionTemplate>(EXPORT_activeTexture));
+    exports->Set(NanNew<v8::String>("sampleCoverage"), NanNew<v8::FunctionTemplate>(EXPORT_sampleCoverage));
+    exports->Set(NanNew<v8::String>("compressedTexImage3D"), NanNew<v8::FunctionTemplate>(EXPORT_compressedTexImage3D));
+    exports->Set(NanNew<v8::String>("compressedTexImage2D"), NanNew<v8::FunctionTemplate>(EXPORT_compressedTexImage2D));
+    exports->Set(NanNew<v8::String>("compressedTexImage1D"), NanNew<v8::FunctionTemplate>(EXPORT_compressedTexImage1D));
+    exports->Set(NanNew<v8::String>("compressedTexSubImage3D"), NanNew<v8::FunctionTemplate>(EXPORT_compressedTexSubImage3D));
+    exports->Set(NanNew<v8::String>("compressedTexSubImage2D"), NanNew<v8::FunctionTemplate>(EXPORT_compressedTexSubImage2D));
+    exports->Set(NanNew<v8::String>("compressedTexSubImage1D"), NanNew<v8::FunctionTemplate>(EXPORT_compressedTexSubImage1D));
+    exports->Set(NanNew<v8::String>("getCompressedTexImage"), NanNew<v8::FunctionTemplate>(EXPORT_getCompressedTexImage));
+    exports->Set(NanNew<v8::String>("blendFuncSeparate"), NanNew<v8::FunctionTemplate>(EXPORT_blendFuncSeparate));
+    exports->Set(NanNew<v8::String>("multiDrawArrays"), NanNew<v8::FunctionTemplate>(EXPORT_multiDrawArrays));
+    exports->Set(NanNew<v8::String>("pointParameterf"), NanNew<v8::FunctionTemplate>(EXPORT_pointParameterf));
+    exports->Set(NanNew<v8::String>("pointParameterfv"), NanNew<v8::FunctionTemplate>(EXPORT_pointParameterfv));
+    exports->Set(NanNew<v8::String>("pointParameteri"), NanNew<v8::FunctionTemplate>(EXPORT_pointParameteri));
+    exports->Set(NanNew<v8::String>("pointParameteriv"), NanNew<v8::FunctionTemplate>(EXPORT_pointParameteriv));
+    exports->Set(NanNew<v8::String>("genQueries"), NanNew<v8::FunctionTemplate>(EXPORT_genQueries));
+    exports->Set(NanNew<v8::String>("isQuery"), NanNew<v8::FunctionTemplate>(EXPORT_isQuery));
+    exports->Set(NanNew<v8::String>("beginQuery"), NanNew<v8::FunctionTemplate>(EXPORT_beginQuery));
+    exports->Set(NanNew<v8::String>("endQuery"), NanNew<v8::FunctionTemplate>(EXPORT_endQuery));
+    exports->Set(NanNew<v8::String>("getQueryiv"), NanNew<v8::FunctionTemplate>(EXPORT_getQueryiv));
+    exports->Set(NanNew<v8::String>("getQueryObjectiv"), NanNew<v8::FunctionTemplate>(EXPORT_getQueryObjectiv));
+    exports->Set(NanNew<v8::String>("getQueryObjectuiv"), NanNew<v8::FunctionTemplate>(EXPORT_getQueryObjectuiv));
+    exports->Set(NanNew<v8::String>("bindBuffer"), NanNew<v8::FunctionTemplate>(EXPORT_bindBuffer));
+    exports->Set(NanNew<v8::String>("genBuffers"), NanNew<v8::FunctionTemplate>(EXPORT_genBuffers));
+    exports->Set(NanNew<v8::String>("isBuffer"), NanNew<v8::FunctionTemplate>(EXPORT_isBuffer));
+    exports->Set(NanNew<v8::String>("bufferData"), NanNew<v8::FunctionTemplate>(EXPORT_bufferData));
+    exports->Set(NanNew<v8::String>("bufferSubData"), NanNew<v8::FunctionTemplate>(EXPORT_bufferSubData));
+    exports->Set(NanNew<v8::String>("getBufferSubData"), NanNew<v8::FunctionTemplate>(EXPORT_getBufferSubData));
+    exports->Set(NanNew<v8::String>("mapBuffer"), NanNew<v8::FunctionTemplate>(EXPORT_mapBuffer));
+    exports->Set(NanNew<v8::String>("unmapBuffer"), NanNew<v8::FunctionTemplate>(EXPORT_unmapBuffer));
+    exports->Set(NanNew<v8::String>("getBufferParameteriv"), NanNew<v8::FunctionTemplate>(EXPORT_getBufferParameteriv));
+    exports->Set(NanNew<v8::String>("blendEquationSeparate"), NanNew<v8::FunctionTemplate>(EXPORT_blendEquationSeparate));
+    exports->Set(NanNew<v8::String>("drawBuffers"), NanNew<v8::FunctionTemplate>(EXPORT_drawBuffers));
+    exports->Set(NanNew<v8::String>("stencilOpSeparate"), NanNew<v8::FunctionTemplate>(EXPORT_stencilOpSeparate));
+    exports->Set(NanNew<v8::String>("stencilFuncSeparate"), NanNew<v8::FunctionTemplate>(EXPORT_stencilFuncSeparate));
+    exports->Set(NanNew<v8::String>("stencilMaskSeparate"), NanNew<v8::FunctionTemplate>(EXPORT_stencilMaskSeparate));
+    exports->Set(NanNew<v8::String>("attachShader"), NanNew<v8::FunctionTemplate>(EXPORT_attachShader));
+    exports->Set(NanNew<v8::String>("bindAttribLocation"), NanNew<v8::FunctionTemplate>(EXPORT_bindAttribLocation));
+    exports->Set(NanNew<v8::String>("compileShader"), NanNew<v8::FunctionTemplate>(EXPORT_compileShader));
+    exports->Set(NanNew<v8::String>("createProgram"), NanNew<v8::FunctionTemplate>(EXPORT_createProgram));
+    exports->Set(NanNew<v8::String>("createShader"), NanNew<v8::FunctionTemplate>(EXPORT_createShader));
+    exports->Set(NanNew<v8::String>("detachShader"), NanNew<v8::FunctionTemplate>(EXPORT_detachShader));
+    exports->Set(NanNew<v8::String>("disableVertexAttribArray"), NanNew<v8::FunctionTemplate>(EXPORT_disableVertexAttribArray));
+    exports->Set(NanNew<v8::String>("enableVertexAttribArray"), NanNew<v8::FunctionTemplate>(EXPORT_enableVertexAttribArray));
+    exports->Set(NanNew<v8::String>("getActiveAttrib"), NanNew<v8::FunctionTemplate>(EXPORT_getActiveAttrib));
+    exports->Set(NanNew<v8::String>("getActiveUniform"), NanNew<v8::FunctionTemplate>(EXPORT_getActiveUniform));
+    exports->Set(NanNew<v8::String>("getAttachedShaders"), NanNew<v8::FunctionTemplate>(EXPORT_getAttachedShaders));
+    exports->Set(NanNew<v8::String>("getAttribLocation"), NanNew<v8::FunctionTemplate>(EXPORT_getAttribLocation));
+    exports->Set(NanNew<v8::String>("getProgramiv"), NanNew<v8::FunctionTemplate>(EXPORT_getProgramiv));
+    exports->Set(NanNew<v8::String>("getProgramInfoLog"), NanNew<v8::FunctionTemplate>(EXPORT_getProgramInfoLog));
+    exports->Set(NanNew<v8::String>("getShaderiv"), NanNew<v8::FunctionTemplate>(EXPORT_getShaderiv));
+    exports->Set(NanNew<v8::String>("getShaderInfoLog"), NanNew<v8::FunctionTemplate>(EXPORT_getShaderInfoLog));
+    exports->Set(NanNew<v8::String>("getShaderSource"), NanNew<v8::FunctionTemplate>(EXPORT_getShaderSource));
+    exports->Set(NanNew<v8::String>("getUniformLocation"), NanNew<v8::FunctionTemplate>(EXPORT_getUniformLocation));
+    exports->Set(NanNew<v8::String>("getUniformfv"), NanNew<v8::FunctionTemplate>(EXPORT_getUniformfv));
+    exports->Set(NanNew<v8::String>("getUniformiv"), NanNew<v8::FunctionTemplate>(EXPORT_getUniformiv));
+    exports->Set(NanNew<v8::String>("getVertexAttribdv"), NanNew<v8::FunctionTemplate>(EXPORT_getVertexAttribdv));
+    exports->Set(NanNew<v8::String>("getVertexAttribfv"), NanNew<v8::FunctionTemplate>(EXPORT_getVertexAttribfv));
+    exports->Set(NanNew<v8::String>("getVertexAttribiv"), NanNew<v8::FunctionTemplate>(EXPORT_getVertexAttribiv));
+    exports->Set(NanNew<v8::String>("isProgram"), NanNew<v8::FunctionTemplate>(EXPORT_isProgram));
+    exports->Set(NanNew<v8::String>("isShader"), NanNew<v8::FunctionTemplate>(EXPORT_isShader));
+    exports->Set(NanNew<v8::String>("linkProgram"), NanNew<v8::FunctionTemplate>(EXPORT_linkProgram));
+    exports->Set(NanNew<v8::String>("useProgram"), NanNew<v8::FunctionTemplate>(EXPORT_useProgram));
+    exports->Set(NanNew<v8::String>("uniform1f"), NanNew<v8::FunctionTemplate>(EXPORT_uniform1f));
+    exports->Set(NanNew<v8::String>("uniform2f"), NanNew<v8::FunctionTemplate>(EXPORT_uniform2f));
+    exports->Set(NanNew<v8::String>("uniform3f"), NanNew<v8::FunctionTemplate>(EXPORT_uniform3f));
+    exports->Set(NanNew<v8::String>("uniform4f"), NanNew<v8::FunctionTemplate>(EXPORT_uniform4f));
+    exports->Set(NanNew<v8::String>("uniform1i"), NanNew<v8::FunctionTemplate>(EXPORT_uniform1i));
+    exports->Set(NanNew<v8::String>("uniform2i"), NanNew<v8::FunctionTemplate>(EXPORT_uniform2i));
+    exports->Set(NanNew<v8::String>("uniform3i"), NanNew<v8::FunctionTemplate>(EXPORT_uniform3i));
+    exports->Set(NanNew<v8::String>("uniform4i"), NanNew<v8::FunctionTemplate>(EXPORT_uniform4i));
+    exports->Set(NanNew<v8::String>("uniform1fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform1fv));
+    exports->Set(NanNew<v8::String>("uniform2fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform2fv));
+    exports->Set(NanNew<v8::String>("uniform3fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform3fv));
+    exports->Set(NanNew<v8::String>("uniform4fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform4fv));
+    exports->Set(NanNew<v8::String>("uniform1iv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform1iv));
+    exports->Set(NanNew<v8::String>("uniform2iv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform2iv));
+    exports->Set(NanNew<v8::String>("uniform3iv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform3iv));
+    exports->Set(NanNew<v8::String>("uniform4iv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform4iv));
+    exports->Set(NanNew<v8::String>("uniformMatrix2fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix2fv));
+    exports->Set(NanNew<v8::String>("uniformMatrix3fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix3fv));
+    exports->Set(NanNew<v8::String>("uniformMatrix4fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix4fv));
+    exports->Set(NanNew<v8::String>("validateProgram"), NanNew<v8::FunctionTemplate>(EXPORT_validateProgram));
+    exports->Set(NanNew<v8::String>("vertexAttrib1d"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib1d));
+    exports->Set(NanNew<v8::String>("vertexAttrib1dv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib1dv));
+    exports->Set(NanNew<v8::String>("vertexAttrib1f"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib1f));
+    exports->Set(NanNew<v8::String>("vertexAttrib1fv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib1fv));
+    exports->Set(NanNew<v8::String>("vertexAttrib1s"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib1s));
+    exports->Set(NanNew<v8::String>("vertexAttrib1sv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib1sv));
+    exports->Set(NanNew<v8::String>("vertexAttrib2d"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib2d));
+    exports->Set(NanNew<v8::String>("vertexAttrib2dv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib2dv));
+    exports->Set(NanNew<v8::String>("vertexAttrib2f"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib2f));
+    exports->Set(NanNew<v8::String>("vertexAttrib2fv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib2fv));
+    exports->Set(NanNew<v8::String>("vertexAttrib2s"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib2s));
+    exports->Set(NanNew<v8::String>("vertexAttrib2sv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib2sv));
+    exports->Set(NanNew<v8::String>("vertexAttrib3d"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib3d));
+    exports->Set(NanNew<v8::String>("vertexAttrib3dv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib3dv));
+    exports->Set(NanNew<v8::String>("vertexAttrib3f"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib3f));
+    exports->Set(NanNew<v8::String>("vertexAttrib3fv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib3fv));
+    exports->Set(NanNew<v8::String>("vertexAttrib3s"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib3s));
+    exports->Set(NanNew<v8::String>("vertexAttrib3sv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib3sv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4Nbv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nbv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4Niv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4Niv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4Nsv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nsv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4Nub"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nub));
+    exports->Set(NanNew<v8::String>("vertexAttrib4Nubv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nubv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4Nuiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nuiv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4Nusv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nusv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4bv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4bv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4d"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4d));
+    exports->Set(NanNew<v8::String>("vertexAttrib4dv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4dv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4f"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4f));
+    exports->Set(NanNew<v8::String>("vertexAttrib4fv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4fv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4iv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4iv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4s"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4s));
+    exports->Set(NanNew<v8::String>("vertexAttrib4sv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4sv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4ubv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4ubv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4uiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4uiv));
+    exports->Set(NanNew<v8::String>("vertexAttrib4usv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttrib4usv));
+    exports->Set(NanNew<v8::String>("vertexAttribPointer"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribPointer));
+    exports->Set(NanNew<v8::String>("uniformMatrix2x3fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix2x3fv));
+    exports->Set(NanNew<v8::String>("uniformMatrix3x2fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix3x2fv));
+    exports->Set(NanNew<v8::String>("uniformMatrix2x4fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix2x4fv));
+    exports->Set(NanNew<v8::String>("uniformMatrix4x2fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix4x2fv));
+    exports->Set(NanNew<v8::String>("uniformMatrix3x4fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix3x4fv));
+    exports->Set(NanNew<v8::String>("uniformMatrix4x3fv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix4x3fv));
+    exports->Set(NanNew<v8::String>("colorMaski"), NanNew<v8::FunctionTemplate>(EXPORT_colorMaski));
+    exports->Set(NanNew<v8::String>("getBooleani_v"), NanNew<v8::FunctionTemplate>(EXPORT_getBooleani_v));
+    exports->Set(NanNew<v8::String>("getIntegeri_v"), NanNew<v8::FunctionTemplate>(EXPORT_getIntegeri_v));
+    exports->Set(NanNew<v8::String>("enablei"), NanNew<v8::FunctionTemplate>(EXPORT_enablei));
+    exports->Set(NanNew<v8::String>("disablei"), NanNew<v8::FunctionTemplate>(EXPORT_disablei));
+    exports->Set(NanNew<v8::String>("isEnabledi"), NanNew<v8::FunctionTemplate>(EXPORT_isEnabledi));
+    exports->Set(NanNew<v8::String>("beginTransformFeedback"), NanNew<v8::FunctionTemplate>(EXPORT_beginTransformFeedback));
+    exports->Set(NanNew<v8::String>("endTransformFeedback"), NanNew<v8::FunctionTemplate>(EXPORT_endTransformFeedback));
+    exports->Set(NanNew<v8::String>("bindBufferRange"), NanNew<v8::FunctionTemplate>(EXPORT_bindBufferRange));
+    exports->Set(NanNew<v8::String>("bindBufferBase"), NanNew<v8::FunctionTemplate>(EXPORT_bindBufferBase));
+    exports->Set(NanNew<v8::String>("getTransformFeedbackVarying"), NanNew<v8::FunctionTemplate>(EXPORT_getTransformFeedbackVarying));
+    exports->Set(NanNew<v8::String>("clampColor"), NanNew<v8::FunctionTemplate>(EXPORT_clampColor));
+    exports->Set(NanNew<v8::String>("beginConditionalRender"), NanNew<v8::FunctionTemplate>(EXPORT_beginConditionalRender));
+    exports->Set(NanNew<v8::String>("endConditionalRender"), NanNew<v8::FunctionTemplate>(EXPORT_endConditionalRender));
+    exports->Set(NanNew<v8::String>("vertexAttribIPointer"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribIPointer));
+    exports->Set(NanNew<v8::String>("getVertexAttribIiv"), NanNew<v8::FunctionTemplate>(EXPORT_getVertexAttribIiv));
+    exports->Set(NanNew<v8::String>("getVertexAttribIuiv"), NanNew<v8::FunctionTemplate>(EXPORT_getVertexAttribIuiv));
+    exports->Set(NanNew<v8::String>("vertexAttribI1i"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI1i));
+    exports->Set(NanNew<v8::String>("vertexAttribI2i"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI2i));
+    exports->Set(NanNew<v8::String>("vertexAttribI3i"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI3i));
+    exports->Set(NanNew<v8::String>("vertexAttribI4i"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI4i));
+    exports->Set(NanNew<v8::String>("vertexAttribI1ui"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI1ui));
+    exports->Set(NanNew<v8::String>("vertexAttribI2ui"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI2ui));
+    exports->Set(NanNew<v8::String>("vertexAttribI3ui"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI3ui));
+    exports->Set(NanNew<v8::String>("vertexAttribI4ui"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI4ui));
+    exports->Set(NanNew<v8::String>("vertexAttribI1iv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI1iv));
+    exports->Set(NanNew<v8::String>("vertexAttribI2iv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI2iv));
+    exports->Set(NanNew<v8::String>("vertexAttribI3iv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI3iv));
+    exports->Set(NanNew<v8::String>("vertexAttribI4iv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI4iv));
+    exports->Set(NanNew<v8::String>("vertexAttribI1uiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI1uiv));
+    exports->Set(NanNew<v8::String>("vertexAttribI2uiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI2uiv));
+    exports->Set(NanNew<v8::String>("vertexAttribI3uiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI3uiv));
+    exports->Set(NanNew<v8::String>("vertexAttribI4uiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI4uiv));
+    exports->Set(NanNew<v8::String>("vertexAttribI4bv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI4bv));
+    exports->Set(NanNew<v8::String>("vertexAttribI4sv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI4sv));
+    exports->Set(NanNew<v8::String>("vertexAttribI4ubv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI4ubv));
+    exports->Set(NanNew<v8::String>("vertexAttribI4usv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribI4usv));
+    exports->Set(NanNew<v8::String>("getUniformuiv"), NanNew<v8::FunctionTemplate>(EXPORT_getUniformuiv));
+    exports->Set(NanNew<v8::String>("bindFragDataLocation"), NanNew<v8::FunctionTemplate>(EXPORT_bindFragDataLocation));
+    exports->Set(NanNew<v8::String>("getFragDataLocation"), NanNew<v8::FunctionTemplate>(EXPORT_getFragDataLocation));
+    exports->Set(NanNew<v8::String>("uniform1ui"), NanNew<v8::FunctionTemplate>(EXPORT_uniform1ui));
+    exports->Set(NanNew<v8::String>("uniform2ui"), NanNew<v8::FunctionTemplate>(EXPORT_uniform2ui));
+    exports->Set(NanNew<v8::String>("uniform3ui"), NanNew<v8::FunctionTemplate>(EXPORT_uniform3ui));
+    exports->Set(NanNew<v8::String>("uniform4ui"), NanNew<v8::FunctionTemplate>(EXPORT_uniform4ui));
+    exports->Set(NanNew<v8::String>("uniform1uiv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform1uiv));
+    exports->Set(NanNew<v8::String>("uniform2uiv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform2uiv));
+    exports->Set(NanNew<v8::String>("uniform3uiv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform3uiv));
+    exports->Set(NanNew<v8::String>("uniform4uiv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform4uiv));
+    exports->Set(NanNew<v8::String>("texParameterIiv"), NanNew<v8::FunctionTemplate>(EXPORT_texParameterIiv));
+    exports->Set(NanNew<v8::String>("texParameterIuiv"), NanNew<v8::FunctionTemplate>(EXPORT_texParameterIuiv));
+    exports->Set(NanNew<v8::String>("getTexParameterIiv"), NanNew<v8::FunctionTemplate>(EXPORT_getTexParameterIiv));
+    exports->Set(NanNew<v8::String>("getTexParameterIuiv"), NanNew<v8::FunctionTemplate>(EXPORT_getTexParameterIuiv));
+    exports->Set(NanNew<v8::String>("clearBufferiv"), NanNew<v8::FunctionTemplate>(EXPORT_clearBufferiv));
+    exports->Set(NanNew<v8::String>("clearBufferuiv"), NanNew<v8::FunctionTemplate>(EXPORT_clearBufferuiv));
+    exports->Set(NanNew<v8::String>("clearBufferfv"), NanNew<v8::FunctionTemplate>(EXPORT_clearBufferfv));
+    exports->Set(NanNew<v8::String>("clearBufferfi"), NanNew<v8::FunctionTemplate>(EXPORT_clearBufferfi));
+    exports->Set(NanNew<v8::String>("getStringi"), NanNew<v8::FunctionTemplate>(EXPORT_getStringi));
+    exports->Set(NanNew<v8::String>("drawArraysInstanced"), NanNew<v8::FunctionTemplate>(EXPORT_drawArraysInstanced));
+    exports->Set(NanNew<v8::String>("drawElementsInstanced"), NanNew<v8::FunctionTemplate>(EXPORT_drawElementsInstanced));
+    exports->Set(NanNew<v8::String>("texBuffer"), NanNew<v8::FunctionTemplate>(EXPORT_texBuffer));
+    exports->Set(NanNew<v8::String>("primitiveRestartIndex"), NanNew<v8::FunctionTemplate>(EXPORT_primitiveRestartIndex));
+    exports->Set(NanNew<v8::String>("getInteger64i_v"), NanNew<v8::FunctionTemplate>(EXPORT_getInteger64i_v));
+    exports->Set(NanNew<v8::String>("getBufferParameteri64v"), NanNew<v8::FunctionTemplate>(EXPORT_getBufferParameteri64v));
+    exports->Set(NanNew<v8::String>("framebufferTexture"), NanNew<v8::FunctionTemplate>(EXPORT_framebufferTexture));
+    exports->Set(NanNew<v8::String>("vertexAttribDivisor"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribDivisor));
+    exports->Set(NanNew<v8::String>("minSampleShading"), NanNew<v8::FunctionTemplate>(EXPORT_minSampleShading));
+    exports->Set(NanNew<v8::String>("blendEquationi"), NanNew<v8::FunctionTemplate>(EXPORT_blendEquationi));
+    exports->Set(NanNew<v8::String>("blendEquationSeparatei"), NanNew<v8::FunctionTemplate>(EXPORT_blendEquationSeparatei));
+    exports->Set(NanNew<v8::String>("blendFunci"), NanNew<v8::FunctionTemplate>(EXPORT_blendFunci));
+    exports->Set(NanNew<v8::String>("blendFuncSeparatei"), NanNew<v8::FunctionTemplate>(EXPORT_blendFuncSeparatei));
+    exports->Set(NanNew<v8::String>("isRenderbuffer"), NanNew<v8::FunctionTemplate>(EXPORT_isRenderbuffer));
+    exports->Set(NanNew<v8::String>("bindRenderbuffer"), NanNew<v8::FunctionTemplate>(EXPORT_bindRenderbuffer));
+    exports->Set(NanNew<v8::String>("genRenderbuffers"), NanNew<v8::FunctionTemplate>(EXPORT_genRenderbuffers));
+    exports->Set(NanNew<v8::String>("renderbufferStorage"), NanNew<v8::FunctionTemplate>(EXPORT_renderbufferStorage));
+    exports->Set(NanNew<v8::String>("getRenderbufferParameteriv"), NanNew<v8::FunctionTemplate>(EXPORT_getRenderbufferParameteriv));
+    exports->Set(NanNew<v8::String>("isFramebuffer"), NanNew<v8::FunctionTemplate>(EXPORT_isFramebuffer));
+    exports->Set(NanNew<v8::String>("bindFramebuffer"), NanNew<v8::FunctionTemplate>(EXPORT_bindFramebuffer));
+    exports->Set(NanNew<v8::String>("genFramebuffers"), NanNew<v8::FunctionTemplate>(EXPORT_genFramebuffers));
+    exports->Set(NanNew<v8::String>("checkFramebufferStatus"), NanNew<v8::FunctionTemplate>(EXPORT_checkFramebufferStatus));
+    exports->Set(NanNew<v8::String>("framebufferTexture1D"), NanNew<v8::FunctionTemplate>(EXPORT_framebufferTexture1D));
+    exports->Set(NanNew<v8::String>("framebufferTexture2D"), NanNew<v8::FunctionTemplate>(EXPORT_framebufferTexture2D));
+    exports->Set(NanNew<v8::String>("framebufferTexture3D"), NanNew<v8::FunctionTemplate>(EXPORT_framebufferTexture3D));
+    exports->Set(NanNew<v8::String>("framebufferRenderbuffer"), NanNew<v8::FunctionTemplate>(EXPORT_framebufferRenderbuffer));
+    exports->Set(NanNew<v8::String>("getFramebufferAttachmentParameteriv"), NanNew<v8::FunctionTemplate>(EXPORT_getFramebufferAttachmentParameteriv));
+    exports->Set(NanNew<v8::String>("generateMipmap"), NanNew<v8::FunctionTemplate>(EXPORT_generateMipmap));
+    exports->Set(NanNew<v8::String>("blitFramebuffer"), NanNew<v8::FunctionTemplate>(EXPORT_blitFramebuffer));
+    exports->Set(NanNew<v8::String>("renderbufferStorageMultisample"), NanNew<v8::FunctionTemplate>(EXPORT_renderbufferStorageMultisample));
+    exports->Set(NanNew<v8::String>("framebufferTextureLayer"), NanNew<v8::FunctionTemplate>(EXPORT_framebufferTextureLayer));
+    exports->Set(NanNew<v8::String>("mapBufferRange"), NanNew<v8::FunctionTemplate>(EXPORT_mapBufferRange));
+    exports->Set(NanNew<v8::String>("flushMappedBufferRange"), NanNew<v8::FunctionTemplate>(EXPORT_flushMappedBufferRange));
+    exports->Set(NanNew<v8::String>("bindVertexArray"), NanNew<v8::FunctionTemplate>(EXPORT_bindVertexArray));
+    exports->Set(NanNew<v8::String>("genVertexArrays"), NanNew<v8::FunctionTemplate>(EXPORT_genVertexArrays));
+    exports->Set(NanNew<v8::String>("isVertexArray"), NanNew<v8::FunctionTemplate>(EXPORT_isVertexArray));
+    exports->Set(NanNew<v8::String>("getActiveUniformsiv"), NanNew<v8::FunctionTemplate>(EXPORT_getActiveUniformsiv));
+    exports->Set(NanNew<v8::String>("getActiveUniformName"), NanNew<v8::FunctionTemplate>(EXPORT_getActiveUniformName));
+    exports->Set(NanNew<v8::String>("getUniformBlockIndex"), NanNew<v8::FunctionTemplate>(EXPORT_getUniformBlockIndex));
+    exports->Set(NanNew<v8::String>("getActiveUniformBlockiv"), NanNew<v8::FunctionTemplate>(EXPORT_getActiveUniformBlockiv));
+    exports->Set(NanNew<v8::String>("getActiveUniformBlockName"), NanNew<v8::FunctionTemplate>(EXPORT_getActiveUniformBlockName));
+    exports->Set(NanNew<v8::String>("uniformBlockBinding"), NanNew<v8::FunctionTemplate>(EXPORT_uniformBlockBinding));
+    exports->Set(NanNew<v8::String>("copyBufferSubData"), NanNew<v8::FunctionTemplate>(EXPORT_copyBufferSubData));
+    exports->Set(NanNew<v8::String>("drawElementsBaseVertex"), NanNew<v8::FunctionTemplate>(EXPORT_drawElementsBaseVertex));
+    exports->Set(NanNew<v8::String>("drawRangeElementsBaseVertex"), NanNew<v8::FunctionTemplate>(EXPORT_drawRangeElementsBaseVertex));
+    exports->Set(NanNew<v8::String>("drawElementsInstancedBaseVertex"), NanNew<v8::FunctionTemplate>(EXPORT_drawElementsInstancedBaseVertex));
+    exports->Set(NanNew<v8::String>("provokingVertex"), NanNew<v8::FunctionTemplate>(EXPORT_provokingVertex));
+    exports->Set(NanNew<v8::String>("texImage2DMultisample"), NanNew<v8::FunctionTemplate>(EXPORT_texImage2DMultisample));
+    exports->Set(NanNew<v8::String>("texImage3DMultisample"), NanNew<v8::FunctionTemplate>(EXPORT_texImage3DMultisample));
+    exports->Set(NanNew<v8::String>("getMultisamplefv"), NanNew<v8::FunctionTemplate>(EXPORT_getMultisamplefv));
+    exports->Set(NanNew<v8::String>("sampleMaski"), NanNew<v8::FunctionTemplate>(EXPORT_sampleMaski));
+    exports->Set(NanNew<v8::String>("bindFragDataLocationIndexed"), NanNew<v8::FunctionTemplate>(EXPORT_bindFragDataLocationIndexed));
+    exports->Set(NanNew<v8::String>("getFragDataIndex"), NanNew<v8::FunctionTemplate>(EXPORT_getFragDataIndex));
+    exports->Set(NanNew<v8::String>("genSamplers"), NanNew<v8::FunctionTemplate>(EXPORT_genSamplers));
+    exports->Set(NanNew<v8::String>("isSampler"), NanNew<v8::FunctionTemplate>(EXPORT_isSampler));
+    exports->Set(NanNew<v8::String>("bindSampler"), NanNew<v8::FunctionTemplate>(EXPORT_bindSampler));
+    exports->Set(NanNew<v8::String>("samplerParameteri"), NanNew<v8::FunctionTemplate>(EXPORT_samplerParameteri));
+    exports->Set(NanNew<v8::String>("samplerParameteriv"), NanNew<v8::FunctionTemplate>(EXPORT_samplerParameteriv));
+    exports->Set(NanNew<v8::String>("samplerParameterf"), NanNew<v8::FunctionTemplate>(EXPORT_samplerParameterf));
+    exports->Set(NanNew<v8::String>("samplerParameterfv"), NanNew<v8::FunctionTemplate>(EXPORT_samplerParameterfv));
+    exports->Set(NanNew<v8::String>("samplerParameterIiv"), NanNew<v8::FunctionTemplate>(EXPORT_samplerParameterIiv));
+    exports->Set(NanNew<v8::String>("samplerParameterIuiv"), NanNew<v8::FunctionTemplate>(EXPORT_samplerParameterIuiv));
+    exports->Set(NanNew<v8::String>("getSamplerParameteriv"), NanNew<v8::FunctionTemplate>(EXPORT_getSamplerParameteriv));
+    exports->Set(NanNew<v8::String>("getSamplerParameterIiv"), NanNew<v8::FunctionTemplate>(EXPORT_getSamplerParameterIiv));
+    exports->Set(NanNew<v8::String>("getSamplerParameterfv"), NanNew<v8::FunctionTemplate>(EXPORT_getSamplerParameterfv));
+    exports->Set(NanNew<v8::String>("getSamplerParameterIuiv"), NanNew<v8::FunctionTemplate>(EXPORT_getSamplerParameterIuiv));
+    exports->Set(NanNew<v8::String>("queryCounter"), NanNew<v8::FunctionTemplate>(EXPORT_queryCounter));
+    exports->Set(NanNew<v8::String>("getQueryObjecti64v"), NanNew<v8::FunctionTemplate>(EXPORT_getQueryObjecti64v));
+    exports->Set(NanNew<v8::String>("getQueryObjectui64v"), NanNew<v8::FunctionTemplate>(EXPORT_getQueryObjectui64v));
+    exports->Set(NanNew<v8::String>("vertexAttribP1ui"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribP1ui));
+    exports->Set(NanNew<v8::String>("vertexAttribP1uiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribP1uiv));
+    exports->Set(NanNew<v8::String>("vertexAttribP2ui"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribP2ui));
+    exports->Set(NanNew<v8::String>("vertexAttribP2uiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribP2uiv));
+    exports->Set(NanNew<v8::String>("vertexAttribP3ui"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribP3ui));
+    exports->Set(NanNew<v8::String>("vertexAttribP3uiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribP3uiv));
+    exports->Set(NanNew<v8::String>("vertexAttribP4ui"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribP4ui));
+    exports->Set(NanNew<v8::String>("vertexAttribP4uiv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribP4uiv));
+    exports->Set(NanNew<v8::String>("drawArraysIndirect"), NanNew<v8::FunctionTemplate>(EXPORT_drawArraysIndirect));
+    exports->Set(NanNew<v8::String>("drawElementsIndirect"), NanNew<v8::FunctionTemplate>(EXPORT_drawElementsIndirect));
+    exports->Set(NanNew<v8::String>("uniform1d"), NanNew<v8::FunctionTemplate>(EXPORT_uniform1d));
+    exports->Set(NanNew<v8::String>("uniform2d"), NanNew<v8::FunctionTemplate>(EXPORT_uniform2d));
+    exports->Set(NanNew<v8::String>("uniform3d"), NanNew<v8::FunctionTemplate>(EXPORT_uniform3d));
+    exports->Set(NanNew<v8::String>("uniform4d"), NanNew<v8::FunctionTemplate>(EXPORT_uniform4d));
+    exports->Set(NanNew<v8::String>("uniform1dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform1dv));
+    exports->Set(NanNew<v8::String>("uniform2dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform2dv));
+    exports->Set(NanNew<v8::String>("uniform3dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform3dv));
+    exports->Set(NanNew<v8::String>("uniform4dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniform4dv));
+    exports->Set(NanNew<v8::String>("uniformMatrix2dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix2dv));
+    exports->Set(NanNew<v8::String>("uniformMatrix3dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix3dv));
+    exports->Set(NanNew<v8::String>("uniformMatrix4dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix4dv));
+    exports->Set(NanNew<v8::String>("uniformMatrix2x3dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix2x3dv));
+    exports->Set(NanNew<v8::String>("uniformMatrix2x4dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix2x4dv));
+    exports->Set(NanNew<v8::String>("uniformMatrix3x2dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix3x2dv));
+    exports->Set(NanNew<v8::String>("uniformMatrix3x4dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix3x4dv));
+    exports->Set(NanNew<v8::String>("uniformMatrix4x2dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix4x2dv));
+    exports->Set(NanNew<v8::String>("uniformMatrix4x3dv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformMatrix4x3dv));
+    exports->Set(NanNew<v8::String>("getUniformdv"), NanNew<v8::FunctionTemplate>(EXPORT_getUniformdv));
+    exports->Set(NanNew<v8::String>("getSubroutineUniformLocation"), NanNew<v8::FunctionTemplate>(EXPORT_getSubroutineUniformLocation));
+    exports->Set(NanNew<v8::String>("getSubroutineIndex"), NanNew<v8::FunctionTemplate>(EXPORT_getSubroutineIndex));
+    exports->Set(NanNew<v8::String>("getActiveSubroutineUniformiv"), NanNew<v8::FunctionTemplate>(EXPORT_getActiveSubroutineUniformiv));
+    exports->Set(NanNew<v8::String>("getActiveSubroutineUniformName"), NanNew<v8::FunctionTemplate>(EXPORT_getActiveSubroutineUniformName));
+    exports->Set(NanNew<v8::String>("getActiveSubroutineName"), NanNew<v8::FunctionTemplate>(EXPORT_getActiveSubroutineName));
+    exports->Set(NanNew<v8::String>("uniformSubroutinesuiv"), NanNew<v8::FunctionTemplate>(EXPORT_uniformSubroutinesuiv));
+    exports->Set(NanNew<v8::String>("getUniformSubroutineuiv"), NanNew<v8::FunctionTemplate>(EXPORT_getUniformSubroutineuiv));
+    exports->Set(NanNew<v8::String>("getProgramStageiv"), NanNew<v8::FunctionTemplate>(EXPORT_getProgramStageiv));
+    exports->Set(NanNew<v8::String>("patchParameteri"), NanNew<v8::FunctionTemplate>(EXPORT_patchParameteri));
+    exports->Set(NanNew<v8::String>("patchParameterfv"), NanNew<v8::FunctionTemplate>(EXPORT_patchParameterfv));
+    exports->Set(NanNew<v8::String>("bindTransformFeedback"), NanNew<v8::FunctionTemplate>(EXPORT_bindTransformFeedback));
+    exports->Set(NanNew<v8::String>("genTransformFeedbacks"), NanNew<v8::FunctionTemplate>(EXPORT_genTransformFeedbacks));
+    exports->Set(NanNew<v8::String>("isTransformFeedback"), NanNew<v8::FunctionTemplate>(EXPORT_isTransformFeedback));
+    exports->Set(NanNew<v8::String>("pauseTransformFeedback"), NanNew<v8::FunctionTemplate>(EXPORT_pauseTransformFeedback));
+    exports->Set(NanNew<v8::String>("resumeTransformFeedback"), NanNew<v8::FunctionTemplate>(EXPORT_resumeTransformFeedback));
+    exports->Set(NanNew<v8::String>("drawTransformFeedback"), NanNew<v8::FunctionTemplate>(EXPORT_drawTransformFeedback));
+    exports->Set(NanNew<v8::String>("drawTransformFeedbackStream"), NanNew<v8::FunctionTemplate>(EXPORT_drawTransformFeedbackStream));
+    exports->Set(NanNew<v8::String>("beginQueryIndexed"), NanNew<v8::FunctionTemplate>(EXPORT_beginQueryIndexed));
+    exports->Set(NanNew<v8::String>("endQueryIndexed"), NanNew<v8::FunctionTemplate>(EXPORT_endQueryIndexed));
+    exports->Set(NanNew<v8::String>("getQueryIndexediv"), NanNew<v8::FunctionTemplate>(EXPORT_getQueryIndexediv));
+    exports->Set(NanNew<v8::String>("releaseShaderCompiler"), NanNew<v8::FunctionTemplate>(EXPORT_releaseShaderCompiler));
+    exports->Set(NanNew<v8::String>("shaderBinary"), NanNew<v8::FunctionTemplate>(EXPORT_shaderBinary));
+    exports->Set(NanNew<v8::String>("getShaderPrecisionFormat"), NanNew<v8::FunctionTemplate>(EXPORT_getShaderPrecisionFormat));
+    exports->Set(NanNew<v8::String>("depthRangef"), NanNew<v8::FunctionTemplate>(EXPORT_depthRangef));
+    exports->Set(NanNew<v8::String>("clearDepthf"), NanNew<v8::FunctionTemplate>(EXPORT_clearDepthf));
+    exports->Set(NanNew<v8::String>("getProgramBinary"), NanNew<v8::FunctionTemplate>(EXPORT_getProgramBinary));
+    exports->Set(NanNew<v8::String>("programBinary"), NanNew<v8::FunctionTemplate>(EXPORT_programBinary));
+    exports->Set(NanNew<v8::String>("programParameteri"), NanNew<v8::FunctionTemplate>(EXPORT_programParameteri));
+    exports->Set(NanNew<v8::String>("useProgramStages"), NanNew<v8::FunctionTemplate>(EXPORT_useProgramStages));
+    exports->Set(NanNew<v8::String>("activeShaderProgram"), NanNew<v8::FunctionTemplate>(EXPORT_activeShaderProgram));
+    exports->Set(NanNew<v8::String>("bindProgramPipeline"), NanNew<v8::FunctionTemplate>(EXPORT_bindProgramPipeline));
+    exports->Set(NanNew<v8::String>("genProgramPipelines"), NanNew<v8::FunctionTemplate>(EXPORT_genProgramPipelines));
+    exports->Set(NanNew<v8::String>("isProgramPipeline"), NanNew<v8::FunctionTemplate>(EXPORT_isProgramPipeline));
+    exports->Set(NanNew<v8::String>("getProgramPipelineiv"), NanNew<v8::FunctionTemplate>(EXPORT_getProgramPipelineiv));
+    exports->Set(NanNew<v8::String>("programUniform1i"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform1i));
+    exports->Set(NanNew<v8::String>("programUniform1iv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform1iv));
+    exports->Set(NanNew<v8::String>("programUniform1f"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform1f));
+    exports->Set(NanNew<v8::String>("programUniform1fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform1fv));
+    exports->Set(NanNew<v8::String>("programUniform1d"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform1d));
+    exports->Set(NanNew<v8::String>("programUniform1dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform1dv));
+    exports->Set(NanNew<v8::String>("programUniform1ui"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform1ui));
+    exports->Set(NanNew<v8::String>("programUniform1uiv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform1uiv));
+    exports->Set(NanNew<v8::String>("programUniform2i"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform2i));
+    exports->Set(NanNew<v8::String>("programUniform2iv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform2iv));
+    exports->Set(NanNew<v8::String>("programUniform2f"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform2f));
+    exports->Set(NanNew<v8::String>("programUniform2fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform2fv));
+    exports->Set(NanNew<v8::String>("programUniform2d"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform2d));
+    exports->Set(NanNew<v8::String>("programUniform2dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform2dv));
+    exports->Set(NanNew<v8::String>("programUniform2ui"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform2ui));
+    exports->Set(NanNew<v8::String>("programUniform2uiv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform2uiv));
+    exports->Set(NanNew<v8::String>("programUniform3i"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform3i));
+    exports->Set(NanNew<v8::String>("programUniform3iv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform3iv));
+    exports->Set(NanNew<v8::String>("programUniform3f"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform3f));
+    exports->Set(NanNew<v8::String>("programUniform3fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform3fv));
+    exports->Set(NanNew<v8::String>("programUniform3d"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform3d));
+    exports->Set(NanNew<v8::String>("programUniform3dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform3dv));
+    exports->Set(NanNew<v8::String>("programUniform3ui"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform3ui));
+    exports->Set(NanNew<v8::String>("programUniform3uiv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform3uiv));
+    exports->Set(NanNew<v8::String>("programUniform4i"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform4i));
+    exports->Set(NanNew<v8::String>("programUniform4iv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform4iv));
+    exports->Set(NanNew<v8::String>("programUniform4f"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform4f));
+    exports->Set(NanNew<v8::String>("programUniform4fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform4fv));
+    exports->Set(NanNew<v8::String>("programUniform4d"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform4d));
+    exports->Set(NanNew<v8::String>("programUniform4dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform4dv));
+    exports->Set(NanNew<v8::String>("programUniform4ui"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform4ui));
+    exports->Set(NanNew<v8::String>("programUniform4uiv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniform4uiv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix2fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix2fv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix3fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix3fv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix4fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix4fv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix2dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix2dv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix3dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix3dv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix4dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix4dv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix2x3fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x3fv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix3x2fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x2fv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix2x4fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x4fv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix4x2fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x2fv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix3x4fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x4fv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix4x3fv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x3fv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix2x3dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x3dv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix3x2dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x2dv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix2x4dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x4dv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix4x2dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x2dv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix3x4dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x4dv));
+    exports->Set(NanNew<v8::String>("programUniformMatrix4x3dv"), NanNew<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x3dv));
+    exports->Set(NanNew<v8::String>("validateProgramPipeline"), NanNew<v8::FunctionTemplate>(EXPORT_validateProgramPipeline));
+    exports->Set(NanNew<v8::String>("getProgramPipelineInfoLog"), NanNew<v8::FunctionTemplate>(EXPORT_getProgramPipelineInfoLog));
+    exports->Set(NanNew<v8::String>("vertexAttribL1d"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribL1d));
+    exports->Set(NanNew<v8::String>("vertexAttribL2d"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribL2d));
+    exports->Set(NanNew<v8::String>("vertexAttribL3d"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribL3d));
+    exports->Set(NanNew<v8::String>("vertexAttribL4d"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribL4d));
+    exports->Set(NanNew<v8::String>("vertexAttribL1dv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribL1dv));
+    exports->Set(NanNew<v8::String>("vertexAttribL2dv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribL2dv));
+    exports->Set(NanNew<v8::String>("vertexAttribL3dv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribL3dv));
+    exports->Set(NanNew<v8::String>("vertexAttribL4dv"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribL4dv));
+    exports->Set(NanNew<v8::String>("vertexAttribLPointer"), NanNew<v8::FunctionTemplate>(EXPORT_vertexAttribLPointer));
+    exports->Set(NanNew<v8::String>("getVertexAttribLdv"), NanNew<v8::FunctionTemplate>(EXPORT_getVertexAttribLdv));
+    exports->Set(NanNew<v8::String>("viewportArrayv"), NanNew<v8::FunctionTemplate>(EXPORT_viewportArrayv));
+    exports->Set(NanNew<v8::String>("viewportIndexedf"), NanNew<v8::FunctionTemplate>(EXPORT_viewportIndexedf));
+    exports->Set(NanNew<v8::String>("viewportIndexedfv"), NanNew<v8::FunctionTemplate>(EXPORT_viewportIndexedfv));
+    exports->Set(NanNew<v8::String>("scissorArrayv"), NanNew<v8::FunctionTemplate>(EXPORT_scissorArrayv));
+    exports->Set(NanNew<v8::String>("scissorIndexed"), NanNew<v8::FunctionTemplate>(EXPORT_scissorIndexed));
+    exports->Set(NanNew<v8::String>("scissorIndexedv"), NanNew<v8::FunctionTemplate>(EXPORT_scissorIndexedv));
+    exports->Set(NanNew<v8::String>("depthRangeArrayv"), NanNew<v8::FunctionTemplate>(EXPORT_depthRangeArrayv));
+    exports->Set(NanNew<v8::String>("depthRangeIndexed"), NanNew<v8::FunctionTemplate>(EXPORT_depthRangeIndexed));
+    exports->Set(NanNew<v8::String>("getFloati_v"), NanNew<v8::FunctionTemplate>(EXPORT_getFloati_v));
+    exports->Set(NanNew<v8::String>("getDoublei_v"), NanNew<v8::FunctionTemplate>(EXPORT_getDoublei_v));
+    exports->Set(NanNew<v8::String>("shaderSource"), NanNew<v8::FunctionTemplate>(EXPORT_shaderSource));
 }
 
 
 void gl3BindInit(v8::Handle<v8::Object> exports) {
-    v8::HandleScope scope;
-    v8::Handle<v8::ObjectTemplate> GL3 = v8::ObjectTemplate::New();
+    NanScope();
+    v8::Handle<v8::ObjectTemplate> GL3 = NanNew<v8::ObjectTemplate>();
     GL3->SetInternalFieldCount(1);
     defineConstants(GL3);
     defineFunctions(GL3);
     defineObjects(GL3);
-    exports->Set(v8::String::NewSymbol("GL3"), GL3->NewInstance());
+    exports->Set(NanNew<v8::String>("GL3"), GL3->NewInstance());
 }

@@ -37,7 +37,7 @@ public:
         NODE_SET_PROTOTYPE_METHOD(tpl, "waitEvents", NODE_waitEvents);
         NODE_SET_PROTOTYPE_METHOD(tpl, "getFramebufferSize", NODE_getFramebufferSize);
 
-        NanAssignPersistent<v8::Function>(constructor, tpl->GetFunction());
+        NanAssignPersistent(constructor, tpl->GetFunction());
 
         // Export constructor.
         exports->Set(NanNew<v8::String>("OpenGLWindow"), tpl->GetFunction());
@@ -47,47 +47,47 @@ public:
         if(!pf_onMove.IsEmpty()) {
             NanScope();
             Local<Value> argv[2] = { NanNew<Integer>(x), NanNew<Integer>(y) };
-            pf_onMove->Call(NanObjectWrapHandle(this), 2, argv);
+            NanNew(pf_onMove)->Call(NanObjectWrapHandle(this), 2, argv);
         }
     }
     virtual void onResize(int width, int height) override {
         if(!pf_onResize.IsEmpty()) {
             NanScope();
             Local<Value> argv[2] = { NanNew<Integer>(width), NanNew<Integer>(height) };
-            pf_onResize->Call(NanObjectWrapHandle(this), 2, argv);
+            NanNew(pf_onResize)->Call(NanObjectWrapHandle(this), 2, argv);
         }
     }
     virtual void onClose() override {
         if(!pf_onClose.IsEmpty()) {
             NanScope();
-            pf_onClose->Call(NanObjectWrapHandle(this), 0, NULL);
+            NanNew(pf_onClose)->Call(NanObjectWrapHandle(this), 0, NULL);
         }
     }
     virtual void onRefresh() override {
         if(!pf_onRefresh.IsEmpty()) {
             NanScope();
-            pf_onRefresh->Call(NanObjectWrapHandle(this), 0, NULL);
+            NanNew(pf_onRefresh)->Call(NanObjectWrapHandle(this), 0, NULL);
         }
     }
     virtual void onFocus(int focused) override {
         if(!pf_onFocus.IsEmpty()) {
             NanScope();
             Local<Value> argv[1] = { NanNew<Boolean>(focused == GL_TRUE) };
-            pf_onFocus->Call(NanObjectWrapHandle(this), 1, argv);
+            NanNew(pf_onFocus)->Call(NanObjectWrapHandle(this), 1, argv);
         }
     }
     virtual void onIconify(int iconified) override {
         if(!pf_onIconify.IsEmpty()) {
             NanScope();
             Local<Value> argv[1] = { NanNew<Boolean>(iconified == GL_TRUE) };
-            pf_onIconify->Call(NanObjectWrapHandle(this), 1, argv);
+            NanNew(pf_onIconify)->Call(NanObjectWrapHandle(this), 1, argv);
         }
     }
     virtual void onFramebufferSize(int width, int height) override {
         if(!pf_onFramebufferSize.IsEmpty()) {
             NanScope();
             Local<Value> argv[2] = { NanNew<Integer>(width), NanNew<Integer>(height) };
-            pf_onFramebufferSize->Call(NanObjectWrapHandle(this), 2, argv);
+            NanNew(pf_onFramebufferSize)->Call(NanObjectWrapHandle(this), 2, argv);
         }
     }
 

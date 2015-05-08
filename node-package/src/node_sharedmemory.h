@@ -1,5 +1,6 @@
 #include <node.h>
 #include <v8.h>
+#include <nan.h>
 
 class NODE_SharedMemory : public node::ObjectWrap {
 public:
@@ -15,19 +16,19 @@ private:
     explicit NODE_SharedMemory(int shmid, int semid, int size, bool is_create);
     ~NODE_SharedMemory();
 
-    static v8::Handle<v8::Value> New(const v8::Arguments& args);
+    static NAN_METHOD(New);
 
-    static v8::Handle<v8::Value> NODE_size(const v8::Arguments& args);
-    static v8::Handle<v8::Value> NODE_shmid(const v8::Arguments& args);
-    static v8::Handle<v8::Value> NODE_semid(const v8::Arguments& args);
-    static v8::Handle<v8::Value> NODE_buffer(const v8::Arguments& args);
-    static v8::Handle<v8::Value> NODE_delete(const v8::Arguments& args);
-    static v8::Handle<v8::Value> NODE_close(const v8::Arguments& args);
+    static NAN_METHOD(NODE_size);
+    static NAN_METHOD(NODE_shmid);
+    static NAN_METHOD(NODE_semid);
+    static NAN_METHOD(NODE_buffer);
+    static NAN_METHOD(NODE_delete);
+    static NAN_METHOD(NODE_close);
 
-    static v8::Handle<v8::Value> NODE_writeLock(const v8::Arguments& args);
-    static v8::Handle<v8::Value> NODE_writeUnlock(const v8::Arguments& args);
-    static v8::Handle<v8::Value> NODE_readLock(const v8::Arguments& args);
-    static v8::Handle<v8::Value> NODE_readUnlock(const v8::Arguments& args);
+    static NAN_METHOD(NODE_writeLock);
+    static NAN_METHOD(NODE_writeUnlock);
+    static NAN_METHOD(NODE_readLock);
+    static NAN_METHOD(NODE_readUnlock);
 
     static v8::Persistent<v8::Function> constructor;
 };

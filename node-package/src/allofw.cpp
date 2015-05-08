@@ -17,9 +17,9 @@ void NODE_init(Handle<Object> exports) {
     NODE_SharedMemory::Init(exports);
     NODE_OpenGL_Init(exports);
 
-    Local<Object> graphics = Object::New();
+    Local<Object> graphics = NanNew<Object>();
     NODE_Graphics_init(graphics);
-    exports->Set(String::NewSymbol("graphics"), graphics);
+    exports->Set(NanNew<String>("graphics"), graphics);
 }
 
 NODE_MODULE(allofw, NODE_init);

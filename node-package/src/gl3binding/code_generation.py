@@ -6,7 +6,7 @@ functions_definitions = []
 function_codes = []
 
 def DefineConstant(name, c_name, value, type = "Uint32"):
-    constant_lines.append("""exports->Set(v8::String::NewSymbol("%s"), v8::%s::New(%s), v8::ReadOnly);""" % (name, type, c_name))
+    constant_lines.append("""exports->Set(NanNew<v8::String>("%s"), NanNew<v8::%s>(%s), v8::ReadOnly);""" % (name, type, c_name))
     if value == None: print name
     if type == "Uint32" and value > 0xffffffff:
         print name
@@ -14,8 +14,8 @@ def DefineConstant(name, c_name, value, type = "Uint32"):
 
 def DefineFunction(name, code):
     c_name = "EXPORT_%s" % name
-    functions_definitions.append("""exports->Set(v8::String::NewSymbol("%s"), v8::FunctionTemplate::New(%s));""" % (name, c_name))
-    function_codes.append("""v8::Handle<v8::Value> %s(const v8::Arguments& args) {\n%s\n}""" % (c_name, code))
+    functions_definitions.append("""exports->Set(NanNew<v8::String>("%s"), NanNew<v8::FunctionTemplate>(%s));""" % (name, c_name))
+    function_codes.append("""NAN_METHOD(%s) {\n%s\n}""" % (c_name, code))
 
 def indent(strings, spaces):
     return map(lambda x: spaces + x, strings)
@@ -40,17 +40,34 @@ void defineObjects(v8::Handle<v8::ObjectTemplate> exports) {
 
 code_helper_functions = """
 void do_nothing_release_callback(char*, void*) { }
+void* glbind_get_buffer_data(v8::Handle<v8::Value> value) {
+    if(value->IsArrayBufferView()) {
+        v8::ArrayBufferView* view = v8::ArrayBufferView::Cast(*value);
+        unsigned char* ptr = (unsigned char*)view->Buffer()->Externalize().Data();
+        ptr += view->ByteOffset();
+        // This is because ArrayBuffer::GetContents is not available yet (v8 version too low).
+        // Here, we use Externalize, by not deallocating the memory here, the client side is still able to access it.
+        // However, the GC won't collect this memory, so it's leaked.
+        // Use this: new Buffer(new Uint8Array(fa.buffer))
+        fprintf(stderr, "Warning: memory leak occurred. This problem is currently unsolvable, please avoid using ArrayBuffers with GL3 binding functions.\\n");
+        return ptr;
+    } else if(node::Buffer::HasInstance(value)) {
+        return node::Buffer::Data(value);
+    } else {
+        return NULL;
+    }
+}
 """
 
 code_glbind_init = """
 void gl3BindInit(v8::Handle<v8::Object> exports) {
-    v8::HandleScope scope;
-    v8::Handle<v8::ObjectTemplate> GL3 = v8::ObjectTemplate::New();
+    NanScope();
+    v8::Handle<v8::ObjectTemplate> GL3 = NanNew<v8::ObjectTemplate>();
     GL3->SetInternalFieldCount(1);
     defineConstants(GL3);
     defineFunctions(GL3);
     defineObjects(GL3);
-    exports->Set(v8::String::NewSymbol("GL3"), GL3->NewInstance());
+    exports->Set(NanNew<v8::String>("GL3"), GL3->NewInstance());
 }
 """
 

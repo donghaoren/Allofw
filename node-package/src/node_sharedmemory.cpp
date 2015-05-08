@@ -15,36 +15,26 @@
 using namespace v8;
 
 void NODE_SharedMemory::Init(Handle<Object> exports) {
-    Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
-    tpl->SetClassName(String::NewSymbol("SharedMemory"));
+    Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
+    tpl->SetClassName(NanNew<String>("SharedMemory"));
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
     // Prototype
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("size"), FunctionTemplate::New(NODE_size)->GetFunction());
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("shmid"), FunctionTemplate::New(NODE_shmid)->GetFunction());
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("semid"), FunctionTemplate::New(NODE_semid)->GetFunction());
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("buffer"), FunctionTemplate::New(NODE_buffer)->GetFunction());
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("delete"), FunctionTemplate::New(NODE_delete)->GetFunction());
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("close"), FunctionTemplate::New(NODE_close)->GetFunction());
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("writeLock"), FunctionTemplate::New(NODE_writeLock)->GetFunction());
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("writeUnlock"), FunctionTemplate::New(NODE_writeUnlock)->GetFunction());
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("readLock"), FunctionTemplate::New(NODE_readLock)->GetFunction());
-    tpl->PrototypeTemplate()->Set(
-        String::NewSymbol("readUnlock"), FunctionTemplate::New(NODE_readUnlock)->GetFunction());
+    NODE_SET_PROTOTYPE_METHOD(tpl, "size", NODE_size);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "shmid", NODE_shmid);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "semid", NODE_semid);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "buffer", NODE_buffer);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "close", NODE_close);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "writeLock", NODE_writeLock);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "writeUnlock", NODE_writeUnlock);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "readLock", NODE_readLock);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "readUnlock", NODE_readUnlock);
 
-    constructor = Persistent<Function>::New(tpl->GetFunction());
+    NanAssignPersistent(constructor, tpl->GetFunction());
 
     // Export constructor.
-    exports->Set(String::NewSymbol("SharedMemory"), constructor);
+    exports->Set(NanNew<String>("SharedMemory"), tpl->GetFunction());
 }
 
 int shmrm(key_t key) {
@@ -122,7 +112,8 @@ NODE_SharedMemory::~NODE_SharedMemory() {
     }
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::New(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::New) {
+    NanScope();
     if(args.IsConstructCall()) {
         if(args.Length() == 3) {
             int key = args[0]->IntegerValue();
@@ -130,10 +121,10 @@ v8::Handle<v8::Value> NODE_SharedMemory::New(const v8::Arguments& args) {
             bool is_create = args[2]->BooleanValue();
             NODE_SharedMemory* obj = new NODE_SharedMemory(key, size, is_create);
             if(obj->shm_id < 0 || obj->sem_id < 0) {
-                return ThrowException(Exception::Error(String::New("SharedMemory: shmget()/semget() failed.")));
+                NanThrowError("SharedMemory: shmget()/semget() failed.");
             }
             obj->Wrap(args.This());
-            return args.This();
+            NanReturnThis();
         } else if(args.Length() == 4) {
             int shmid = args[0]->IntegerValue();
             int semid = args[1]->IntegerValue();
@@ -141,66 +132,66 @@ v8::Handle<v8::Value> NODE_SharedMemory::New(const v8::Arguments& args) {
             bool is_create = args[3]->BooleanValue();
             NODE_SharedMemory* obj = new NODE_SharedMemory(shmid, semid, size, is_create);
             if(obj->shm_id < 0 || obj->sem_id < 0) {
-                return ThrowException(Exception::Error(String::New("SharedMemory: shmget()/semget() failed.")));
+                NanThrowError("SharedMemory: shmget()/semget() failed.");
             }
             obj->Wrap(args.This());
-            return args.This();
+            NanReturnThis();
         } else {
-            return ThrowException(Exception::Error(String::New("SharedMemory: invalid arguments.")));
+            NanThrowError("SharedMemory: invalid arguments.");
         }
     } else {
         // Invoked as plain function `MyObject(...)`, turn into construct call.
         const int argc = 3;
         Local<Value> argv[argc] = { args[0], args[1], args[2] };
-        return constructor->NewInstance(argc, argv);
+        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
     }
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_size(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_size) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
-    return Integer::New(obj->size);
+    NanReturnValue(NanNew<Integer>(obj->size));
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_shmid(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_shmid) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
-    return Integer::New(obj->shm_id);
+    NanReturnValue(NanNew<Integer>(obj->shm_id));
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_semid(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_semid) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
-    return Integer::New(obj->sem_id);
+    NanReturnValue(NanNew<Integer>(obj->sem_id));
 }
 
 void do_nothing_free_callback(char* data, void* hint) { }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_buffer(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_buffer) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
     if(obj->shm_data) {
         int start = args[0]->IsUndefined() ? 0 : args[0]->IntegerValue();
         int length = args[1]->IsUndefined() ? obj->size : args[1]->IntegerValue();
-        return node::Buffer::New((char*)obj->shm_data + start, length, do_nothing_free_callback, NULL)->handle_;
+        NanReturnValue(NanNewBufferHandle((char*)obj->shm_data + start, length, do_nothing_free_callback, NULL));
     } else {
-        return ThrowException(Exception::Error(String::New("buffer: shared memory deleted or not opened.")));
+        NanThrowError("buffer: shared memory deleted or not opened.");
     }
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_delete(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_delete) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
     if(obj->sem_id >= 0) semctl(obj->sem_id, 0, IPC_RMID, 0);
     if(obj->shm_id >= 0) shmctl(obj->shm_id, IPC_RMID, 0);
     obj->shm_id = -1;
     obj->sem_id = -1;
     obj->shm_data = NULL;
-    return args.This();
+    NanReturnThis();
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_close(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_close) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
     shmdt(obj->shm_data);
-    return args.This();
+    NanReturnThis();
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_writeLock(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_writeLock) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
     sembuf operations[2];
     operations[0].sem_num = 1;  // wait for reads to be zero.
@@ -209,21 +200,21 @@ v8::Handle<v8::Value> NODE_SharedMemory::NODE_writeLock(const v8::Arguments& arg
     operations[1].sem_num = 0;  // increment writes.
     operations[1].sem_op = 1;
     operations[1].sem_flg = 0;
-    if(semop(obj->sem_id, operations, 2) == 0) return args.This();
-    return ThrowException(Exception::Error(String::New("writeLock: semop() failed.")));
+    if(semop(obj->sem_id, operations, 2) == 0) NanReturnThis();
+    NanThrowError("writeLock: semop() failed.");
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_writeUnlock(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_writeUnlock) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
     sembuf operations[1];
     operations[0].sem_num = 0;  // decrement writes.
     operations[0].sem_op = -1;
     operations[0].sem_flg = 0;
-    if(semop(obj->sem_id, operations, 1) == 0) return args.This();
-    return ThrowException(Exception::Error(String::New("writeUnlock: semop() failed.")));
+    if(semop(obj->sem_id, operations, 1) == 0) NanReturnThis();
+    NanThrowError("writeUnlock: semop() failed.");
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_readLock(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_readLock) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
     sembuf operations[2];
     operations[0].sem_num = 0;  // wait for writes to be zero.
@@ -232,18 +223,18 @@ v8::Handle<v8::Value> NODE_SharedMemory::NODE_readLock(const v8::Arguments& args
     operations[1].sem_num = 1;  // increment reads.
     operations[1].sem_op = 1;
     operations[1].sem_flg = 0;
-    if(semop(obj->sem_id, operations, 2) == 0) return args.This();
-    return ThrowException(Exception::Error(String::New("readUnlock: semop() failed.")));
+    if(semop(obj->sem_id, operations, 2) == 0) NanReturnThis();
+    NanThrowError("readUnlock: semop() failed.");
 }
 
-v8::Handle<v8::Value> NODE_SharedMemory::NODE_readUnlock(const v8::Arguments& args) {
+NAN_METHOD(NODE_SharedMemory::NODE_readUnlock) {
     NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
     sembuf operations[1];
     operations[0].sem_num = 1;  // decrement reads.
     operations[0].sem_op = -1;
     operations[0].sem_flg = 0;
-    if(semop(obj->sem_id, operations, 1) == 0) return args.This();
-    return ThrowException(Exception::Error(String::New("readUnlock: semop() failed.")));
+    if(semop(obj->sem_id, operations, 1) == 0) NanReturnThis();
+    NanThrowError("readUnlock: semop() failed.");
 }
 
 v8::Persistent<v8::Function> NODE_SharedMemory::constructor;

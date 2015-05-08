@@ -20,7 +20,7 @@ class ConstPointerType:
             "    {c}_nonconst = new {construct_name}[{c}_array->Length()];",
             "    {c} = (const {name}*){c}_nonconst;",
             "}} else if({js}->IsObject()) {{",
-            "    {c} = (const {name}*)node::Buffer::Data({js});",
+            "    {c} = (const {name}*)glbind_get_buffer_data({js});",
             "}} else if({js}->IsNumber()) {{",
             "    {c} = (const {name}*)({js}->IntegerValue());",
             "}} else {{",
@@ -57,7 +57,7 @@ class PointerType:
             "    {c}_nonconst = new {construct_name}[{c}_array->Length()];",
             "    {c} = ({name}*){c}_nonconst;",
             "}} else if({js}->IsObject()) {{",
-            "    {c} = ({name}*)node::Buffer::Data({js});",
+            "    {c} = ({name}*)glbind_get_buffer_data({js});",
             "}} else if({js}->IsNumber()) {{",
             "    {c} = ({name}*)({js}->IntegerValue());",
             "}} else {{",
@@ -68,7 +68,7 @@ class PointerType:
         ]))
 
     def convert_to_js_variable(self, c, js):
-        return ["v8::Handle<v8::Value> %s = node::Buffer::New((char*)%s, 0, do_nothing_release_callback, NULL)->handle_;" % (js, c)]
+        return ["v8::Handle<v8::Value> %s = NanNewBufferHandle((char*)%s, 0, do_nothing_release_callback, NULL);" % (js, c)]
 
     def pointer(self):
         raise Exception("Invalid")
@@ -105,22 +105,22 @@ def typedef(name, c2js, js2c):
     types[name] = Type(name, c2js, js2c)
 
 def typedef_s32(name):
-    typedef(name, "v8::Int32::New(value)", "value->Int32Value()")
+    typedef(name, "NanNew<v8::Int32>(value)", "value->Int32Value()")
 
 def typedef_u32(name):
-    typedef(name, "v8::Uint32::New(value)", "value->Uint32Value()")
+    typedef(name, "NanNew<v8::Uint32>(value)", "value->Uint32Value()")
 
 def typedef_s64(name):
-    typedef(name, "v8::IntegerValue::New(value)", "value->IntegerValue()")
+    typedef(name, "NanNew<v8::IntegerValue>(value)", "value->IntegerValue()")
 
 def typedef_u64(name):
-    typedef(name, "v8::IntegerValue::New(value)", "(uint64_t)value->IntegerValue()")
+    typedef(name, "NanNew<v8::IntegerValue>(value)", "(uint64_t)value->IntegerValue()")
 
 def typedef_f32(name):
-    typedef(name, "v8::NumberValue::New((double)value)", "(float)value->NumberValue()")
+    typedef(name, "NanNew<v8::NumberValue>((double)value)", "(float)value->NumberValue()")
 
 def typedef_f64(name):
-    typedef(name, "v8::NumberValue::New(value)", "value->NumberValue()")
+    typedef(name, "NanNew<v8::NumberValue>(value)", "value->NumberValue()")
 
 typedef("GLvoid", "", "")
 typedef_u32("GLbitfield")
@@ -160,9 +160,9 @@ class UStringType:
         return [
             "v8::Handle<v8::Value> %s;" % js,
             "if(%s) {" % c,
-            "    %s = v8::String::New((const char*)%s, strlen((const char*)%s));" % (js, c, c),
+            "    %s = NanNew<v8::String>((const char*)%s, strlen((const char*)%s));" % (js, c, c),
             "} else {",
-            "    %s = v8::Undefined();" % js,
+            "    %s = NanUndefined();" % js,
             "}"
         ]
 
@@ -183,7 +183,7 @@ class CStringType:
         ], [])
 
     def convert_to_js_variable(self, c, js):
-        return ["v8::Handle<v8::Value> %s = v8::String::New((const char*)%s, strlen((const char*)%s));" % (js, c, c)]
+        return ["v8::Handle<v8::Value> %s = NanNew<v8::String>((const char*)%s, strlen((const char*)%s));" % (js, c, c)]
 
     def pointer(self):
         raise Exception("Invalid")
@@ -249,8 +249,13 @@ class ClassType:
         return ["GLuint %s;" % (name)]
 
     def assign_c_variable(self, js, c):
-        return (["{c} = node::ObjectWrap::Unwrap<NODE_{classname}>({js}->ToObject())->gl_handle;".format(c = c, js = js, classname = self.name)],
-                [])
+        return ([
+            "if({js}->IsNumber()) {{".format(c = c, js = js, classname = self.name),
+            "    {c} = {js}->IntegerValue();".format(c = c, js = js, classname = self.name),
+            "} else {",
+            "    {c} = node::ObjectWrap::Unwrap<NODE_{classname}>({js}->ToObject())->gl_handle;".format(c = c, js = js, classname = self.name),
+            "}"
+        ], [])
 
     def convert_to_js_variable(self, c, js):
         return ["v8::Handle<v8::Value> {js} = NODE_{classname}::fromGLHandle({c});".format(classname = self.name, c = c, js = js)]
@@ -266,10 +271,9 @@ class ClassType:
             GLuint gl_handle;
 
             static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
-                NanScope();
                 const int argc = 1;
                 v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                NanReturnValue(constructor->NewInstance(argc, argv));
+                return NanNew(constructor)->NewInstance(argc, argv);
             }
 
         private:
@@ -277,10 +281,11 @@ class ClassType:
             explicit NODE_{{classname}}() { {{construct_gl_object}} }
             ~NODE_{{classname}}() { {{release_code}} printf("Release {{classname}}: %d\\n", gl_handle); }
 
-            static v8::Handle<v8::Value> New(const v8::Arguments& args);
+            static NAN_METHOD(New);
 
-            static v8::Handle<v8::Value> NODE_id(const v8::Arguments& args);
-            static v8::Handle<v8::Value> NODE_toString(const v8::Arguments& args);
+            static NAN_METHOD(NODE_id);
+            static NAN_METHOD(NODE_delete);
+            static NAN_METHOD(NODE_toString);
 
             static v8::Persistent<v8::Function> constructor;
         };
@@ -288,55 +293,62 @@ class ClassType:
         v8::Persistent<v8::Function> NODE_{{classname}}::constructor;
 
         void NODE_{{classname}}::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(New);
-            tpl->SetClassName(v8::String::NewSymbol("{{classname}}"));
+            v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
+            tpl->SetClassName(NanNew<v8::String>("{{classname}}"));
             tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
             // Prototype
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("id"), v8::FunctionTemplate::New(NODE_id)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("toString"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
-            tpl->PrototypeTemplate()->Set(
-                v8::String::NewSymbol("inspect"), v8::FunctionTemplate::New(NODE_toString)->GetFunction());
+            NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
+            NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
+            NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
 
-            constructor = v8::Persistent<v8::Function>::New(tpl->GetFunction());
+            NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+
+            NanAssignPersistent(constructor, tpl->GetFunction());
 
             // Export constructor.
-            exports->Set(v8::String::NewSymbol("{{classname}}"), constructor);
+            exports->Set(NanNew<v8::String>("{{classname}}"), tpl->GetFunction());
         }
 
-        v8::Handle<v8::Value> NODE_{{classname}}::New(const v8::Arguments& args) {
-            v8::HandleScope scope;
+        NAN_METHOD(NODE_{{classname}}::New) {
+            NanScope();
 
             if(args.IsConstructCall()) {
                 if(args.Length() == 0) {
                     NODE_{{classname}}* obj = new NODE_{{classname}}();
                     obj->Wrap(args.This());
-                    return args.This();
+                    NanReturnThis();
                 } else {
                     NODE_{{classname}}* obj = new NODE_{{classname}}(args[0]->Uint32Value());
                     obj->Wrap(args.This());
-                    return args.This();
+                    NanReturnThis();
                 }
             } else {
                 // Invoked as plain function `MyObject(...)`, turn into construct call.
                 const int argc = 1;
                 v8::Local<v8::Value> argv[argc] = { args[0] };
-                return scope.Close(constructor->NewInstance(argc, argv));
+                NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
             }
         }
 
-        v8::Handle<v8::Value> NODE_{{classname}}::NODE_id(const v8::Arguments& args) {
+        NAN_METHOD(NODE_{{classname}}::NODE_id) {
             NODE_{{classname}}* obj = ObjectWrap::Unwrap<NODE_{{classname}}>(args.This());
-            return v8::Uint32::New(obj->gl_handle);
+            NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
         }
 
-        v8::Handle<v8::Value> NODE_{{classname}}::NODE_toString(const v8::Arguments& args) {
+        NAN_METHOD(NODE_{{classname}}::NODE_delete) {
+            NODE_{{classname}}* obj = ObjectWrap::Unwrap<NODE_{{classname}}>(args.This());
+            GLuint gl_handle = obj->gl_handle;
+            {{release_code}}
+            obj->gl_handle = 0;
+            NanReturnUndefined();
+        }
+
+        NAN_METHOD(NODE_{{classname}}::NODE_toString) {
             NODE_{{classname}}* obj = ObjectWrap::Unwrap<NODE_{{classname}}>(args.This());
             char buf[64];
             sprintf(buf, "{{classname}}:%d", obj->gl_handle);
-            return v8::String::New(buf);
+            NanReturnValue(NanNew<v8::String>(buf));
         }
         """
         items = {
@@ -346,7 +358,7 @@ class ClassType:
         }
         for key, value in items.items():
             c = c.replace("{{%s}}" % key, value)
-        return c
+        return c.replace("\n        ", "\n")
 
     def pointer(self):
         return ClassTypeOutputArray(self)
