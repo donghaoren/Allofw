@@ -48,7 +48,9 @@ void ScopedLogger::print(int level, const char* string) {
     std::string indent = std::string("\n") + s;
     boost::algorithm::trim_right(indent);
     boost::algorithm::replace_all(indent, "\n", std::string("\n") + prefix);
-    loggerOutput(level, indent.substr(1).c_str());
+    if(!indent.empty()) {
+        loggerOutput(level, indent.substr(1).c_str());
+    }
 }
 void ScopedLogger::printf(int level, const char* fmt, ...) {
     if(level < details_->minimum_level) return;
