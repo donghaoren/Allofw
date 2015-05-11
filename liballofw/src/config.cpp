@@ -39,12 +39,20 @@ public:
     }
 
     virtual void parseFile(const char* path) {
-        entries.push_back(YAML::LoadFile(path));
+        try {
+            entries.push_back(YAML::LoadFile(path));
+        } catch(std::exception& e) {
+            throw exception(e.what());
+        }
     }
     virtual void parseFile(const char* path, const char* key) {
-        YAML::Node part = YAML::LoadFile(path)[key];
-        if(!part.IsNull() && part.IsDefined())
-            entries.push_back(part);
+        try {
+            YAML::Node part = YAML::LoadFile(path)[key];
+            if(!part.IsNull() && part.IsDefined())
+                entries.push_back(part);
+        } catch(std::exception& e) {
+            throw exception(e.what());
+        }
     }
 
     template<typename T>

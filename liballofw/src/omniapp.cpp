@@ -17,7 +17,14 @@ ALLOFW_NS_BEGIN
 
 OmniAppBase::OmniAppBase(const char* config_path) {
     config_ = Configuration::Create();
-    config_->parseFile(config_path);
+    try {
+        config_->parseFile(config_path);
+    } catch(allofw::exception& e) {
+        Logger::Default()->printf(Logger::kWarning, "OmniApp: failed to read config file '%s', using defaults.", config_path);
+        Logger::Default()->pushScope("> ");
+        Logger::Default()->printf(Logger::kWarning, e.what());
+        Logger::Default()->popScope();
+    }
 }
 
 void OmniAppBase::onInitialize() { }

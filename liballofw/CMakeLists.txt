@@ -114,6 +114,23 @@
   )
 
 #----------------------------------------------------------------------------------------------------------------------
+# Samples
+
+  FUNCTION(ADD_SAMPLE_EXECUTABLE sample_name sample_sources)
+      ADD_EXECUTABLE ( ${sample_name} samples/${sample_sources} )
+      TARGET_LINK_LIBRARIES ( ${sample_name}
+        allofw
+        ${OPENGL_LIBRARIES}
+      )
+      SET_TARGET_PROPERTIES ( ${sample_name}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/samples"
+      )
+  ENDFUNCTION(ADD_SAMPLE_EXECUTABLE)
+
+  ADD_SAMPLE_EXECUTABLE ( cubes cubes.cpp )
+
+#----------------------------------------------------------------------------------------------------------------------
 # Install
 
   INSTALL (

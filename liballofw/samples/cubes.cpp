@@ -1,13 +1,7 @@
-#include "allofw/opengl.h"
-#include "allofw/opengl_utils.h"
-#include "allofw/omnistereo.h"
-#include "allofw/logger.h"
 #include "allofw/omniapp.h"
+#include "allofw/logger.h"
+#include "allofw/opengl_utils.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <memory.h>
-#include <math.h>
 #include <vector>
 
 using namespace allofw;
