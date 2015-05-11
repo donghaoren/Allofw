@@ -70,11 +70,11 @@ void OmniAppBase::onKeyboard(const char* c_key, const char* c_action, const char
 
 void OmniAppBase::initialize() {
     window_ = OpenGLWindow::Create(config_);
+    window_->makeContextCurrent();
     omni_ = OmniStereo::Create(config_);
     omni_->setDelegate(this);
     window_->setDelegate(this);
     closing_ = false;
-    window_->makeContextCurrent();
     window_->enableKeyboardInput();
 
     onInitialize();
