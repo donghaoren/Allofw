@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import subprocess
 import os
+os.chdir("dist")
 
 def command(cmd):
     print cmd

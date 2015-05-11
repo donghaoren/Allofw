@@ -1,15 +1,13 @@
 CXXFLAGS = -std=c++11 -I../include -L../lib
-LDFLAGS  = -lallofw
-
-CXXFLAGS += -framework OpenGL
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-    CXXFLAGS += -lGL
+    LDFLAGS += -lGL -lallofw
 endif
 ifeq ($(UNAME_S),Darwin)
-    CXXFLAGS += -framework OpenGL
+    LDFLAGS += -framework OpenGL -lallofw
 endif
 
 cubes: cubes.cpp
 	g++ cubes.cpp $(CXXFLAGS) $(LDFLAGS) -o cubes
+	install_name_tool -change liballofw.dylib ../lib/liballofw.dylib cubes
