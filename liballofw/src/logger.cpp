@@ -1,10 +1,14 @@
 #include "allofw/logger.h"
 #include <pthread.h>
+#include <thread>
 #include <string>
 #include <deque>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <stdio.h>
+#include <cstdio>
+#include <cstdarg>
+#include <sys/types.h>
+
 
 ALLOFW_NS_BEGIN
 
@@ -14,11 +18,11 @@ struct ScopedLogger::Impl {
 
 ScopedLogger::ScopedLogger() {
     impl = new Impl();
+    std::hash<std::thread::id> hasher;
+    uint64_t tid = hasher(std::this_thread::get_id());
 
-    uint64_t tid;
-    pthread_threadid_np(NULL, &tid);
     char buf[64];
-    snprintf(buf, 64, "[T.%llu] ", tid);
+    snprintf(buf, 64, "[T.%lu] ", tid);
     impl->prefix_stack.push_back(buf);
 }
 void ScopedLogger::pushScope(const char* prefix) {
@@ -76,8 +80,8 @@ protected:
                 } break;
             }
         } else {
-            ::fputs(s, stderr);
-            ::fputc('\n', stderr);
+            std::fputs(s, stderr);
+            std::fputc('\n', stderr);
         }
     }
 };
