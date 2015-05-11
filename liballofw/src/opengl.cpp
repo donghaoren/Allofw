@@ -14,7 +14,6 @@ namespace {
 
     void glfw_error_callback(int error, const char* description) {
         Logger::Default()->printf(Logger::kError, "glfw: %d, %s\n", error, description);
-        fprintf(stderr, "glfw: %s\n", description);
     }
 
     void glfw_get_screen_size(int* width, int* height) {
