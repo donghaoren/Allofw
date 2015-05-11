@@ -12,39 +12,46 @@
 
 ALLOFW_NS_BEGIN
 
-struct ScopedLogger::Impl {
+struct ScopedLogger::Details {
     std::deque<std::string> prefix_stack;
+    int minimum_level;
 };
 
 ScopedLogger::ScopedLogger() {
-    impl = new Impl();
+    details_ = new Details();
     std::hash<std::thread::id> hasher;
     int tid = hasher(std::this_thread::get_id()) % 1000;
 
     char buf[64];
     snprintf(buf, 64, "[T.%03d] ", tid);
-    impl->prefix_stack.push_back(buf);
+    details_->prefix_stack.push_back(buf);
+    details_->minimum_level = 0;
+}
+void ScopedLogger::setLevelFilter(int minimum_level) {
+    details_->minimum_level = minimum_level;
 }
 void ScopedLogger::pushScope(const char* prefix) {
     std::string previous_prefix;
-    if(!impl->prefix_stack.empty()) previous_prefix = impl->prefix_stack.back();
-    impl->prefix_stack.push_back(previous_prefix + prefix);
+    if(!details_->prefix_stack.empty()) previous_prefix = details_->prefix_stack.back();
+    details_->prefix_stack.push_back(previous_prefix + prefix);
 }
 void ScopedLogger::popScope() {
-    if(!impl->prefix_stack.empty()) {
-        impl->prefix_stack.pop_back();
+    if(!details_->prefix_stack.empty()) {
+        details_->prefix_stack.pop_back();
     }
 }
 void ScopedLogger::print(int level, const char* string) {
+    if(level < details_->minimum_level) return;
     std::string s(string);
     std::string prefix;
-    if(!impl->prefix_stack.empty()) prefix = impl->prefix_stack.back();
+    if(!details_->prefix_stack.empty()) prefix = details_->prefix_stack.back();
     std::string indent = std::string("\n") + s;
     boost::algorithm::trim_right(indent);
     boost::algorithm::replace_all(indent, "\n", std::string("\n") + prefix);
     loggerOutput(level, indent.substr(1).c_str());
 }
 void ScopedLogger::printf(int level, const char* fmt, ...) {
+    if(level < details_->minimum_level) return;
     char buf[1024];
     va_list args;
     va_start(args, fmt);
@@ -52,13 +59,14 @@ void ScopedLogger::printf(int level, const char* fmt, ...) {
     print(level, buf);
 }
 void ScopedLogger::vprintf(int level, const char* fmt, va_list args) {
+    if(level < details_->minimum_level) return;
     char buf[1024];
     vsnprintf(buf, 1024, fmt, args);
     print(level, buf);
 }
 
 ScopedLogger::~ScopedLogger() {
-    delete impl;
+    delete details_;
 }
 
 class LoggerImplStderr : public ScopedLogger {

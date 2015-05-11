@@ -78,11 +78,15 @@ vec4 omni_render(vec3 v) {
 
 const char* gShader_draw_vertex =
 R"================(#version 330
+uniform vec2 positionScalers = vec2(1, 1);
+
 layout(location = 0) in vec2 position;
+
 out vec2 vp_coordinates;
+
 void main() {
     vp_coordinates = position;
-    gl_Position = vec4(position * 2.0 - 1.0, 0.0, 1.0);
+    gl_Position = vec4(positionScalers * (position * 2.0 - 1.0), 0.0, 1.0);
 }
 )================";
 
@@ -113,7 +117,7 @@ void main() {
     vec3 blend = texture(texBlend, vp_coordinates).rgb;
 
     // Read color from cubemap.
-    vec4 cubemap_color = texture(texCubemap, normalize(warp));
+    vec4 cubemap_color = texture(texCubemap, warp);
 
     vec4 final_color = cubemap_color;
 
@@ -160,7 +164,13 @@ public:
                 warpblend_ = WarpBlend::LoadAllosphereCalibration(warpblend.c_str(), hostname.c_str());
             }
         } else {
-            warpblend_ = WarpBlend::CreateEquirectangular();
+            std::string generate = conf->getSTLString("omnistereo.warpblend.generate", "equirectangular");
+            if(generate == "equirectangular") {
+                warpblend_ = WarpBlend::CreateEquirectangular();
+            } else if(generate == "perspective") {
+                float fov = conf->getFloat("omnistereo.warpblend.generate_fov", 90);
+                warpblend_ = WarpBlend::CreatePerspective(fov / 180.0 * PI);
+            }
         }
     }
     // Set cubemap resolution, allocate the cubemap.
@@ -342,15 +352,26 @@ public:
                 } break;
             }
             for(int vp = 0; vp < warpblend_->getViewportCount(); vp++) {
-                Rectangle2 viewport_bounds = warpblend_->getViewport(vp);
+                WarpBlend::ViewportInfo vp_info = warpblend_->getViewport(vp);
+                Rectangle2 viewport_bounds = vp_info.viewport;
                 GLTextureID warp_texture = warpblend_->getWarpTexture(vp);
                 GLTextureID blend_texture = warpblend_->getBlendTexture(vp);
-                glViewport(
+                Rectangle2 vp_to_draw(
                     draw_viewport.x + viewport_bounds.x * draw_viewport.w,
                     draw_viewport.y + viewport_bounds.y * draw_viewport.h,
                     viewport_bounds.w * draw_viewport.w,
                     viewport_bounds.h * draw_viewport.h
                 );
+                glViewport(vp_to_draw.x, vp_to_draw.y, vp_to_draw.w, vp_to_draw.h);
+                Vector2f position_scalers(1, 1);
+                if(vp_info.enforce_aspect_ratio) {
+                    if(vp_to_draw.w / vp_to_draw.h > vp_info.aspect_ratio) {
+                        position_scalers.y = vp_to_draw.w / vp_to_draw.h / vp_info.aspect_ratio;
+                    } else {
+                        position_scalers.x = vp_to_draw.h * vp_info.aspect_ratio / vp_to_draw.w;
+                    }
+                }
+                glUniform2f(program_draw_positionScalers_, position_scalers.x, position_scalers.y);
 
                 glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, warp_texture);
                 glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, blend_texture);
@@ -534,6 +555,7 @@ private:
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texFront"), 4);
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanorama"), 5);
         program_draw_drawMask_ = glGetUniformLocation(program_draw_, "drawMask");
+        program_draw_positionScalers_ = glGetUniformLocation(program_draw_, "positionScalers");
         glutils::checkGLErrors("compile program");
 
         glGenVertexArrays(1, &vertex_array_quad_);
@@ -552,7 +574,7 @@ private:
     StereoTexture tex_cubemap_, tex_cubemap_depth_;
     GLuint framebuffer_;
     GLuint program_draw_;
-    GLuint program_draw_drawMask_;
+    GLuint program_draw_drawMask_, program_draw_positionScalers_;
     GLuint vertex_array_quad_, vertex_array_quad_buffer_;
     int resolution_;
     StereoMode stereo_mode_;

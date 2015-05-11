@@ -25,10 +25,14 @@ namespace ALLOFW_NS {
     class Logger {
     public:
         // Log levels.
-        static const int kInfo     = 0;
-        static const int kWarning  = 1;
-        static const int kError    = 2;
-        static const int kFatal    = 3;
+        static const int kVerbose  =   0;
+        static const int kInfo     = 100;
+        static const int kWarning  = 200;
+        static const int kError    = 300;
+        static const int kFatal    = 400;
+
+        // Level filter.
+        virtual void setLevelFilter(int minimum_level) = 0;
 
         // Scope functionality.
         virtual void pushScope(const char* prefix = "    ") = 0;
@@ -49,6 +53,7 @@ namespace ALLOFW_NS {
     class ScopedLogger : public Logger, non_copyable {
     public:
         ScopedLogger();
+        virtual void setLevelFilter(int minimum_level) override;
         virtual void pushScope(const char* prefix = "    ") override;
         virtual void popScope() override;
         virtual void print(int level, const char* string) override;
@@ -59,8 +64,8 @@ namespace ALLOFW_NS {
         // Implement this to suit your needs.
         virtual void loggerOutput(int level, const char* string) = 0;
     private:
-        struct Impl;
-        Impl* impl;
+        struct Details;
+        Details* details_;
     };
 
     // Handy class to be used with C++ scopes.

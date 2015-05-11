@@ -19,7 +19,7 @@ public:
     virtual int getViewportCount() {
         return data.size();
     }
-    virtual Rectangle2 getViewport(int viewport) {
+    virtual ViewportInfo getViewport(int viewport) {
         return data[viewport].viewport;
     }
 
@@ -64,10 +64,12 @@ public:
 
     void createEquirectangular() {
         data.resize(1);
-        int W = 800;
-        int H = 600;
+        int W = 1000;
+        int H = 500;
         data[0].allocate(Size2i(W, H), Size2i(W, H));
-        data[0].viewport = Rectangle2(0, 0, 1, 1);
+        data[0].viewport.viewport = Rectangle2(0, 0, 1, 1);
+        data[0].viewport.aspect_ratio = 2.0;
+        data[0].viewport.enforce_aspect_ratio = true;
         for(int y = 0; y < H; y++) {
             for(int x = 0; x < W; x++) {
                 int i = x + y * W;
@@ -78,6 +80,26 @@ public:
                 float vz = -std::cos(theta) * std::cos(phi);
                 float vy = std::sin(phi);
                 data[0].warp.data[i] = Vector3f(vx, vy, vz);
+            }
+        }
+    }
+    void createPerspective(float fov) {
+        data.resize(1);
+        int W = 800;
+        int H = 800;
+        data[0].allocate(Size2i(W, H), Size2i(W, H));
+        data[0].viewport.viewport = Rectangle2(0, 0, 1, 1);
+        data[0].viewport.aspect_ratio = 1.0;
+        data[0].viewport.enforce_aspect_ratio = true;
+        float scale = 2.0f * tan(fov / 2.0f);
+        for(int y = 0; y < H; y++) {
+            for(int x = 0; x < W; x++) {
+                int i = x + y * W;
+                float px = ((float)x / (float)W - 0.5) * scale;
+                float py = ((float)y / (float)H - 0.5) * scale;
+                float pz = -1.0f;
+                data[0].blend.data[i] = Vector4f(1, 1, 1, 1);
+                data[0].warp.data[i] = Vector3f(px, py, pz);
             }
         }
     }
@@ -94,10 +116,10 @@ public:
         for(size_t p = 0; p < data.size(); p++) {
             ViewportData& vp = data[p];
             YAML::Node proj = conf["projections"][p];
-            vp.viewport.x = proj["viewport"]["l"].as<float>();
-            vp.viewport.y = proj["viewport"]["b"].as<float>();
-            vp.viewport.w = proj["viewport"]["w"].as<float>();
-            vp.viewport.h = proj["viewport"]["h"].as<float>();
+            vp.viewport.viewport.x = proj["viewport"]["l"].as<float>();
+            vp.viewport.viewport.y = proj["viewport"]["b"].as<float>();
+            vp.viewport.viewport.w = proj["viewport"]["w"].as<float>();
+            vp.viewport.viewport.h = proj["viewport"]["h"].as<float>();
             std::string blend_file = proj["blend"]["file"].as<std::string>();
             FIBITMAP *blend_image = FreeImage_Load(FIF_PNG, (std::string(calibration_path) + "/" + blend_file).c_str(), PNG_DEFAULT);
             blend_image = FreeImage_ConvertTo24Bits(blend_image);
@@ -120,6 +142,8 @@ public:
             vp.warp.size.w = warp_size[1];
             vp.warp.size.h = warp_size[0] / 3;
             vp.warp.data = new Vector3f[vp.warp.size.w * vp.warp.size.h];
+            vp.viewport.aspect_ratio = (float)vp.warp.size.w / (float)vp.warp.size.h;
+            vp.viewport.enforce_aspect_ratio = false;
             float* buf = new float[vp.warp.size.w * vp.warp.size.h];
             fread(buf, sizeof(float), vp.warp.size.w * vp.warp.size.h, fwarp); // x
             for(int j = 0; j < vp.warp.size.w * vp.warp.size.h; j++) {
@@ -157,7 +181,7 @@ public:
     struct ViewportData {
         WarpData warp;
         BlendData blend;
-        Rectangle2 viewport;
+        ViewportInfo viewport;
         GLuint warp_texture;
         GLuint blend_texture;
 
@@ -199,7 +223,10 @@ WarpBlend* WarpBlend::CreateEquirectangular() {
     return impl;
 }
 
-WarpBlend* WarpBlend::CreatePerspective(float aspect_ratio, float fov) {
+WarpBlend* WarpBlend::CreatePerspective(float fov) {
+    WarpBlendImpl* impl = new WarpBlendImpl();
+    impl->createPerspective(fov);
+    return impl;
 }
 
 WarpBlend* WarpBlend::LoadAllosphereCalibration(const char* calibration_path, const char* hostname) {

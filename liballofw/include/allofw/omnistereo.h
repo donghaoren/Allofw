@@ -156,9 +156,15 @@ namespace ALLOFW_NS {
             Size2i size;
         };
 
+        struct ViewportInfo {
+            Rectangle2 viewport;
+            bool enforce_aspect_ratio;
+            float aspect_ratio;
+        };
+
         // How many viewports to draw.
         virtual int getViewportCount() = 0;
-        virtual Rectangle2 getViewport(int viewport) = 0;
+        virtual ViewportInfo getViewport(int viewport) = 0;
 
         // Get warp and blend data.
         virtual BlendData getBlendData(int viewport) = 0;
@@ -169,7 +175,7 @@ namespace ALLOFW_NS {
         virtual GLTextureID getWarpTexture(int viewport) = 0;
 
         static WarpBlend* CreateEquirectangular();
-        static WarpBlend* CreatePerspective(float aspect_ratio, float fov);
+        static WarpBlend* CreatePerspective(float fov);
         static WarpBlend* LoadAllosphereCalibration(const char* calibration_path, const char* hostname = nullptr);
     };
 }

@@ -314,7 +314,7 @@ OpenGLWindow* OpenGLWindow::Create(OpenGLWindow::Hint hint, const char* title) {
 OpenGLWindow* OpenGLWindow::Create(Configuration* config) {
     OpenGLWindow::Hint hint;
     hint.width = config->getInt32("window.width", 900);
-    hint.height = config->getInt32("window.height", 900);
+    hint.height = config->getInt32("window.height", 600);
     if(config->getBoolean("window.fullscreen", false)) {
         hint.fullscreen();
     }
