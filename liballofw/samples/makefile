@@ -10,4 +10,6 @@ endif
 
 cubes: cubes.cpp
 	g++ cubes.cpp $(CXXFLAGS) $(LDFLAGS) -o cubes
-	install_name_tool -change liballofw.dylib ../lib/liballofw.dylib cubes
+	ifeq ($(UNAME_S),Darwin)
+	    install_name_tool -change liballofw.dylib ../lib/liballofw.dylib cubes
+	endif
