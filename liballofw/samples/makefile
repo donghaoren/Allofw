@@ -1,15 +1,20 @@
+# A sample makefile that uses liballofw.
+
 CXXFLAGS = -std=c++11 -I../include -L../lib
 
+# Detect OS.
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
     LDFLAGS += -lGL -lallofw
+    INSTALL_NAME_TOOL = true
+    CXX = g++
 endif
 ifeq ($(UNAME_S),Darwin)
     LDFLAGS += -framework OpenGL -lallofw
+    INSTALL_NAME_TOOL = install_name_tool
+    CXX = clang++
 endif
 
 cubes: cubes.cpp
 	g++ cubes.cpp $(CXXFLAGS) $(LDFLAGS) -o cubes
-	ifeq ($(UNAME_S),Darwin)
-	    install_name_tool -change liballofw.dylib ../lib/liballofw.dylib cubes
-	endif
+	$(INSTALL_NAME_TOOL) -change liballofw.dylib ../lib/liballofw.dylib cubes
