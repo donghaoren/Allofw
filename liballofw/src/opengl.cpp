@@ -46,10 +46,10 @@ public:
         delegate = nullptr;
 
         if(!glfw_initialized) {
+            glfwSetErrorCallback(glfw_error_callback);
             if(!glfwInit()) {
                 throw glfw_runtime_error("glfwInit() failed.");
             }
-            glfwSetErrorCallback(glfw_error_callback);
             glfw_initialized = true;
         }
         glfwDefaultWindowHints();
