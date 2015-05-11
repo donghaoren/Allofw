@@ -19,10 +19,10 @@ struct ScopedLogger::Impl {
 ScopedLogger::ScopedLogger() {
     impl = new Impl();
     std::hash<std::thread::id> hasher;
-    uint64_t tid = hasher(std::this_thread::get_id());
+    int tid = hasher(std::this_thread::get_id()) % 1000;
 
     char buf[64];
-    snprintf(buf, 64, "[T.%lu] ", tid);
+    snprintf(buf, 64, "[T.%03d] ", tid);
     impl->prefix_stack.push_back(buf);
 }
 void ScopedLogger::pushScope(const char* prefix) {

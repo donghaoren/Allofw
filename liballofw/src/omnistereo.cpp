@@ -40,9 +40,13 @@ vec3 omni_quat_rotate(vec4 q, vec3 v) {
     vec4 q1 = vec4(-q.xyz, q.w);
     return omni_quat_multiply(omni_quat_multiply(q, vec4(v, 0.0)), q1).xyz;
 }
+vec3 omni_quat_inverse_rotate(vec4 q, vec3 v) {
+    vec4 q1 = vec4(-q.xyz, q.w);
+    return omni_quat_multiply(omni_quat_multiply(q1, vec4(v, 0.0)), q).xyz;
+}
 // Transform coordinates to camera space.
 vec3 omni_transform(vec3 v) {
-    return omni_quat_rotate(omni_rotation, v) + omni_position;
+    return omni_quat_inverse_rotate(omni_rotation, v - omni_position);
 }
 // Transform normal to camera space.
 vec3 omni_transform_normal(vec3 v) {
@@ -204,7 +208,7 @@ public:
         Vector3 axis = dv.cross(du).unit();
         double angle = std::acos(v1.dot(v2));
         if(v1.cross(v2).dot(axis) < 0) angle = -angle;
-        return Quaternion::rotation(axis, angle);
+        return Quaternion::Rotation(axis, angle);
     }
 
     Quaternion make_viewport_quaternion(Vector3 face, Vector3 up) {
@@ -238,22 +242,22 @@ public:
                 capture_info.face = face;
                 switch(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face) {
                     case GL_TEXTURE_CUBE_MAP_POSITIVE_X: {
-                        capture_info.viewport_rotation = Quaternion::rotation(Vector3(0, 0, 1), PI) * Quaternion::rotation(Vector3(0, 1, 0), +PI / 2);
+                        capture_info.viewport_rotation = Quaternion::Rotation(Vector3(0, 0, 1), PI) * Quaternion::Rotation(Vector3(0, 1, 0), +PI / 2);
                     } break;
                     case GL_TEXTURE_CUBE_MAP_NEGATIVE_X: {
-                        capture_info.viewport_rotation = Quaternion::rotation(Vector3(0, 0, 1), PI) * Quaternion::rotation(Vector3(0, 1, 0), -PI / 2);
+                        capture_info.viewport_rotation = Quaternion::Rotation(Vector3(0, 0, 1), PI) * Quaternion::Rotation(Vector3(0, 1, 0), -PI / 2);
                     } break;
                     case GL_TEXTURE_CUBE_MAP_POSITIVE_Y: {
-                        capture_info.viewport_rotation = Quaternion::rotation(Vector3(1, 0, 0), -PI / 2);
+                        capture_info.viewport_rotation = Quaternion::Rotation(Vector3(1, 0, 0), -PI / 2);
                     } break;
                     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y: {
-                        capture_info.viewport_rotation = Quaternion::rotation(Vector3(1, 0, 0), +PI / 2);
+                        capture_info.viewport_rotation = Quaternion::Rotation(Vector3(1, 0, 0), +PI / 2);
                     } break;
                     case GL_TEXTURE_CUBE_MAP_POSITIVE_Z: {
-                        capture_info.viewport_rotation = Quaternion::rotation(Vector3(1, 0, 0), PI);
+                        capture_info.viewport_rotation = Quaternion::Rotation(Vector3(1, 0, 0), PI);
                     } break;
                     case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z: {
-                        capture_info.viewport_rotation = Quaternion::rotation(Vector3(0, 0, 1), PI);
+                        capture_info.viewport_rotation = Quaternion::Rotation(Vector3(0, 0, 1), PI);
                     } break;
                 }
                 glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -269,6 +273,7 @@ public:
                     tex_cubemap_depth_.eyes[eye], 0);
                 glDepthMask(GL_TRUE);
                 glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+                glEnable(GL_DEPTH_TEST);
                 if(delegate_) delegate_->onCaptureFace(capture_info);
             }
         }
@@ -350,6 +355,8 @@ public:
                 glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, warp_texture);
                 glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, blend_texture);
                 glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_CUBE_MAP, tex_cubemap_.eyes[eye]);
+
+                glDisable(GL_DEPTH_TEST);
 
                 glBindVertexArray(vertex_array_quad_);
                 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

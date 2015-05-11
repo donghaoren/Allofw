@@ -84,6 +84,7 @@
     src/opengl.cpp
     src/opengl_utils.cpp
     src/omnistereo.cpp
+    src/omniapp.cpp
     src/warpblend.cpp
 
     src/allofw.cpp

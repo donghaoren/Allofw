@@ -17,51 +17,54 @@ struct Quaternion_ {
 
     inline Quaternion_() = default;
 
-    inline Quaternion_(T w_, T x_, T y_, T z_)
+    inline Quaternion_(T x_, T y_, T z_, T w_)
     : v(x_, y_, z_), w(w_) { }
 
     template<typename T1>
-    inline Quaternion_(T w_, const Vector3_<T1>& v_)
+    inline Quaternion_(const Vector3_<T1>& v_, T w_)
     : v(v_), w(w_) { }
 
     template<typename OtherT>
     inline Quaternion_(const OtherT& other)
-    : w(other.w), v(other.x, other.y, other.z) { }
+    : v(other.x, other.y, other.z), w(other.w) { }
 
-    static inline Quaternion_ rotation(const Vector3_<T>& v, double alpha) {
-        return Quaternion_(std::cos(alpha / 2), v.unit() * std::sin(alpha / 2));
+    static inline Quaternion_ Rotation(const Vector3_<T>& v, double alpha) {
+        return Quaternion_(v.unit() * std::sin(alpha / 2), std::cos(alpha / 2));
+    }
+    static inline Quaternion_ One() {
+        return Quaternion_(0, 0, 0, 1);
     }
     inline T len() const{
         return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z + w * w);
     }
     inline Quaternion_ operator + (const Quaternion_& q) const {
-        return Quaternion_(w + q.w, v + q.v);
+        return Quaternion_(v + q.v, w + q.w);
     }
     inline Quaternion_ operator - (const Quaternion_& q) const {
-        return Quaternion_(w - q.w, v - q.v);
+        return Quaternion_(v - q.v, w - q.w);
     }
     inline Quaternion_ operator - () const {
-        return Quaternion_(-w, -v);
+        return Quaternion_(-v, -w);
     }
     inline Quaternion_ operator * (T s) const {
-        return Quaternion_(w * s, v * s);
+        return Quaternion_(v * s, w * s);
     }
     inline Quaternion_ operator / (T s) const {
-        return Quaternion_(w / s, v / s);
+        return Quaternion_(v / s, w / s);
     }
     inline Quaternion_ unit() const {
         T l = len();
         return *this * (1.0 / l);
     }
     inline Quaternion_ operator * (const Quaternion_& q) const {
-        return Quaternion_(w * q.w - v.dot(q.v), v * q.v + q.v * w + v * q.w);
+        return Quaternion_(v * q.v + q.v * w + v * q.w, w * q.w - v.dot(q.v));
     }
     template<typename T1>
     inline Quaternion_ operator * (const Vector3_<T1>& v) const {
-        return *this * Quaternion_(0, v);
+        return *this * Quaternion_(v, 0);
     }
     inline Quaternion_ inversion() const {
-        return Quaternion_(w, -v);
+        return Quaternion_(-v, w);
     }
     template<typename T1>
     inline Vector3_<T1> rotate(const Vector3_<T1>& v) const {
@@ -85,7 +88,7 @@ inline Vector3_<T1> operator * (const Vector3_<T1>& v, const Matrix3_<T2>& m) {
 
 template<typename T1, typename T2>
 inline Quaternion_<T2> operator * (const Vector3_<T1>& v, const Quaternion_<T2>& q) {
-    return Quaternion_<T2>(0, v) * q;
+    return Quaternion_<T2>(v, 0) * q;
 }
 
 typedef Quaternion_<float> Quaternionf;

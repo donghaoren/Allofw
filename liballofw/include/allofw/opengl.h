@@ -41,6 +41,7 @@ namespace ALLOFW_NS {
 
         class Delegate {
         public:
+            // General window events.
             virtual void onMove(int x, int y);
             virtual void onResize(int width, int height);
             virtual void onClose();
@@ -48,15 +49,31 @@ namespace ALLOFW_NS {
             virtual void onFocus(int focused);
             virtual void onIconify(int iconified);
             virtual void onFramebufferSize(int width, int height);
+            // Keyboard evnets.
+            virtual void onKeyboard(const char* key, const char* action, const char* modifiers, int scancode);
             virtual ~Delegate() { }
         };
 
+        // Set window delegate.
         virtual void setDelegate(Delegate* delegate) = 0;
+
+        // Active the window's OpenGL context.
         virtual void makeContextCurrent() = 0;
+
+        // Swap buffers.
         virtual void swapBuffers() = 0;
+
+        // Process all pending events.
         virtual void pollEvents() = 0;
+
+        // Wait for events.
         virtual void waitEvents() = 0;
+
+        // Get framebuffer size. For high-resolution display, this might be different to the window size.
         virtual Size2i getFramebufferSize() = 0;
+
+        // Input handling.
+        virtual void enableKeyboardInput() = 0;
 
         virtual ~OpenGLWindow() { }
 
