@@ -91,7 +91,7 @@ public:
         }
         YAML::Node conf = YAML::LoadFile(std::string(calibration_path) + "/" + hostname + ".json");
         data.resize(conf["projections"].size());
-        for(int p = 0; p < data.size(); p++) {
+        for(size_t p = 0; p < data.size(); p++) {
             ViewportData& vp = data[p];
             YAML::Node proj = conf["projections"][p];
             vp.viewport.x = proj["viewport"]["l"].as<float>();
@@ -149,7 +149,7 @@ public:
     }
 
     ~WarpBlendImpl() {
-        for(int i = 0; i < data.size(); i++) {
+        for(size_t i = 0; i < data.size(); i++) {
             data[i].deallocate();
         }
     }

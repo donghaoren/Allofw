@@ -156,7 +156,7 @@ public:
     static void cb_keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
         OpenGLWindowImpl* impl = (OpenGLWindowImpl*)glfwGetWindowUserPointer(window);
         if(!impl->delegate) return;
-        const char* my_action;
+        const char* my_action = "UNKNOWN";
         switch(action) {
             case GLFW_PRESS: my_action = "PRESS"; break;
             case GLFW_REPEAT: my_action = "REPEAT"; break;
