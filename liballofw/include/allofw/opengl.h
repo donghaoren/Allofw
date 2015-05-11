@@ -2,6 +2,7 @@
 #define ALLOFW_OPENGL_H
 
 #include "common.h"
+#include "config.h"
 #include "math/geometry.h"
 
 #ifdef __APPLE__
@@ -22,12 +23,12 @@ namespace ALLOFW_NS {
         struct Hint {
             static const int FULLSCREEN = -1;
 
-            bool stereo;
+            bool active_stereo;
             int width;
             int height;
 
             Hint() {
-                stereo = false;
+                active_stereo = false;
                 width = 900;
                 height = 600;
             }
@@ -61,6 +62,7 @@ namespace ALLOFW_NS {
 
         // Static methods to create a window.
         static OpenGLWindow* Create(Hint hint, const char* title);
+        static OpenGLWindow* Create(Configuration* config);
     };
 }
 

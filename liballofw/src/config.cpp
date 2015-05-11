@@ -22,7 +22,9 @@ public:
         std::string r = getStringEx(key, fallback);
         return r.size();
     }
-
+    virtual bool getBoolean(const char* key, bool fallback = 0.0) {
+        return get<bool>(key, fallback);
+    }
     virtual int getInt32(const char* key, int fallback = 0) {
         return get<int>(key, fallback);
     }

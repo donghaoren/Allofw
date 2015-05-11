@@ -54,7 +54,7 @@ public:
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        if(hint.stereo) {
+        if(hint.active_stereo) {
             glfwWindowHint(GLFW_STEREO, GL_TRUE);
         }
         int width = hint.width;
@@ -65,7 +65,7 @@ public:
         }
         window = glfwCreateWindow(width, height, title, NULL, NULL);
         if(!window) {
-            if(hint.stereo) {
+            if(hint.active_stereo) {
                 glfwWindowHint(GLFW_STEREO, GL_FALSE);
                 window = glfwCreateWindow(width, height, title, NULL, NULL);
             }
@@ -161,6 +161,20 @@ public:
 
 OpenGLWindow* OpenGLWindow::Create(OpenGLWindow::Hint hint, const char* title) {
     return new OpenGLWindowImpl(hint, title);
+}
+
+OpenGLWindow* OpenGLWindow::Create(Configuration* config) {
+    OpenGLWindow::Hint hint;
+    hint.width = config->getInt32("window.width", 900);
+    hint.height = config->getInt32("window.height", 900);
+    if(config->getBoolean("window.fullscreen", false)) {
+        hint.fullscreen();
+    }
+    if(config->getBoolean("window.active_stereo", false)) {
+        hint.active_stereo = true;
+    }
+    std::string title = config->getSTLString("window.title", "Allofw Window");
+    return Create(hint, title.c_str());
 }
 
 // Default callbacks.

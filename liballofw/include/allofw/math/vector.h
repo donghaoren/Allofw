@@ -15,6 +15,11 @@ struct Vector2_ {
     inline Vector2_(const Vector2_<number_from_t>& v) : x(v.x), y(v.y) { }
     inline Vector2_(number_t v) { x = y = v; }
     inline Vector2_(number_t x_, number_t y_) : x(x_), y(y_) { }
+
+    template<typename OtherT>
+    inline Vector2_(const OtherT& other)
+    : x(other.x), y(other.y) { }
+
     inline Vector2_& operator += (const Vector2_& v) { x += v.x; y += v.y; return *this; }
     inline Vector2_& operator -= (const Vector2_& v) { x -= v.x; y -= v.y; return *this; }
     inline Vector2_& operator *= (number_t s) { x *= s; y *= s; return *this; }
@@ -44,7 +49,14 @@ struct Vector2_ {
 
     static Vector2_ NaN() { return Vector2_(NAN, NAN); }
 
-    number_t x, y;
+    union {
+        number_t x;
+        number_t w;
+    };
+    union {
+        number_t y;
+        number_t h;
+    };
 };
 
 template <typename T>
@@ -59,6 +71,11 @@ struct Vector3_ {
     inline Vector3_(const Vector3_<number_from_t>& v) : x(v.x), y(v.y), z(v.z) { }
     inline Vector3_(number_t v) { x = y = z = v; }
     inline Vector3_(number_t x_, number_t y_, number_t z_) : x(x_), y(y_), z(z_) { }
+
+    template<typename OtherT>
+    inline Vector3_(const OtherT& other)
+    : x(other.x), y(other.y), z(other.z) { }
+
     inline Vector3_& operator += (const Vector3_& v) { x += v.x; y += v.y; z += v.z; return *this; }
     inline Vector3_& operator -= (const Vector3_& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
     inline Vector3_& operator *= (number_t s) { x *= s; y *= s; z *= s; return *this; }
@@ -108,6 +125,11 @@ struct Vector4_ {
     inline Vector4_(const Vector4_<number_from_t>& v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
     inline Vector4_(number_t v) { x = y = z = w = v; }
     inline Vector4_(number_t x_, number_t y_, number_t z_, number_t w_) : x(x_), y(y_), z(z_), w(w_) { }
+
+    template<typename OtherT>
+    inline Vector4_(const OtherT& other)
+    : x(other.x), y(other.y), z(other.z), w(other.w) { }
+
     inline Vector4_& operator += (const Vector4_& v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
     inline Vector4_& operator -= (const Vector4_& v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }
     inline Vector4_& operator *= (number_t s) { x *= s; y *= s; z *= s; w *= s; return *this; }

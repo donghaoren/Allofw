@@ -1,4 +1,4 @@
-#include <allofw/math/matrix.hpp>
+#include "allofw/math/matrix.h"
 
 #include <iostream>
 
@@ -7,7 +7,7 @@
 using namespace std;
 using namespace arma;
 
-IVNS_BEGIN
+ALLOFW_NS_BEGIN
 
 // Armadillo uses column-major order for storage.
 // We are also using column-major order.
@@ -44,4 +44,4 @@ template void internal::matrix_svd<float, 3>(const float*, float*, float*, float
 template void internal::matrix_svd<double, 4>(const double*, double*, double*, double*);
 template void internal::matrix_svd<float, 4>(const float*, float*, float*, float*);
 
-IVNS_END
+ALLOFW_NS_END

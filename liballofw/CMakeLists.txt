@@ -48,6 +48,7 @@
   FIND_PACKAGE ( FreeImage REQUIRED )
   FIND_PACKAGE ( GLUT REQUIRED )
   FIND_PACKAGE ( Skia REQUIRED )
+  FIND_PACKAGE ( Armadillo REQUIRED )
 
   INCLUDE_DIRECTORIES (
     ${Boost_INCLUDE_DIRS}
@@ -55,6 +56,7 @@
     ${OPENGL_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${YAMLCPP_INCLUDE_DIRS}
+    ${ARMADILLO_INCLUDE_DIR}
   )
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -71,12 +73,18 @@
   ADD_LIBRARY ( allofw SHARED
     src/stream.cpp
 
+    src/math.cpp
+
     src/graphics_skia.cpp
     src/graphics_ffmpeg.cpp
 
+    src/logger.cpp
+
     src/config.cpp
     src/opengl.cpp
+    src/opengl_utils.cpp
     src/omnistereo.cpp
+    src/warpblend.cpp
 
     src/allofw.cpp
   )
@@ -90,6 +98,7 @@
       ${GLFW_LIBRARIES}
       ${FREEIMAGE_LIBRARIES}
       ${YAMLCPP_LIBRARIES}
+      ${ARMADILLO_LIBRARIES}
   )
 
   ADD_EXECUTABLE ( test_glfw

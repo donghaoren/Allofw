@@ -14,15 +14,27 @@ typedef Vector3_<double> Size3d;
 
 template<typename number_t>
 struct Rectangle2_ {
-    Vector2_<number_t> position;
-    Vector2_<number_t> size;
+    union {
+        Vector2_<number_t> position;
+        struct {
+          number_t x;
+          number_t y;
+        };
+    };
+    union {
+        Vector2_<number_t> size;
+        struct {
+            number_t w;
+            number_t h;
+        };
+    };
     Rectangle2_() = default;
     Rectangle2_(const Vector2_<number_t>& position_, const Vector2_<number_t>& size_)
-      : position(position_), size(size_) { }
+    : position(position_), size(size_) { }
     Rectangle2_(number_t w, number_t h)
-      : position(0, 0), size(w, h) { }
+    : position(0, 0), size(w, h) { }
     Rectangle2_(number_t x, number_t y, number_t w, number_t h)
-      : position(x, y), size(w, h) { }
+    : position(x, y), size(w, h) { }
 };
 
 typedef Rectangle2_<int> Rectangle2i;
@@ -36,11 +48,11 @@ struct Rectangle3_ {
     Vector3_<number_t> size;
     Rectangle3_() = default;
     Rectangle3_(const Vector3_<number_t>& position_, const Vector3_<number_t>& size_)
-      : position(position_), size(size_) { }
+    : position(position_), size(size_) { }
     Rectangle3_(number_t w, number_t h, number_t d)
-      : position(0, 0, 0), size(w, h, d) { }
+    : position(0, 0, 0), size(w, h, d) { }
     Rectangle3_(number_t x, number_t y, number_t z, number_t w, number_t h, number_t d)
-      : position(x, y, z), size(w, h, d) { }
+    : position(x, y, z), size(w, h, d) { }
 };
 
 typedef Rectangle3_<int> Rectangle3i;

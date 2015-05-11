@@ -36,6 +36,14 @@ public:
     invalid_argument(const char* what_ = nullptr) : exception(what_) { }
 };
 
+class non_copyable {
+public:
+    non_copyable() = default;
+private:
+    non_copyable(const non_copyable&);
+    non_copyable& operator = (const non_copyable&);
+};
+
 ALLOFW_NS_END
 
 #endif
