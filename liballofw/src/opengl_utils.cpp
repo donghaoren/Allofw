@@ -25,6 +25,7 @@ GLuint compileShaderProgram(const char* source_vertex, const char* source_fragme
     if(length > 1) {
         char* infolog = new char[length];
         glGetShaderInfoLog(shader_v, length, NULL, infolog);
+printf("length = %d, infolog = %s, status = %d\n", length, infolog, status);
         logger->print(Logger::kWarning, "glutils::compileShaderProgram: Vertex Shader Compile Info");
         logger->pushScope("> ");
         logger->print(Logger::kWarning, infolog);
