@@ -1,4 +1,5 @@
 #include "allofw/opengl.h"
+#include "allofw/logger.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
@@ -12,6 +13,7 @@ namespace {
     bool glfw_initialized = false;
 
     void glfw_error_callback(int error, const char* description) {
+        Logger::Default()->printf(Logger::kError, "glfw: %d, %s\n", error, description);
         fprintf(stderr, "glfw: %s\n", description);
     }
 
@@ -47,6 +49,7 @@ public:
             if(!glfwInit()) {
                 throw glfw_runtime_error("glfwInit() failed.");
             }
+            glfwSetErrorCallback(glfw_error_callback);
             glfw_initialized = true;
         }
         glfwDefaultWindowHints();
