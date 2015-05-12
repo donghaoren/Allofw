@@ -151,11 +151,18 @@ public:
         eye_separation_ = conf->getFloat("omnistereo.eye_separation", 0.065);
         sphere_radius_ = conf->getFloat("omnistereo.sphere_radius", 5.0);
         near_ = conf->getFloat("omnistereo.near", 0.01);
-        far_ = conf->getFloat("omnistereo.far", 100);;
+        far_ = conf->getFloat("omnistereo.far", 100);
 
-        initCubemaps();
-        allocateCubemaps();
-        initDraw();
+        capture_method_ = kCaptureMethod_Cubemap;
+        switch(capture_method_) {
+            case kCaptureMethod_Cubemap: {
+                initCubemaps();
+                allocateCubemaps();
+                initDrawCubemaps();
+            } break;
+            case kCaptureMethod_PerProjection: {
+            } break;
+        }
 
         std::string warpblend = conf->getSTLString("omnistereo.warpblend.allosphere_calibration", "undefined");
         if(warpblend != "undefined") {
@@ -177,9 +184,11 @@ public:
     }
     // Set cubemap resolution, allocate the cubemap.
     virtual void setResolution(int size) {
-        if(resolution_ != size) {
-            resolution_ = size;
-            allocateCubemaps();
+        if(capture_method_ == kCaptureMethod_Cubemap) {
+            if(resolution_ != size) {
+                resolution_ = size;
+                allocateCubemaps();
+            }
         }
     }
 
@@ -188,7 +197,11 @@ public:
         if(stereo_mode_ != stereo_mode) {
             stereo_mode_ = stereo_mode;
             stereo_enabled_ = stereo_mode_ != kStereoMode_Mono;
-            allocateCubemaps();
+            switch(capture_method_) {
+                case kCaptureMethod_Cubemap: {
+                    allocateCubemaps();
+                } break;
+            }
         }
     }
 
@@ -207,29 +220,44 @@ public:
 
     // Get the cubemap.
     virtual StereoTexture getCubemapTexture() {
-        return tex_cubemap_;
+        if(capture_method_ == kCaptureMethod_Cubemap) {
+            return tex_cubemap_;
+        } else {
+            throw exception("cubemap not available in current capture method.");
+        }
     }
     virtual StereoTexture getDepthCubemapTexture() {
-        return tex_cubemap_depth_;
+        if(capture_method_ == kCaptureMethod_Cubemap) {
+            return tex_cubemap_depth_;
+        } else {
+            throw exception("cubemap not available in current capture method.");
+        }
     }
 
-    // Find quaternion that rotates v1 -> v2, u1 -> u2.
-    Quaternion quat_two_vectors_rotate(Vector3 v1, Vector3 u1, Vector3 v2, Vector3 u2) {
-        Vector3 dv = (v2 - v1).unit();
-        Vector3 du = (u2 - u2).unit();
-        Vector3 axis = dv.cross(du).unit();
-        double angle = std::acos(v1.dot(v2));
-        if(v1.cross(v2).dot(axis) < 0) angle = -angle;
-        return Quaternion::Rotation(axis, angle);
+    virtual void capture() override {
+        switch(capture_method_) {
+            case kCaptureMethod_Cubemap: {
+                captureCubemap();
+            } break;
+            case kCaptureMethod_PerProjection: {
+                capturePerProjection();
+            } break;
+        }
     }
 
-    Quaternion make_viewport_quaternion(Vector3 face, Vector3 up) {
-        Quaternion r = quat_two_vectors_rotate(face, up, Vector3(0, 0, -1), Vector3(0, 1, 0));
-        return r;
+    virtual void composite(const Rectangle2i& viewport, const CompositeInfo& info) {
+        switch(capture_method_) {
+            case kCaptureMethod_Cubemap: {
+                compositeCubemap(viewport, info);
+            } break;
+            case kCaptureMethod_PerProjection: {
+                compositePerProjection(viewport, info);
+            } break;
+        }
     }
 
-    // Capture.
-    virtual void capture() {
+    // Capture into cubemap.
+    void captureCubemap() {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
         // Store viewport and depth range.
         GLint viewport[4];
@@ -242,7 +270,6 @@ public:
         Delegate::CaptureInfo capture_info;
         capture_info.omnistereo = this;
         capture_info.pose = pose_;
-        capture_info.eye_separation = stereo_enabled_ ? eye_separation_ : 0;
         capture_info.sphere_radius = sphere_radius_;
         capture_info.near = near_;
         capture_info.far = far_;
@@ -250,6 +277,7 @@ public:
         capture_info.viewport_aspect = 1;
         for(int eye = 0; eye < eyes; eye++) {
             capture_info.eye = eye;
+            capture_info.eye_separation = stereo_enabled_ ? (eye == kEye_Left ? -eye_separation_ : eye_separation_) : 0;
             for(int face = 0; face < 6; face++) {
                 capture_info.face = face;
                 switch(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face) {
@@ -301,7 +329,7 @@ public:
     }
 
     // Draw the cubemap to the current viewport.
-    virtual void composite(const Rectangle2i& viewport, const CompositeInfo& info) {
+    virtual void compositeCubemap(const Rectangle2i& viewport, const CompositeInfo& info) {
         int eyes = stereo_enabled_ ? 2 : 1;
         int mask = info.mask;
         for(int eye = 0; eye < eyes; eye++) {
@@ -396,6 +424,13 @@ public:
         glutils::checkGLErrors("OmniStereo::composite");
     }
 
+    // Capture into cubemap.
+    void capturePerProjection() {
+    }
+
+    void compositePerProjection(const Rectangle2i& viewport, const CompositeInfo& info) {
+    }
+
     // Necessary functions and uniforms for use in shader programs.
     // vec4 omni_transform(vec4 v)          : Transform coordinates to camera space.
     // vec3 omni_transform_normal(vec3 v)   : Transform normal to camera space.
@@ -449,7 +484,16 @@ public:
     }
 
     virtual ~OmniStereoImpl() {
+        switch(capture_method_) {
+            case kCaptureMethod_Cubemap: {
+                freeCubemaps();
+            } break;
+            case kCaptureMethod_PerProjection: {
+
+            } break;
+        };
         freeCubemaps();
+        delete warpblend_;
     }
 
 private:
@@ -543,10 +587,11 @@ private:
         textures[2] = tex_cubemap_depth_.L;
         textures[3] = tex_cubemap_depth_.R;
         glDeleteTextures(4, textures);
+        glDeleteProgram(program_draw_);
     }
 
-    void initDraw() {
-        LoggerScope logger(Logger::kInfo, "OmniStereo::initDraw");
+    void initDrawCubemaps() {
+        LoggerScope logger(Logger::kInfo, "OmniStereo::initDrawCubemaps");
         program_draw_ = glutils::compileShaderProgram(gShader_draw_vertex, gShader_draw_fragment);
         if(!program_draw_) {
             throw exception("Fatal: failed compile shader program.");
@@ -574,13 +619,26 @@ private:
         glutils::checkGLErrors("vertex array");
     }
 
+    // PerProjection initialization.
+
+    // Internal structs.
     struct ProjectionTexture {
         StereoTexture texture;
         Quaternion rotation;
         float fov;
     };
 
+    enum CaptureMethod {
+        kCaptureMethod_Cubemap          = 0,
+        kCaptureMethod_PerProjection    = 1
+    };
+
+    CaptureMethod capture_method_;
+
+    // Cubemap capture method.
     StereoTexture tex_cubemap_, tex_cubemap_depth_;
+
+    // PreProjection capture method.
     std::vector<ProjectionTexture> tex_projection_;
 
     GLuint framebuffer_;
