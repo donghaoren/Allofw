@@ -34,52 +34,51 @@ namespace {
         ByteStreamIOContext(const ByteStreamIOContext  &);
         ByteStreamIOContext& operator = (const ByteStreamIOContext &);
     public:
-        ByteStreamIOContext(ByteStream* stream_)
-          : stream(stream_),
-            buffer_size(1024 * 1024),
-            buffer(static_cast<unsigned char*>(av_malloc(buffer_size)))
+        ByteStreamIOContext(ByteStream* stream)
+          : stream_(stream),
+            buffer_size_(1024 * 1024),
+            buffer_(static_cast<unsigned char*>(av_malloc(buffer_size_)))
         {
-            ctx = avio_alloc_context(buffer, buffer_size, 0, this, &ByteStreamIOContext::read, NULL, &ByteStreamIOContext::seek);
+            ctx_ = avio_alloc_context(buffer_, buffer_size_, 0, this, &ByteStreamIOContext::read, NULL, &ByteStreamIOContext::seek);
         }
 
         ~ByteStreamIOContext() {
-            av_free(ctx);
-            av_free(buffer);
+            av_free(ctx_);
+            av_free(buffer_);
         }
 
         static int read(void *opaque, unsigned char *buf, int buf_size) {
             ByteStreamIOContext* h = static_cast<ByteStreamIOContext*>(opaque);
-            return h->stream->read(buf, buf_size);
+            return h->stream_->read(buf, buf_size);
         }
 
         static int64_t seek(void *opaque, int64_t offset, int whence) {
             ByteStreamIOContext* h = static_cast<ByteStreamIOContext*>(opaque);
             if(whence == SEEK_SET) {
-                h->stream->seek(ByteStream::BEGIN, offset);
-                return h->stream->position();
+                h->stream_->seek(ByteStream::BEGIN, offset);
+                return h->stream_->position();
             }
             if(whence == SEEK_CUR) {
-                h->stream->seek(ByteStream::CURRENT, offset);
-                return h->stream->position();
+                h->stream_->seek(ByteStream::CURRENT, offset);
+                return h->stream_->position();
             }
             if(whence == SEEK_END) {
-                h->stream->seek(ByteStream::END, offset);
-                return h->stream->position();
+                h->stream_->seek(ByteStream::END, offset);
+                return h->stream_->position();
             }
             if(whence == AVSEEK_SIZE) {
-                return h->stream->position();
+                return h->stream_->position();
             }
             return -1;
         }
 
-        AVIOContext *get_avio() { return ctx; }
+        AVIOContext *get_avio() { return ctx_; }
 
     private:
-        int64_t position;
-        ByteStream* stream;
-        int buffer_size;
-        unsigned char * buffer;
-        AVIOContext * ctx;
+        ByteStream* stream_;
+        int buffer_size_;
+        unsigned char * buffer_;
+        AVIOContext * ctx_;
     };
 
     class VideoSurface2D_ffmpeg : public VideoSurface2D {
@@ -90,93 +89,93 @@ namespace {
 
             ffmpeg_initialize();
 
-            mIOContext = NULL;
-            mFormatContext = NULL;
-            mCodecContext = NULL;
-            mCodecContextOpened = false;
-            mCodec = NULL;
-            mFrame = NULL;
-            mFrameRGB = NULL;
-            mOptionsDict = NULL;
-            mBuffer = NULL;
+            io_context_ = NULL;
+            format_context_ = NULL;
+            codec_context_ = NULL;
+            codec_context_opened_ = false;
+            codec_ = NULL;
+            frame_ = NULL;
+            frame_rgb_ = NULL;
+            options_dict_ = NULL;
+            buffer_ = NULL;
 
-            //mIOContext = new ByteStreamIOContext(stream);
-            //mFormatContext = avformat_alloc_context();
-            //mFormatContext->pb = mIOContext->get_avio();
-            //avformat_open_input(&mFormatContext, "dummy", nullptr, nullptr);
+            //io_context_ = new ByteStreamIOContext(stream);
+            //format_context_ = avformat_alloc_context();
+            //format_context_->pb = io_context_->get_avio();
+            //avformat_open_input(&format_context_, "dummy", nullptr, nullptr);
 
-            if(avformat_open_input(&mFormatContext, path, NULL, NULL) != 0) {
+            if(avformat_open_input(&format_context_, path, NULL, NULL) != 0) {
                 _cleanup();
                 throw invalid_argument("could not open input file");
             }
 
-            if(avformat_find_stream_info(mFormatContext, NULL) < 0) {
+            if(avformat_find_stream_info(format_context_, NULL) < 0) {
                 _cleanup();
                 throw invalid_argument("could not find stream information");
             }
 
-            // av_dump_format(mFormatContext, 0, "VideoSurface2D_ffmpeg(ByteStream*)", 0);
+            // av_dump_format(format_context_, 0, "VideoSurface2D_ffmpeg(ByteStream*)", 0);
 
-            mVideoStream = -1;
-            for(int i = 0; i < mFormatContext->nb_streams; i++) {
-                if(mFormatContext->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-                    mVideoStream = i;
+            video_stream_ = -1;
+            for(int i = 0; i < format_context_->nb_streams; i++) {
+                if(format_context_->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+                    video_stream_ = i;
                     break;
                 }
             }
 
-            if(mVideoStream == -1) {
+            if(video_stream_ == -1) {
                 _cleanup();
                 throw invalid_argument("could not find video stream");
             }
 
-            mCodecContext = mFormatContext->streams[mVideoStream]->codec;
+            codec_context_ = format_context_->streams[video_stream_]->codec;
 
-            mCodec = avcodec_find_decoder(mCodecContext->codec_id);
+            codec_ = avcodec_find_decoder(codec_context_->codec_id);
 
-            if(mCodec == NULL) {
+            if(codec_ == NULL) {
                 _cleanup();
                 throw invalid_argument("could not find video decoder");
             }
 
-            if(avcodec_open2(mCodecContext, mCodec, &mOptionsDict) < 0) {
+            if(avcodec_open2(codec_context_, codec_, &options_dict_) < 0) {
                 _cleanup();
                 throw invalid_argument("could not open codec");
             }
-            mCodecContextOpened = true;
+            codec_context_opened_ = true;
 
-            mFrame = av_frame_alloc();
-            mFrameRGB = av_frame_alloc();
+            frame_ = av_frame_alloc();
+            frame_rgb_ = av_frame_alloc();
 
-            int mNumBytes = avpicture_get_size(PIX_FMT_RGBA, mCodecContext->width, mCodecContext->height);
-            mBuffer = (uint8_t *)av_malloc(mNumBytes * sizeof(uint8_t));
+            int num_bytes_ = avpicture_get_size(PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
+            buffer_ = (uint8_t *)av_malloc(num_bytes_ * sizeof(uint8_t));
 
             sws_ctx = sws_getContext(
-                mCodecContext->width,
-                mCodecContext->height,
-                mCodecContext->pix_fmt,
-                mCodecContext->width,
-                mCodecContext->height,
+                codec_context_->width,
+                codec_context_->height,
+                codec_context_->pix_fmt,
+                codec_context_->width,
+                codec_context_->height,
                 PIX_FMT_RGBA, SWS_FAST_BILINEAR,
                 NULL, NULL, NULL
             );
 
-            mTimeBase = (int64_t(mCodecContext->time_base.num) * AV_TIME_BASE) / int64_t(mCodecContext->time_base.den);
-            mFPS = (double)mFormatContext->streams[mVideoStream]->r_frame_rate.num / (double)mFormatContext->streams[mVideoStream]->r_frame_rate.den;
-            mDuration = (double)mFormatContext->duration / (double)AV_TIME_BASE;
+            time_base_ = (int64_t(codec_context_->time_base.num) * AV_TIME_BASE) / int64_t(codec_context_->time_base.den);
+            fps_ = (double)format_context_->streams[video_stream_]->r_frame_rate.num / (double)format_context_->streams[video_stream_]->r_frame_rate.den;
+            duration_ = (double)format_context_->duration / (double)AV_TIME_BASE;
 
             // Assign appropriate parts of buffer to image planes in pFrameRGB
             // Note that pFrameRGB is an AVFrame, but AVFrame is a superset of AVPicture
-            avpicture_fill((AVPicture*)mFrameRGB, mBuffer, PIX_FMT_RGBA, mCodecContext->width, mCodecContext->height);
+            avpicture_fill((AVPicture*)frame_rgb_, buffer_, PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
         }
 
         void _cleanup() {
-            if(mCodecContextOpened) avcodec_close(mCodecContext);
-            if(mFrame) { av_free(mFrame); mFrame = NULL; }
-            if(mFrameRGB) { av_free(mFrameRGB); mFrameRGB = NULL; }
-            if(mFormatContext) { avformat_close_input(&mFormatContext); mFormatContext = NULL; }
-            if(mIOContext) { delete mIOContext; mIOContext = NULL; }
-            if(mBuffer) { av_free(mBuffer); }
+            if(codec_context_opened_) { avcodec_close(codec_context_); }
+            if(frame_) { av_free(frame_); frame_ = NULL; }
+            if(frame_rgb_) { av_free(frame_rgb_); frame_rgb_ = NULL; }
+            if(format_context_) { avformat_close_input(&format_context_); format_context_ = NULL; }
+            if(io_context_) { delete io_context_; io_context_ = NULL; }
+            if(buffer_) { av_free(buffer_); }
         }
 
         virtual ~VideoSurface2D_ffmpeg() {
@@ -184,32 +183,32 @@ namespace {
         }
 
         virtual int width() const {
-            return mCodecContext->width;
+            return codec_context_->width;
         }
 
         virtual int height() const {
-            return mCodecContext->height;
+            return codec_context_->height;
         }
 
         virtual void seek(double time) {
-            av_seek_frame(mFormatContext, -1, int64_t(time * AV_TIME_BASE), AVSEEK_FLAG_ANY);
-            avcodec_flush_buffers(mCodecContext);
+            av_seek_frame(format_context_, -1, int64_t(time * AV_TIME_BASE), AVSEEK_FLAG_ANY);
+            avcodec_flush_buffers(codec_context_);
         }
 
         virtual bool nextFrame() {
-            while(av_read_frame(mFormatContext, &mPacket) >= 0) {
-                if(mPacket.stream_index == mVideoStream) {
-                    int frameFinished;
-                    avcodec_decode_video2(mCodecContext, mFrame, &frameFinished, &mPacket);
-                    if(frameFinished) {
+            while(av_read_frame(format_context_, &packet_) >= 0) {
+                if(packet_.stream_index == video_stream_) {
+                    int frame_finished;
+                    avcodec_decode_video2(codec_context_, frame_, &frame_finished, &packet_);
+                    if(frame_finished) {
                         sws_scale(
                             sws_ctx,
-                            (uint8_t const * const *)mFrame->data,
-                            mFrame->linesize,
+                            (uint8_t const * const *)frame_->data,
+                            frame_->linesize,
                             0,
-                            mCodecContext->height,
-                            mFrameRGB->data,
-                            mFrameRGB->linesize
+                            codec_context_->height,
+                            frame_rgb_->data,
+                            frame_rgb_->linesize
                         );
                         return true;
                     }
@@ -219,35 +218,34 @@ namespace {
         }
 
         virtual double fps() {
-            return mFPS;
+            return fps_;
         }
 
         virtual double duration() {
-            return mDuration;
+            return duration_;
         }
 
         virtual const void* pixels() const {
-            return mBuffer;
+            return buffer_;
         }
 
-        ByteStreamIOContext* mIOContext;
-
-        AVFormatContext *mFormatContext;
-        AVCodecContext  *mCodecContext;
-        bool             mCodecContextOpened;
-        AVCodec         *mCodec;
-        AVFrame         *mFrame;
-        AVFrame         *mFrameRGB;
-        AVDictionary    *mOptionsDict;
-        AVPacket        mPacket;
-        int             mVideoStream;
-        int             frameFinished;
-        int             mNumBytes;
-        uint8_t         *mBuffer;
-        int64_t         mTimeBase;
-        double          mFPS;
-        double          mDuration;
-        struct SwsContext *sws_ctx;
+        ByteStreamIOContext  *io_context_;
+        AVFormatContext      *format_context_;
+        AVCodecContext       *codec_context_;
+        bool                  codec_context_opened_;
+        AVCodec              *codec_;
+        AVFrame              *frame_;
+        AVFrame              *frame_rgb_;
+        AVDictionary         *options_dict_;
+        AVPacket              packet_;
+        int                   video_stream_;
+        int                   frameFinished;
+        int                   num_bytes_;
+        uint8_t              *buffer_;
+        int64_t               time_base_;
+        double                fps_;
+        double                duration_;
+        struct SwsContext    *sws_ctx;
     };
 
 }

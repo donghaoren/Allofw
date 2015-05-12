@@ -20,9 +20,13 @@ omnistereo:
     ## Eye separation. (default parameters 0.065, 5 are modeled with physical size.)
     # eye_separation: 0.065
     # sphere_radius: 5
+
     ## Clip distances.
     # near: 0.01
     # far: 100
+
+    ## Cubemap resolution.
+    # resolution: 1024
 
     ## Where to find warp and blend information.
     warpblend:

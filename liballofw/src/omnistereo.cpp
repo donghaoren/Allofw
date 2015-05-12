@@ -12,6 +12,7 @@
 #include "allofw/omnistereo.h"
 #include "allofw/opengl_utils.h"
 #include <string>
+#include <vector>
 
 ALLOFW_NS_BEGIN
 
@@ -37,12 +38,14 @@ vec4 omni_quat_multiply(vec4 q1, vec4 q2) {
 // Rotate vector v with quaternion q.
 // Assumption: |q| = 1.
 vec3 omni_quat_rotate(vec4 q, vec3 v) {
-    vec4 q1 = vec4(-q.xyz, q.w);
-    return omni_quat_multiply(omni_quat_multiply(q, vec4(v, 0.0)), q1).xyz;
+    float d = dot(q.xyz, v);
+    vec3 c = cross(q.xyz, v);
+    return q.w * q.w * v + (q.w + q.w) * c + d * q.xyz - cross(c, q.xyz);
 }
 vec3 omni_quat_inverse_rotate(vec4 q, vec3 v) {
-    vec4 q1 = vec4(-q.xyz, q.w);
-    return omni_quat_multiply(omni_quat_multiply(q1, vec4(v, 0.0)), q).xyz;
+    float d = dot(q.xyz, v);
+    vec3 c = cross(q.xyz, v);
+    return q.w * q.w * v - (q.w + q.w) * c + d * q.xyz - cross(c, q.xyz);
 }
 // Transform coordinates to camera space.
 vec3 omni_transform(vec3 v) {
@@ -50,7 +53,7 @@ vec3 omni_transform(vec3 v) {
 }
 // Transform normal to camera space.
 vec3 omni_transform_normal(vec3 v) {
-    return omni_quat_rotate(omni_rotation, v);
+    return omni_quat_inverse_rotate(omni_rotation, v);
 }
 // Perform Omnistereo displacement on vertex.
 vec3 omni_displace(vec3 vertex) {
@@ -130,7 +133,6 @@ void main() {
 class OmniStereoImpl : public OmniStereo {
 public:
     OmniStereoImpl(Configuration* conf) {
-        if(!conf) conf = Configuration::Create();
         LoggerScope logger(Logger::kInfo, "OmniStereo::Initialization");
 
         resolution_ = conf->getUInt32("omnistereo.resolution", 1024);
@@ -240,7 +242,7 @@ public:
         Delegate::CaptureInfo capture_info;
         capture_info.omnistereo = this;
         capture_info.pose = pose_;
-        capture_info.eye_separation = eye_separation_;
+        capture_info.eye_separation = stereo_enabled_ ? eye_separation_ : 0;
         capture_info.sphere_radius = sphere_radius_;
         capture_info.near = near_;
         capture_info.far = far_;
@@ -474,6 +476,7 @@ private:
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         glutils::checkGLErrors("setup textures");
         glGenFramebuffers(1, &framebuffer_);
+        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     }
     void setupCubemapParameters(bool is_depth = false) {
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -571,7 +574,15 @@ private:
         glutils::checkGLErrors("vertex array");
     }
 
+    struct ProjectionTexture {
+        StereoTexture texture;
+        Quaternion rotation;
+        float fov;
+    };
+
     StereoTexture tex_cubemap_, tex_cubemap_depth_;
+    std::vector<ProjectionTexture> tex_projection_;
+
     GLuint framebuffer_;
     GLuint program_draw_;
     GLuint program_draw_drawMask_, program_draw_positionScalers_;

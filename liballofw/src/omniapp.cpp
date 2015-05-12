@@ -145,11 +145,12 @@ void OmniAppMixin_Navigation::onFrame(double dt) {
     for(Vector4 v : translation_speeds_) {
         translation_speed += v.xyz() * v.w;
     }
-    pose().position += translation_speed * dt;
+    pose().position += pose().rotation.rotate(translation_speed * dt);
 
     Quaternion r1 = Quaternion::Rotation(Vector3(0, 1, 0), dt * (rotation_speed_.x - rotation_speed_.y));
     Quaternion r2 = Quaternion::Rotation(Vector3(1, 0, 0), dt * (rotation_speed_.z - rotation_speed_.w));
     pose().rotation = r1 * pose().rotation * r2;
+    pose().rotation = pose().rotation.unit();
 }
 
 ALLOFW_NS_END
