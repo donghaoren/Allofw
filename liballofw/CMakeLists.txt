@@ -5,6 +5,12 @@
   PROJECT ( liballofw )
 
 #----------------------------------------------------------------------------------------------------------------------
+# User Configuration Parameters
+
+  SET ( WITH_SKIA   FALSE CACHE BOOL "Build with Skia.")
+
+
+#----------------------------------------------------------------------------------------------------------------------
 # Configuration Parameters
 
   SET ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules" )
@@ -47,17 +53,22 @@
   FIND_PACKAGE ( GLEW REQUIRED )
   FIND_PACKAGE ( FreeImage REQUIRED )
   FIND_PACKAGE ( GLUT REQUIRED )
-  FIND_PACKAGE ( Skia REQUIRED )
   FIND_PACKAGE ( Armadillo REQUIRED )
 
   INCLUDE_DIRECTORIES (
     ${Boost_INCLUDE_DIRS}
-    ${Skia_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${YAMLCPP_INCLUDE_DIRS}
     ${ARMADILLO_INCLUDE_DIR}
   )
+
+  IF ( ${WITH_SKIA} )
+    FIND_PACKAGE ( Skia REQUIRED )
+    INCLUDE_DIRECTORIES (
+      ${Skia_INCLUDE_DIRS}
+    )
+  ENDIF ( )
 
 #----------------------------------------------------------------------------------------------------------------------
 # Included Dependencies
@@ -72,27 +83,18 @@
 
   ADD_LIBRARY ( allofw SHARED
     src/stream.cpp
-
     src/math.cpp
-
-    src/graphics_skia.cpp
-    src/graphics_ffmpeg.cpp
-
-    src/logger.cpp
-
     src/config.cpp
+    src/logger.cpp
     src/opengl.cpp
     src/opengl_utils.cpp
     src/omnistereo.cpp
-    src/omniapp.cpp
     src/warpblend.cpp
-
     src/allofw.cpp
   )
 
   TARGET_LINK_LIBRARIES ( allofw
     LINK_PRIVATE
-      ${Skia_LIBRARIES}
       ${FFMPEG_LIBRARIES}
       ${OPENGL_LIBRARIES}
       ${GLEW_LIBRARIES}
@@ -102,16 +104,45 @@
       ${ARMADILLO_LIBRARIES}
   )
 
-  ADD_EXECUTABLE ( test_glfw
-    src/test/test_glfw.cpp
+  ADD_LIBRARY ( allofw-omniapp SHARED
+    src/omniapp.cpp
+    src/omniapp_broadcasting.cpp
+    src/omniapp_broadcasting_socket.cpp
   )
 
-  TARGET_LINK_LIBRARIES ( test_glfw
-    allofw
-    ${GLFW_LIBRARIES}
-    ${GLEW_LIBRARIES}
-    ${OPENGL_LIBRARIES}
+  TARGET_LINK_LIBRARIES ( allofw-omniapp
+    LINK_PRIVATE
+      allofw
+      ${ZeroMQ_LIBRARIES}
   )
+
+  IF ( ${WITH_SKIA} )
+    ADD_LIBRARY ( allofw-graphics SHARED
+      src/graphics_skia.cpp
+      src/graphics_ffmpeg.cpp
+    )
+
+    TARGET_LINK_LIBRARIES ( allofw-graphics
+      LINK_PRIVATE
+        allofw
+        ${Skia_LIBRARIES}
+        ${FFMPEG_LIBRARIES}
+        ${OPENGL_LIBRARIES}
+        ${GLEW_LIBRARIES}
+        ${GLFW_LIBRARIES}
+        ${FREEIMAGE_LIBRARIES}
+        ${YAMLCPP_LIBRARIES}
+        ${ARMADILLO_LIBRARIES}
+    )
+
+    INSTALL (
+      TARGETS
+        allofw-graphics
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib
+    )
+  ENDIF ( )
 
 #----------------------------------------------------------------------------------------------------------------------
 # Samples
@@ -120,6 +151,7 @@
       ADD_EXECUTABLE ( ${sample_name} samples/${sample_sources} )
       TARGET_LINK_LIBRARIES ( ${sample_name}
         allofw
+        allofw-omniapp
         ${OPENGL_LIBRARIES}
       )
       SET_TARGET_PROPERTIES ( ${sample_name}
@@ -129,6 +161,7 @@
   ENDFUNCTION(ADD_SAMPLE_EXECUTABLE)
 
   ADD_SAMPLE_EXECUTABLE ( cubes cubes.cpp )
+  ADD_SAMPLE_EXECUTABLE ( cubes_bcast cubes_bcast.cpp )
 
 #----------------------------------------------------------------------------------------------------------------------
 # Install
@@ -143,6 +176,7 @@
   INSTALL (
     TARGETS
       allofw
+      allofw-omniapp
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib

@@ -12,20 +12,11 @@
 #include "allofw/omniapp.h"
 #include "allofw/logger.h"
 #include "allofw/utils.h"
+#include <unistd.h>
 
 ALLOFW_NS_BEGIN
 
-OmniAppBase::OmniAppBase(const char* config_path) {
-    config_ = Configuration::Create();
-    try {
-        config_->parseFile(config_path);
-    } catch(allofw::exception& e) {
-        Logger::Default()->printf(Logger::kWarning, "OmniApp: failed to read config file '%s', using defaults.", config_path);
-        Logger::Default()->pushScope("> ");
-        Logger::Default()->printf(Logger::kWarning, e.what());
-        Logger::Default()->popScope();
-    }
-}
+OmniAppBase::OmniAppBase() { }
 
 void OmniAppBase::onInitialize() { }
 
@@ -34,6 +25,11 @@ void OmniAppBase::onFrame(double dt) { }
 void OmniAppBase::onPresent() { }
 
 void OmniAppBase::render() {
+    // Compute dt.
+    double t = get_time_seconds();
+    double dt = t - t_previous_frame_;
+    t_previous_frame_ = t;
+    onFrame(dt);
     Size2i viewport_size = window_->getFramebufferSize();
     OmniStereo::CompositeInfo info;
     Rectangle2i viewport(0, 0, viewport_size.w, viewport_size.h);
@@ -68,7 +64,19 @@ void OmniAppBase::onFramebufferSize(int width, int height) {
 // Input events.
 void OmniAppBase::onKeyboard(const char* c_key, const char* c_action, const char* c_modifiers, int scancode) { }
 
-void OmniAppBase::initialize() {
+void OmniAppBase::initialize(const char* config_path) {
+    config_ = Configuration::Create();
+    try {
+        char hostname[256];
+        gethostname(hostname, 256);
+        config_->parseFile(config_path);
+        config_->parseFile(config_path, hostname);
+    } catch(allofw::exception& e) {
+        Logger::Default()->printf(Logger::kWarning, "OmniApp: failed to read config file '%s', using defaults.", config_path);
+        Logger::Default()->pushScope("> ");
+        Logger::Default()->printf(Logger::kWarning, e.what());
+        Logger::Default()->popScope();
+    }
     window_ = OpenGLWindow::Create(config_);
     window_->makeContextCurrent();
     omni_ = OmniStereo::Create(config_);
@@ -89,11 +97,6 @@ void OmniAppBase::main() {
 }
 void OmniAppBase::tick() {
     if(!closing_) {
-        // Compute dt.
-        double t = get_time_seconds();
-        double dt = t - t_previous_frame_;
-        t_previous_frame_ = t;
-        onFrame(dt);
         render();
         window_->pollEvents();
     }

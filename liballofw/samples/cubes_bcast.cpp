@@ -1,4 +1,4 @@
-#include "allofw/omniapp.h"
+#include "allofw/omniapp_broadcasting.h"
 #include "allofw/logger.h"
 #include "allofw/opengl_utils.h"
 
@@ -26,7 +26,13 @@ void main() {
 }
 )================";
 
-class MyApp : public OmniApp<OmniAppMixin_Navigation> {
+struct State {
+    Pose pose;
+    float size;
+    float spacing;
+};
+
+class MyApp : public OmniApp<BroadcastingApp_Renderer<State> > {
 public:
     struct VertexData {
         float x, y, z;
@@ -44,6 +50,12 @@ public:
         );
         setupBuffers();
     }
+
+    virtual void onFrame(double dt) override {
+        OmniApp::onFrame(dt);
+        pose() = state().pose;
+    }
+
     virtual void onCaptureFace(const CaptureInfo& info) override {
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -103,8 +115,38 @@ public:
     GLuint program_;
 };
 
-int main() {
-    MyApp app;
-    app.initialize();
-    app.main();
+class MyAppSimulator : public BroadcastingApp_Simulator<State> {
+public:
+    virtual void onInitialize() override {
+        BroadcastingApp_Simulator::onInitialize();
+        state() = State();
+    }
+    virtual void onFrame(double dt) override {
+        BroadcastingApp_Simulator::onFrame(dt);
+        state().pose.rotation = state().pose.rotation * Quaternion::Rotation(Vector3(0, 0, 1), dt * 1);
+        printf("fps: %lf\n", 1.0 / dt);
+    }
+};
+
+#include <pthread.h>
+
+int main(int argc, char* argv[]) {
+    std::string type = "simulator";
+    std::string config = "allofw.yaml";
+    if(argc >= 2) type = argv[1];
+    if(argc >= 3) config = argv[2];
+    try {
+        if(type == "simulator") {
+            MyAppSimulator app;
+            app.initialize(config.c_str());
+            app.main();
+        } else {
+            MyApp app;
+            app.initialize(config.c_str());
+            app.main();
+        }
+    } catch(exception& e) {
+        Logger::Default()->printf(Logger::kFatal, "Uncaught exception: %s", e.what());
+        return -1;
+    }
 }

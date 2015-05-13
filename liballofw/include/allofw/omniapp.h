@@ -18,7 +18,7 @@ namespace ALLOFW_NS {
       public non_copyable {
     public:
         //
-        OmniAppBase(const char* config_path = "allofw.yaml");
+        OmniAppBase();
 
         // Event handlers.
 
@@ -44,7 +44,7 @@ namespace ALLOFW_NS {
         virtual void onKeyboard(const char* c_key, const char* c_action, const char* c_modifiers, int scancode) override;
 
         // Initialize.
-        void initialize();
+        void initialize(const char* config_path = "allofw.yaml");
 
         // Render the scene.
         // Override if you want to change the default behaviour.
@@ -86,13 +86,17 @@ namespace ALLOFW_NS {
     template<typename Mixin, typename... Mixins>
     class OmniApp<Mixin, Mixins...> : public virtual OmniApp<Mixins...>, public virtual Mixin {
     public:
-        virtual void onInitialize() {
+        virtual void onInitialize() override {
             Mixin::onInitialize();
             OmniApp<Mixins...>::onInitialize();
         }
-        virtual void onFrame(double dt) {
+        virtual void onFrame(double dt) override {
             Mixin::onFrame(dt);
             OmniApp<Mixins...>::onFrame(dt);
+        }
+        virtual void onPresent() override {
+            Mixin::onPresent();
+            OmniApp<Mixins...>::onPresent();
         }
         virtual void onKeyboard(const char* c_key, const char* c_action, const char* c_modifiers, int scancode) override {
             Mixin::onKeyboard(c_key, c_action, c_modifiers, scancode);
@@ -106,6 +110,7 @@ namespace ALLOFW_NS {
     public:
         virtual void onInitialize() override { }
         virtual void onFrame(double dt) override { }
+        virtual void onPresent() override { }
         virtual void onKeyboard(const char* c_key, const char* c_action, const char* c_modifiers, int scancode) override { }
     };
 

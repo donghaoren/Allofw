@@ -7,7 +7,7 @@
          "<!(node -e \"require('nan')\")"
       ],
       "libraries": [
-        "-L../native/lib", "-lallofw"
+        "-L../native/lib", "-lallofw", "-lallofw-graphics"
       ],
       "cflags!": [ "-fno-exceptions", "-fno-rtti" ],
       "cflags_cc!": [ "-fno-exceptions", "-fno-rtti" ],
