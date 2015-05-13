@@ -102,6 +102,7 @@
       ${FREEIMAGE_LIBRARIES}
       ${YAMLCPP_LIBRARIES}
       ${ARMADILLO_LIBRARIES}
+      pthread
   )
 
   ADD_LIBRARY ( allofw-omniapp SHARED

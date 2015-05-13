@@ -2,6 +2,7 @@
 #include "allofw/utils.h"
 #include "allofw/omniapp_broadcasting.h"
 #include <unistd.h>
+#include <string.h>
 
 ALLOFW_NS_BEGIN
 

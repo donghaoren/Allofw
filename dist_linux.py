@@ -19,7 +19,7 @@ def getLibraryDeps(lib_path):
     for dep in deps:
         if dep.find(" => ") < 0: continue
         dep = dep.split(" => ")[1].split(" ")[0]
-        if dep.startswith("/opt") or dep.find("GLEW") >= 0 or dep.find("libstdc++") >= 0:
+        if dep.startswith("/opt") or dep.find("GLEW") >= 0 or dep.find("libstdc++") >= 0 or dep.find("libblas") >= 0 or dep.find("liblapack") >= 0 or dep.find("libcblas") >= 0 or dep.find("libf77blas") >= 0 or dep.find("libatlas") >= 0:
             dep = dep.split(" ")[0]
             yield dep
 
