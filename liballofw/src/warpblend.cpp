@@ -70,6 +70,7 @@ public:
         data[0].viewport.viewport = Rectangle2(0, 0, 1, 1);
         data[0].viewport.aspect_ratio = 2.0;
         data[0].viewport.enforce_aspect_ratio = true;
+        data[0].viewport.screen_resolution = Size2i(2000, 1000);
         for(int y = 0; y < H; y++) {
             for(int x = 0; x < W; x++) {
                 int i = x + y * W;
@@ -91,6 +92,7 @@ public:
         data[0].viewport.viewport = Rectangle2(0, 0, 1, 1);
         data[0].viewport.aspect_ratio = 1.0;
         data[0].viewport.enforce_aspect_ratio = true;
+        data[0].viewport.screen_resolution = Size2i(1600, 1600);
         float scale = 2.0f * tan(fov / 2.0f);
         for(int y = 0; y < H; y++) {
             for(int x = 0; x < W; x++) {
@@ -144,6 +146,7 @@ public:
             vp.warp.data = new Vector3f[vp.warp.size.w * vp.warp.size.h];
             vp.viewport.aspect_ratio = (float)vp.warp.size.w / (float)vp.warp.size.h;
             vp.viewport.enforce_aspect_ratio = false;
+            vp.viewport.screen_resolution = vp.warp.size;
             float* buf = new float[vp.warp.size.w * vp.warp.size.h];
             fread(buf, sizeof(float), vp.warp.size.w * vp.warp.size.h, fwarp); // x
             for(int j = 0; j < vp.warp.size.w * vp.warp.size.h; j++) {

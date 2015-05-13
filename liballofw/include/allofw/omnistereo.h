@@ -73,7 +73,6 @@ namespace ALLOFW_NS {
                 Pose pose;
                 // Which eye.
                 Eye eye;
-                int face;
                 // Stereo parameters.
                 float eye_separation, sphere_radius;
                 // Viewport and clipping information.
@@ -158,6 +157,7 @@ namespace ALLOFW_NS {
 
         struct ViewportInfo {
             Rectangle2 viewport;
+            Size2i screen_resolution;
             bool enforce_aspect_ratio;
             float aspect_ratio;
         };
@@ -173,6 +173,8 @@ namespace ALLOFW_NS {
         // Get warp and blend textures.
         virtual GLTextureID getBlendTexture(int viewport) = 0;
         virtual GLTextureID getWarpTexture(int viewport) = 0;
+
+        virtual ~WarpBlend() { }
 
         static WarpBlend* CreateEquirectangular();
         static WarpBlend* CreatePerspective(float fov);
