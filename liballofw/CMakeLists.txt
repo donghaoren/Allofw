@@ -45,6 +45,7 @@
 
   PKG_SEARCH_MODULE ( YAMLCPP REQUIRED yaml-cpp )
   PKG_SEARCH_MODULE ( GLFW REQUIRED glfw3 )
+  PKG_SEARCH_MODULE ( ZeroMQ REQUIRED zmq )
 
   # Boost C++ Libraries
   FIND_PACKAGE ( Boost REQUIRED COMPONENTS thread system )
