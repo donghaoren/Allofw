@@ -17,19 +17,8 @@ namespace details {
         }
     };
 
-    void SimulatorLoop::initialize(const char* config_path) {
-        details_->config = Configuration::Create();
-        try {
-            char hostname[256];
-            gethostname(hostname, 256);
-            details_->config->parseFile(config_path);
-            details_->config->parseFile(config_path, hostname);
-        } catch(allofw::exception& e) {
-            Logger::Default()->printf(Logger::kWarning, "OmniApp(Simulator): failed to read config file '%s', using defaults.", config_path);
-            Logger::Default()->pushScope("> ");
-            Logger::Default()->printf(Logger::kWarning, e.what());
-            Logger::Default()->popScope();
-        }
+    void SimulatorLoop::initialize(Configuration* config) {
+        details_->config = config;
         onInitialize();
         details_->t_previous = get_time_seconds();
     }
@@ -57,9 +46,6 @@ namespace details {
     }
 
     SimulatorLoop::~SimulatorLoop() {
-        if(details_->config) {
-            delete details_->config;
-        }
         delete details_;
     }
 

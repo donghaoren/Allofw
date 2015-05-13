@@ -102,7 +102,7 @@ namespace ALLOFW_NS {
             virtual void onInitialize() { }
             virtual void onFrame(double dt) { }
             virtual void onFrameAfter() { }
-            void initialize(const char* config_path = "allofw.yaml");
+            void initialize(Configuration* config);
             void main();
             void tick();
             virtual ~SimulatorLoop();

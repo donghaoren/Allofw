@@ -64,19 +64,8 @@ void OmniAppBase::onFramebufferSize(int width, int height) {
 // Input events.
 void OmniAppBase::onKeyboard(const char* c_key, const char* c_action, const char* c_modifiers, int scancode) { }
 
-void OmniAppBase::initialize(const char* config_path) {
-    config_ = Configuration::Create();
-    try {
-        char hostname[256];
-        gethostname(hostname, 256);
-        config_->parseFile(config_path);
-        config_->parseFile(config_path, hostname);
-    } catch(allofw::exception& e) {
-        Logger::Default()->printf(Logger::kWarning, "OmniApp: failed to read config file '%s', using defaults.", config_path);
-        Logger::Default()->pushScope("> ");
-        Logger::Default()->printf(Logger::kWarning, e.what());
-        Logger::Default()->popScope();
-    }
+void OmniAppBase::initialize(Configuration* config) {
+    config_ = config;
     window_ = OpenGLWindow::Create(config_);
     window_->makeContextCurrent();
     omni_ = OmniStereo::Create(config_);
@@ -105,7 +94,6 @@ void OmniAppBase::tick() {
 OmniAppBase::~OmniAppBase() {
     delete omni_;
     delete window_;
-    delete config_;
 }
 
 OmniAppMixin_Navigation::OmniAppMixin_Navigation() {

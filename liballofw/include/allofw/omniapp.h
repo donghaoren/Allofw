@@ -44,7 +44,7 @@ namespace ALLOFW_NS {
         virtual void onKeyboard(const char* c_key, const char* c_action, const char* c_modifiers, int scancode) override;
 
         // Initialize.
-        void initialize(const char* config_path = "allofw.yaml");
+        void initialize(Configuration* config);
 
         // Render the scene.
         // Override if you want to change the default behaviour.

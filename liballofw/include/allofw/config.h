@@ -36,6 +36,7 @@ namespace ALLOFW_NS {
 
         // Constructor.
         static Configuration* Create();
+        static Configuration* ParseArgs(int argc, char* argv[]);
     };
 
 }

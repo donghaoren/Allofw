@@ -10,6 +10,11 @@
 ALLOFW_NS_BEGIN
 
 namespace {
+    template<typename T>
+    void zmq_setsockopt_ez(void* socket, int name, T value) {
+        zmq_setsockopt(socket, name, &value, sizeof(T));
+    }
+
     class BroadcastingSocketZeroMQ : public BroadcastingSocket {
     public:
         BroadcastingSocketZeroMQ(Configuration* config) {
@@ -31,6 +36,9 @@ namespace {
 
                     int r;
                     socket_pub_ = zmq_socket(zmq_context_, ZMQ_PUB);
+                    zmq_setsockopt_ez(socket_pub_, ZMQ_SNDHWM, config->getInt32("broadcasting.zeromq.sndhwm", 10000));
+                    zmq_setsockopt_ez(socket_pub_, ZMQ_SNDBUF, config->getInt32("broadcasting.zeromq.sndbuf", 0));
+                    zmq_setsockopt_ez(socket_pub_, ZMQ_RATE, config->getInt32("broadcasting.zeromq.rate", 10000000));
                     r = zmq_bind(socket_pub_, ep_broadcast.c_str());
                     if(r < 0) throw exception("zmq_bind(socket_pub_)");
 
@@ -47,6 +55,9 @@ namespace {
 
                     int r;
                     socket_sub_ = zmq_socket(zmq_context_, ZMQ_SUB);
+                    zmq_setsockopt_ez(socket_sub_, ZMQ_RCVHWM, config->getInt32("broadcasting.zeromq.rcvhwm", 10000));
+                    zmq_setsockopt_ez(socket_sub_, ZMQ_RCVBUF, config->getInt32("broadcasting.zeromq.rcvbuf", 0));
+                    zmq_setsockopt_ez(socket_sub_, ZMQ_RATE, config->getInt32("broadcasting.zeromq.rate", 10000000));
                     r = zmq_setsockopt(socket_sub_, ZMQ_SUBSCRIBE, NULL, 0);
                     if(r < 0) throw exception("zmq_setsockopt(socket_sub_)");
                     r = zmq_connect(socket_sub_, ep_broadcast.c_str());

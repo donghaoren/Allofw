@@ -128,21 +128,16 @@ public:
     }
 };
 
-#include <pthread.h>
-
 int main(int argc, char* argv[]) {
-    std::string type = "simulator";
-    std::string config = "allofw.yaml";
-    if(argc >= 2) type = argv[1];
-    if(argc >= 3) config = argv[2];
+    Configuration* config = Configuration::ParseArgs(argc, argv);
     try {
-        if(type == "simulator") {
+        if(config->getSTLString("broadcasting.role", "renderer") == "simulator") {
             MyAppSimulator app;
-            app.initialize(config.c_str());
+            app.initialize(config);
             app.main();
         } else {
             MyApp app;
-            app.initialize(config.c_str());
+            app.initialize(config);
             app.main();
         }
     } catch(exception& e) {

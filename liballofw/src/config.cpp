@@ -1,5 +1,5 @@
 #include "allofw/config.h"
-
+#include "allofw/logger.h"
 #include <vector>
 #include <yaml-cpp/yaml.h>
 #include <iostream>
@@ -86,6 +86,24 @@ public:
 
 Configuration* Configuration::Create() {
     return new ConfigurationImpl();
+}
+
+Configuration* Configuration::ParseArgs(int argc, char* argv[]) {
+    Configuration* config = Configuration::Create();
+    const char* config_path = "allofw.yaml";
+    if(argc >= 2) config_path = argv[1];
+    try {
+        char hostname[256];
+        gethostname(hostname, 256);
+        config->parseFile(config_path);
+        config->parseFile(config_path, hostname);
+    } catch(allofw::exception& e) {
+        Logger::Default()->printf(Logger::kWarning, "OmniApp: failed to read config file '%s', using defaults.", config_path);
+        Logger::Default()->pushScope("> ");
+        Logger::Default()->printf(Logger::kWarning, e.what());
+        Logger::Default()->popScope();
+    }
+    return config;
 }
 
 ALLOFW_NS_END

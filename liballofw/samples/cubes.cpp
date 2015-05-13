@@ -103,8 +103,9 @@ public:
     GLuint program_;
 };
 
-int main() {
+int main(int argc, char* argv[]) {
+    Configuration* config = Configuration::ParseArgs(argc, argv);
     MyApp app;
-    app.initialize();
+    app.initialize(config);
     app.main();
 }
