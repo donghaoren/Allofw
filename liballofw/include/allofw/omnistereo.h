@@ -16,14 +16,6 @@ namespace ALLOFW_NS {
     // The class for Omnistereo rendering.
     class OmniStereo {
     public:
-        // Cubemap face.
-        typedef int CubemapFace;
-        static const int kCubemapFace_PositiveX = 0;
-        static const int kCubemapFace_NegativeX = 1;
-        static const int kCubemapFace_PositiveY = 2;
-        static const int kCubemapFace_NegativeY = 3;
-        static const int kCubemapFace_PositiveZ = 4;
-        static const int kCubemapFace_NegativeZ = 5;
 
         typedef int StereoMode;
         static const int kStereoMode_Mono               =   0;
