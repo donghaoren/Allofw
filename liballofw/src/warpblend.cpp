@@ -238,4 +238,10 @@ WarpBlend* WarpBlend::LoadAllosphereCalibration(const char* calibration_path, co
     return impl;
 }
 
+void WarpBlend::Destroy(WarpBlend* warpblend) {
+    delete warpblend;
+}
+
+WarpBlend::~WarpBlend() { }
+
 ALLOFW_NS_END

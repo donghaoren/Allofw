@@ -108,6 +108,7 @@ public:
 
     static NAN_METHOD(NewInstance);
 
+    allofw::GraphicalContext2D* context;
     allofw::Path2D* path;
 
     friend class NODE_GraphicalContext2D;
@@ -134,6 +135,7 @@ public:
 
     static NAN_METHOD(NewInstance);
 
+    allofw::GraphicalContext2D* context;
     allofw::Paint2D* paint;
 
     friend class NODE_GraphicalContext2D;

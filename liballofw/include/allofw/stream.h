@@ -18,10 +18,13 @@ namespace ALLOFW_NS {
         virtual bool canRead();
         virtual bool canWrite();
         virtual bool canSeek();
-        virtual ~ByteStream() { }
 
         // mode = "r" / "w" / "a"
         static ByteStream* OpenFile(const char* path, const char* mode);
+        static void Destroy(ByteStream* stream);
+
+    protected:
+        virtual ~ByteStream();
     };
 
     class io_error : public std::exception { };

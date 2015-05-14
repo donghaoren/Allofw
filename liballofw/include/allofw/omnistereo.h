@@ -2,8 +2,6 @@
 #define ALLOFW_OMNISTEREO_H
 
 // Omnistereo Rendering.
-#include <memory>
-
 #include "common.h"
 #include "config.h"
 #include "math/math.h"
@@ -128,10 +126,12 @@ namespace ALLOFW_NS {
         // Set the delegate.
         virtual void setDelegate(Delegate* delegate) = 0;
 
-        virtual ~OmniStereo() { }
-
         // Create new OmniStereo with configuration information.
         static OmniStereo* Create(Configuration* conf);
+        static void Destroy(OmniStereo* omnistereo);
+
+    protected:
+        virtual ~OmniStereo();
     };
 
     class WarpBlend {
@@ -166,11 +166,13 @@ namespace ALLOFW_NS {
         virtual GLTextureID getBlendTexture(int viewport) = 0;
         virtual GLTextureID getWarpTexture(int viewport) = 0;
 
-        virtual ~WarpBlend() { }
-
         static WarpBlend* CreateEquirectangular();
         static WarpBlend* CreatePerspective(float fov);
         static WarpBlend* LoadAllosphereCalibration(const char* calibration_path, const char* hostname = nullptr);
+        static void Destroy(WarpBlend* warpblend);
+
+    protected:
+        virtual ~WarpBlend();
     };
 }
 

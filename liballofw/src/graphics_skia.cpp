@@ -26,6 +26,10 @@ using namespace std;
 
 namespace allofw {
 
+    // Functions from graphics_ffmpeg.
+    VideoSurface2D* FFMPEG_VideoSurface2D_FromFile(const char* path);
+    void FFMPEG_VideoSurface2D_Destroy(VideoSurface2D* surface);
+
 namespace {
 
     inline double to_degree(double rad) {
@@ -278,7 +282,12 @@ namespace {
 
     };
 
-    class Surface2D_Bitmap : public Surface2D {
+    class Surface2D_Impl : public Surface2D {
+    public:
+        virtual ~Surface2D_Impl() { }
+    };
+
+    class Surface2D_Bitmap : public Surface2D_Impl {
     public:
         Surface2D_Bitmap() {
             texture = 0;
@@ -365,7 +374,7 @@ namespace {
         GLuint texture;
     };
 
-    class Surface2D_Surface : public Surface2D {
+    class Surface2D_Surface : public Surface2D_Impl {
     public:
 
         Surface2D_Surface(int width, int height) {
@@ -453,7 +462,7 @@ namespace {
         GLuint texture;
     };
 
-    class Surface2D_PDF : public Surface2D {
+    class Surface2D_PDF : public Surface2D_Impl {
     public:
 
         Surface2D_PDF(int width_, int height_) {
@@ -504,14 +513,14 @@ namespace {
 
     };
 
-    class GraphicalContext_Impl : public GraphicalContext2D {
+    class GraphicalContext2D_Impl : public GraphicalContext2D {
     public:
         // Initialize with a bitmap.
-        GraphicalContext_Impl(SkBitmap& bitmap)
+        GraphicalContext2D_Impl(SkBitmap& bitmap)
           : canvas_ptr(new SkCanvas(bitmap)), canvas(*canvas_ptr) {
         }
         // Initialize with a canvas pointer, add a reference to it.
-        GraphicalContext_Impl(SkCanvas* canvas_ptr_)
+        GraphicalContext2D_Impl(SkCanvas* canvas_ptr_)
           : canvas_ptr(canvas_ptr_), canvas(*canvas_ptr) {
             canvas.ref();
         }
@@ -522,6 +531,12 @@ namespace {
         // Create a new paint.
         virtual Paint2D* paint() {
             return new Paint_Impl();
+        }
+        virtual void destroyPath(Path2D* path) {
+            delete (Path_Impl*)path;
+        }
+        virtual void destroyPaint(Paint2D* paint) {
+            delete (Paint_Impl*)paint;
         }
         // Draw a path.
         virtual void drawPath(Path2D* path, Paint2D* paint_) {
@@ -636,7 +651,7 @@ namespace {
         }
 
         // Destructor, unref the canvas.
-        virtual ~GraphicalContext_Impl() {
+        virtual ~GraphicalContext2D_Impl() {
             canvas.unref();
         }
 
@@ -674,18 +689,18 @@ namespace {
         virtual GraphicalContext2D* createGraphicalContext2D(Surface2D* surface_) {
             if(typeid(*surface_) == typeid(Surface2D_Bitmap)) {
                 Surface2D_Bitmap* surface = dynamic_cast<Surface2D_Bitmap*>(surface_);
-                GraphicalContext_Impl* r = new GraphicalContext_Impl(surface->bitmap);
+                GraphicalContext2D_Impl* r = new GraphicalContext2D_Impl(surface->bitmap);
                 return r;
             }
             if(typeid(*surface_) == typeid(Surface2D_Surface)) {
                 Surface2D_Surface* surface = dynamic_cast<Surface2D_Surface*>(surface_);
-                GraphicalContext_Impl* r = new GraphicalContext_Impl(surface->surface->getCanvas());
+                GraphicalContext2D_Impl* r = new GraphicalContext2D_Impl(surface->surface->getCanvas());
                 return r;
             }
             if(typeid(*surface_) == typeid(Surface2D_PDF)) {
                 Surface2D_PDF* surface = dynamic_cast<Surface2D_PDF*>(surface_);
                 SkCanvas* canvas = surface->document->beginPage(surface->width(), surface->height());
-                GraphicalContext_Impl* r = new GraphicalContext_Impl(canvas);
+                GraphicalContext2D_Impl* r = new GraphicalContext2D_Impl(canvas);
                 return r;
             }
             throw invalid_argument("surface");
@@ -710,11 +725,39 @@ namespace {
                 throw invalid_argument("failed to decode image.");
             }
         }
+
+        virtual VideoSurface2D* createVideoSurface2DFromStream(ByteStream* stream) {
+            throw not_implemented_yet();
+        }
+        virtual VideoSurface2D* createVideoSurface2DFromFile(const char* path) {
+            return FFMPEG_VideoSurface2D_FromFile(path);
+        }
+
+        virtual void destroySurface2D(Surface2D* surface) {
+            delete (Surface2D_Impl*)surface;
+        }
+        virtual void destroyVideoSurface2D(VideoSurface2D* video) {
+            FFMPEG_VideoSurface2D_Destroy(video);
+        }
+        virtual void destroyGraphicalContext2D(GraphicalContext2D* context) {
+            delete (GraphicalContext2D_Impl*)context;
+        }
     };
 }
 
 GraphicalBackend* GraphicalBackend::CreateSkia() {
     return new GraphicalBackend_Skia_Impl();
 }
+
+void GraphicalBackend::Destroy(GraphicalBackend* backend) {
+    delete backend;
+}
+
+GraphicalContext2D::~GraphicalContext2D() { }
+Path2D::~Path2D() { }
+Paint2D::~Paint2D() { }
+Surface2D::~Surface2D() { }
+VideoSurface2D::~VideoSurface2D() { }
+GraphicalBackend::~GraphicalBackend() { }
 
 }

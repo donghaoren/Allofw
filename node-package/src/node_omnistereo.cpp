@@ -34,7 +34,7 @@ NODE_OmniStereo::NODE_OmniStereo(Configuration* config) {
 }
 
 NODE_OmniStereo::~NODE_OmniStereo() {
-    delete omnistereo;
+    allofw::OmniStereo::Destroy(omnistereo);
 }
 
 NAN_METHOD(NODE_OmniStereo::New) {

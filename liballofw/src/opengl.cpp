@@ -372,6 +372,12 @@ OpenGLWindow* OpenGLWindow::Create(Configuration* config) {
     return Create(hint, title.c_str());
 }
 
+void OpenGLWindow::Destroy(OpenGLWindow* window) {
+    delete window;
+}
+
+OpenGLWindow::~OpenGLWindow() { }
+
 // Default callbacks.
 void OpenGLWindow::Delegate::onMove(int x, int y) { }
 void OpenGLWindow::Delegate::onResize(int width, int height) { }

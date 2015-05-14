@@ -69,6 +69,9 @@ namespace ALLOFW_NS {
         virtual Path2D* path() = 0;
         virtual Paint2D* paint() = 0;
 
+        virtual void destroyPath(Path2D* path) = 0;
+        virtual void destroyPaint(Paint2D* paint) = 0;
+
         // Draw a path.
         virtual void drawPath(Path2D* path, Paint2D* paint) = 0;
         // Draw text.
@@ -108,8 +111,8 @@ namespace ALLOFW_NS {
         virtual void save() = 0;
         virtual void restore() = 0;
 
-        virtual ~GraphicalContext2D() { }
-
+    protected:
+        virtual ~GraphicalContext2D();
     };
 
     class GraphicalContext3D {
@@ -136,8 +139,8 @@ namespace ALLOFW_NS {
         // Close the current contour.
         virtual void close() = 0;
 
-        virtual ~Path2D() { }
-
+    protected:
+        virtual ~Path2D();
     };
 
     class Paint2D {
@@ -167,7 +170,8 @@ namespace ALLOFW_NS {
 
         virtual Paint2D* clone() = 0;
 
-        virtual ~Paint2D() { }
+    protected:
+        virtual ~Paint2D();
     };
 
     // 2D surface.
@@ -188,8 +192,8 @@ namespace ALLOFW_NS {
 
         virtual void save(ByteStream* stream) = 0;
 
-        virtual ~Surface2D() { }
-
+    protected:
+        virtual ~Surface2D();
     };
 
     class VideoSurface2D {
@@ -206,11 +210,8 @@ namespace ALLOFW_NS {
 
         virtual const void* pixels() const = 0;
 
-        virtual ~VideoSurface2D() { }
-
-        static VideoSurface2D* FromStream(ByteStream* stream);
-        static VideoSurface2D* FromFile(const char* path);
-
+    protected:
+        virtual ~VideoSurface2D();
     };
 
     class GraphicalBackend {
@@ -227,16 +228,25 @@ namespace ALLOFW_NS {
         virtual Surface2D* createSurface2DFromImage(ByteStream* stream) = 0;
         virtual Surface2D* createSurface2DFromImage(const void* data, size_t length) = 0;
 
+        // Load video from stream or file.
+        virtual VideoSurface2D* createVideoSurface2DFromStream(ByteStream* stream) = 0;
+        virtual VideoSurface2D* createVideoSurface2DFromFile(const char* path) = 0;
+
         // Create 2D graphical context for a surface.
         virtual GraphicalContext2D* createGraphicalContext2D(Surface2D* surface) = 0;
 
-        virtual ~GraphicalBackend() { }
+        virtual void destroySurface2D(Surface2D* surface) = 0;
+        virtual void destroyVideoSurface2D(VideoSurface2D* video) = 0;
+        virtual void destroyGraphicalContext2D(GraphicalContext2D* context) = 0;
 
         // Create different backends.
         static GraphicalBackend* CreateSkia();
         // Cairo binding is not unavailable yet.
         // static GraphicalBackend* CreateCairo();
+        static void Destroy(GraphicalBackend* backend);
 
+    protected:
+        virtual ~GraphicalBackend();
     };
 }
 

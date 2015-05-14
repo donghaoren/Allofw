@@ -250,8 +250,12 @@ namespace {
 
 }
 
-VideoSurface2D* VideoSurface2D::FromFile(const char* path) {
+VideoSurface2D* FFMPEG_VideoSurface2D_FromFile(const char* path) {
     return new VideoSurface2D_ffmpeg(path);
+}
+
+void FFMPEG_VideoSurface2D_Destroy(VideoSurface2D* surface) {
+    delete (VideoSurface2D_ffmpeg*)surface;
 }
 
 }

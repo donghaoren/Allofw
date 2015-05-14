@@ -191,7 +191,6 @@ public:
     OmniStereoImpl(Configuration* conf) {
         LoggerScope logger(Logger::kInfo, "OmniStereo::Initialization");
 
-        resolution_ = conf->getUInt32("omnistereo.resolution", 1024);
         std::string stereo_mode = conf->getSTLString("omnistereo.stereo_mode", "mono");
         /**/ if(stereo_mode == "mono") stereo_mode_ = kStereoMode_Mono;
         else if(stereo_mode == "left") stereo_mode_ = kStereoMode_Left;
@@ -233,7 +232,8 @@ public:
         if(capture_method == "cubemap") capture_method_ = kCaptureMethod_Cubemap;
         if(capture_method == "per_projection") capture_method_ = kCaptureMethod_PerProjection;
 
-        preprojector_resolution_scale_ = conf->getFloat("omnistereo.resolution_scale", 1.0);
+        resolution_ = conf->getUInt32("omnistereo.resolution", 1024);
+        preprojector_resolution_scale_ = conf->getFloat("omnistereo.resolution_scale", 0);
 
         switch(capture_method_) {
             case kCaptureMethod_Cubemap: {
@@ -380,7 +380,7 @@ public:
             } break;
         };
         freeCubemaps();
-        delete warpblend_;
+        WarpBlend::Destroy(warpblend_);
     }
 
 private:
@@ -749,7 +749,10 @@ private:
             pt.rotation = Quaternion::Rotation(rotation_axis, rotation_angle).inversion();
             pt.fov = fov;
             Size2i screen_resolution = warpblend_->getViewport(vp).screen_resolution;
-            pt.resolution = resolution_; // std::max(screen_resolution.w, screen_resolution.h) * preprojector_resolution_scale_;
+            pt.resolution = resolution_;
+            if(preprojector_resolution_scale_ != 0) {
+                pt.resolution = std::max(screen_resolution.w, screen_resolution.h) * preprojector_resolution_scale_;
+            }
             logger.printf("Viewport %02d: d = (%.4f,%.4f,%.4f), fov = %.2f degs, res = %d\n", vp, direction.x, direction.y, direction.z, fov / PI * 180.0f, pt.resolution);
         }
 
@@ -1004,6 +1007,12 @@ private:
 OmniStereo* OmniStereo::Create(Configuration* conf) {
     return new OmniStereoImpl(conf);
 }
+
+void OmniStereo::Destroy(OmniStereo* omnistereo) {
+    delete omnistereo;
+}
+
+OmniStereo::~OmniStereo() { }
 
 void OmniStereo::Delegate::onCaptureViewport(const CaptureInfo& info) { }
 

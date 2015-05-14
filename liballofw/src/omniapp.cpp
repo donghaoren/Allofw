@@ -92,8 +92,8 @@ void OmniAppBase::tick() {
 }
 
 OmniAppBase::~OmniAppBase() {
-    delete omni_;
-    delete window_;
+    OmniStereo::Destroy(omni_);
+    OpenGLWindow::Destroy(window_);
 }
 
 OmniAppMixin_Navigation::OmniAppMixin_Navigation() {

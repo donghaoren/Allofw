@@ -67,6 +67,12 @@ ByteStream* ByteStream::OpenFile(const char* path, const char* mode) {
     return f;
 }
 
+void ByteStream::Destroy(ByteStream* stream) {
+    delete stream;
+}
+
+ByteStream::~ByteStream() { }
+
 exception::exception(const char* what_) {
     if(!what_) what_ = "unknown exception";
     size_t len = strlen(what_);

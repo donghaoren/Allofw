@@ -225,6 +225,7 @@ namespace {
         // Get the number of renderers.
         virtual int rendererCount() {
             if(role_ != kSimulator) throw exception("invalid role");
+            return renderer_ids_.size();
         }
 
         // ## Renderer functions:

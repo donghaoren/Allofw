@@ -109,7 +109,7 @@ private:
         NanDisposePersistent(pf_onFramebufferSize);
         NanDisposePersistent(pf_onKeyboard);
         if(window) {
-            delete window;
+            allofw::OpenGLWindow::Destroy(window);
         }
     }
 

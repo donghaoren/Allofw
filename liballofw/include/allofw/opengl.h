@@ -79,11 +79,13 @@ namespace ALLOFW_NS {
         virtual void enableKeyboardInput() = 0;
         virtual void enableMouseInput() = 0;
 
-        virtual ~OpenGLWindow() { }
-
         // Static methods to create a window.
         static OpenGLWindow* Create(Hint hint, const char* title);
         static OpenGLWindow* Create(Configuration* config);
+        static void Destroy(OpenGLWindow* window);
+
+    protected:
+        virtual ~OpenGLWindow();
     };
 }
 

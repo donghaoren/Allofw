@@ -52,7 +52,7 @@ NODE_Surface2D::NODE_Surface2D(const void* data, size_t length) {
 }
 
 NODE_Surface2D::~NODE_Surface2D() {
-    delete surface;
+    backend->destroySurface2D(surface);
 }
 
 NAN_METHOD(NODE_Surface2D::New) {
@@ -133,7 +133,7 @@ NAN_METHOD(NODE_Surface2D::NODE_save) {
     NODE_Surface2D* obj = ObjectWrap::Unwrap<NODE_Surface2D>(args.This());
     allofw::ByteStream* stream = allofw::ByteStream::OpenFile(*str, "w");
     obj->surface->save(stream);
-    delete stream;
+    allofw::ByteStream::Destroy(stream);
     NanReturnUndefined();
 }
 
@@ -159,11 +159,11 @@ void NODE_VideoSurface2D::Init(Handle<Object> exports) {
 }
 
 NODE_VideoSurface2D::NODE_VideoSurface2D(const char* filename) {
-    video = VideoSurface2D::FromFile(filename);
+    video = backend->createVideoSurface2DFromFile(filename);
 }
 
 NODE_VideoSurface2D::~NODE_VideoSurface2D() {
-    delete video;
+    backend->destroyVideoSurface2D(video);
 }
 
 NAN_METHOD(NODE_VideoSurface2D::New) {
@@ -264,7 +264,7 @@ NODE_GraphicalContext2D::NODE_GraphicalContext2D(NODE_Surface2D* surface) {
 }
 
 NODE_GraphicalContext2D::~NODE_GraphicalContext2D() {
-    delete context;
+    backend->destroyGraphicalContext2D(context);
 }
 
 NAN_METHOD(NODE_GraphicalContext2D::New) {
@@ -496,12 +496,13 @@ void NODE_Path2D::Init(Handle<Object> exports) {
     exports->Set(NanNew<String>("Path2D"), tpl->GetFunction());
 }
 
-NODE_Path2D::NODE_Path2D(NODE_GraphicalContext2D* context) {
-    path = context->context->path();
+NODE_Path2D::NODE_Path2D(NODE_GraphicalContext2D* node_context) {
+    context = node_context->context;
+    path = node_context->context->path();
 }
 
 NODE_Path2D::~NODE_Path2D() {
-    delete path;
+    context->destroyPath(path);
 }
 
 NAN_METHOD(NODE_Path2D::New) {
@@ -590,15 +591,17 @@ void NODE_Paint2D::Init(Handle<Object> exports) {
     exports->Set(NanNew<String>("Paint2D"), tpl->GetFunction());
 }
 
-NODE_Paint2D::NODE_Paint2D(NODE_GraphicalContext2D* context) {
-    paint = context->context->paint();
+NODE_Paint2D::NODE_Paint2D(NODE_GraphicalContext2D* node_context) {
+    context = node_context->context;
+    paint = node_context->context->paint();
 }
 NODE_Paint2D::NODE_Paint2D(NODE_Paint2D* paint_) {
+    context = paint_->context;
     paint = paint_->paint->clone();
 }
 
 NODE_Paint2D::~NODE_Paint2D() {
-    delete paint;
+    context->destroyPaint(paint);
 }
 
 NAN_METHOD(NODE_Paint2D::New) {
