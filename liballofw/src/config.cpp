@@ -88,10 +88,15 @@ Configuration* Configuration::Create() {
     return new ConfigurationImpl();
 }
 
-Configuration* Configuration::ParseArgs(int argc, char* argv[]) {
+Configuration* Configuration::ParseMainArgs(int argc, char* argv[]) {
+    if(argc == 2) return ParseArgs(argv[1]);
+    return ParseArgs();
+}
+
+Configuration* Configuration::ParseArgs(const char* args) {
     Configuration* config = Configuration::Create();
     const char* config_path = "allofw.yaml";
-    if(argc >= 2) config_path = argv[1];
+    if(args) config_path = args;
     try {
         char hostname[256];
         gethostname(hostname, 256);

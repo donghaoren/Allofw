@@ -104,7 +104,7 @@ public:
 };
 
 int main(int argc, char* argv[]) {
-    Configuration* config = Configuration::ParseArgs(argc, argv);
+    Configuration* config = Configuration::ParseMainArgs(argc, argv);
     MyApp app;
     app.initialize(config);
     app.main();

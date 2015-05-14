@@ -129,7 +129,7 @@ public:
 };
 
 int main(int argc, char* argv[]) {
-    Configuration* config = Configuration::ParseArgs(argc, argv);
+    Configuration* config = Configuration::ParseMainArgs(argc, argv);
     try {
         if(config->getSTLString("broadcasting.role", "renderer") == "simulator") {
             MyAppSimulator app;

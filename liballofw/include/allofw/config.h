@@ -36,7 +36,8 @@ namespace ALLOFW_NS {
 
         // Constructor.
         static Configuration* Create();
-        static Configuration* ParseArgs(int argc, char* argv[]);
+        static Configuration* ParseMainArgs(int argc, char* argv[]);
+        static Configuration* ParseArgs(const char* args = nullptr);
     };
 
 }

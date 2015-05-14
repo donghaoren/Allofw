@@ -42,9 +42,13 @@ NAN_METHOD(NODE_OmniStereo::New) {
 
     if(args.IsConstructCall()) {
         try {
-            NanUtf8String str(args[0]);
-            char* argv[1] = { *str };
-            Configuration* config = Configuration::ParseArgs(1, argv);
+            Configuration* config;
+            if(args[0]->IsString()) {
+                NanUtf8String str(args[0]);
+                config = Configuration::ParseArgs(*str);
+            } else {
+                config = Configuration::ParseArgs(nullptr);
+            }
             NODE_OmniStereo* obj = new NODE_OmniStereo(config);
             obj->Wrap(args.This());
             NanReturnValue(args.This());
