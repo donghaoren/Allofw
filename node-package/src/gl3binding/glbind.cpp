@@ -1904,6 +1904,26 @@ void defineConstants(v8::Handle<v8::ObjectTemplate> exports) {
     exports->Set(NanNew<v8::String>("LAYER_PROVOKING_VERTEX"), NanNew<v8::Uint32>(GL_LAYER_PROVOKING_VERTEX), v8::ReadOnly);
     exports->Set(NanNew<v8::String>("VIEWPORT_INDEX_PROVOKING_VERTEX"), NanNew<v8::Uint32>(GL_VIEWPORT_INDEX_PROVOKING_VERTEX), v8::ReadOnly);
     exports->Set(NanNew<v8::String>("UNDEFINED_VERTEX"), NanNew<v8::Uint32>(GL_UNDEFINED_VERTEX), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_BOUNDS_TEST_EXT"), NanNew<v8::Uint32>(GL_DEPTH_BOUNDS_TEST_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DEPTH_BOUNDS_EXT"), NanNew<v8::Uint32>(GL_DEPTH_BOUNDS_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SCALED_RESOLVE_FASTEST_EXT"), NanNew<v8::Uint32>(GL_SCALED_RESOLVE_FASTEST_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SCALED_RESOLVE_NICEST_EXT"), NanNew<v8::Uint32>(GL_SCALED_RESOLVE_NICEST_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RGB_S3TC_DXT1_EXT"), NanNew<v8::Uint32>(GL_COMPRESSED_RGB_S3TC_DXT1_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RGBA_S3TC_DXT1_EXT"), NanNew<v8::Uint32>(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RGBA_S3TC_DXT3_EXT"), NanNew<v8::Uint32>(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_RGBA_S3TC_DXT5_EXT"), NanNew<v8::Uint32>(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_SRGB_S3TC_DXT1_EXT"), NanNew<v8::Uint32>(GL_COMPRESSED_SRGB_S3TC_DXT1_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT"), NanNew<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT"), NanNew<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT"), NanNew<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_MAX_ANISOTROPY_EXT"), NanNew<v8::Uint32>(GL_TEXTURE_MAX_ANISOTROPY_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MAX_TEXTURE_MAX_ANISOTROPY_EXT"), NanNew<v8::Uint32>(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MIRROR_CLAMP_EXT"), NanNew<v8::Uint32>(GL_MIRROR_CLAMP_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MIRROR_CLAMP_TO_EDGE_EXT"), NanNew<v8::Uint32>(GL_MIRROR_CLAMP_TO_EDGE_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("MIRROR_CLAMP_TO_BORDER_EXT"), NanNew<v8::Uint32>(GL_MIRROR_CLAMP_TO_BORDER_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("TEXTURE_SRGB_DECODE_EXT"), NanNew<v8::Uint32>(GL_TEXTURE_SRGB_DECODE_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("DECODE_EXT"), NanNew<v8::Uint32>(GL_DECODE_EXT), v8::ReadOnly);
+    exports->Set(NanNew<v8::String>("SKIP_DECODE_EXT"), NanNew<v8::Uint32>(GL_SKIP_DECODE_EXT), v8::ReadOnly);
 }
 
 #if (GL_DEPTH_BUFFER_BIT != 256)
@@ -4639,6 +4659,66 @@ void defineConstants(v8::Handle<v8::ObjectTemplate> exports) {
 #if (GL_UNDEFINED_VERTEX != 33376)
  #error "GL3 constant UNDEFINED_VERTEX's value is incorrect."
 #endif
+#if (GL_DEPTH_BOUNDS_TEST_EXT != 34960)
+ #error "GL3 constant DEPTH_BOUNDS_TEST_EXT's value is incorrect."
+#endif
+#if (GL_DEPTH_BOUNDS_EXT != 34961)
+ #error "GL3 constant DEPTH_BOUNDS_EXT's value is incorrect."
+#endif
+#if (GL_SCALED_RESOLVE_FASTEST_EXT != 37050)
+ #error "GL3 constant SCALED_RESOLVE_FASTEST_EXT's value is incorrect."
+#endif
+#if (GL_SCALED_RESOLVE_NICEST_EXT != 37051)
+ #error "GL3 constant SCALED_RESOLVE_NICEST_EXT's value is incorrect."
+#endif
+#if (GL_COMPRESSED_RGB_S3TC_DXT1_EXT != 33776)
+ #error "GL3 constant COMPRESSED_RGB_S3TC_DXT1_EXT's value is incorrect."
+#endif
+#if (GL_COMPRESSED_RGBA_S3TC_DXT1_EXT != 33777)
+ #error "GL3 constant COMPRESSED_RGBA_S3TC_DXT1_EXT's value is incorrect."
+#endif
+#if (GL_COMPRESSED_RGBA_S3TC_DXT3_EXT != 33778)
+ #error "GL3 constant COMPRESSED_RGBA_S3TC_DXT3_EXT's value is incorrect."
+#endif
+#if (GL_COMPRESSED_RGBA_S3TC_DXT5_EXT != 33779)
+ #error "GL3 constant COMPRESSED_RGBA_S3TC_DXT5_EXT's value is incorrect."
+#endif
+#if (GL_COMPRESSED_SRGB_S3TC_DXT1_EXT != 35916)
+ #error "GL3 constant COMPRESSED_SRGB_S3TC_DXT1_EXT's value is incorrect."
+#endif
+#if (GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT != 35917)
+ #error "GL3 constant COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT's value is incorrect."
+#endif
+#if (GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT != 35918)
+ #error "GL3 constant COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT's value is incorrect."
+#endif
+#if (GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT != 35919)
+ #error "GL3 constant COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT's value is incorrect."
+#endif
+#if (GL_TEXTURE_MAX_ANISOTROPY_EXT != 34046)
+ #error "GL3 constant TEXTURE_MAX_ANISOTROPY_EXT's value is incorrect."
+#endif
+#if (GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT != 34047)
+ #error "GL3 constant MAX_TEXTURE_MAX_ANISOTROPY_EXT's value is incorrect."
+#endif
+#if (GL_MIRROR_CLAMP_EXT != 34626)
+ #error "GL3 constant MIRROR_CLAMP_EXT's value is incorrect."
+#endif
+#if (GL_MIRROR_CLAMP_TO_EDGE_EXT != 34627)
+ #error "GL3 constant MIRROR_CLAMP_TO_EDGE_EXT's value is incorrect."
+#endif
+#if (GL_MIRROR_CLAMP_TO_BORDER_EXT != 35090)
+ #error "GL3 constant MIRROR_CLAMP_TO_BORDER_EXT's value is incorrect."
+#endif
+#if (GL_TEXTURE_SRGB_DECODE_EXT != 35400)
+ #error "GL3 constant TEXTURE_SRGB_DECODE_EXT's value is incorrect."
+#endif
+#if (GL_DECODE_EXT != 35401)
+ #error "GL3 constant DECODE_EXT's value is incorrect."
+#endif
+#if (GL_SKIP_DECODE_EXT != 35402)
+ #error "GL3 constant SKIP_DECODE_EXT's value is incorrect."
+#endif
 NAN_METHOD(EXPORT_cullFace) {
     NanScope();
     // None
@@ -5128,7 +5208,7 @@ NAN_METHOD(EXPORT_getDoublev) {
 }
 NAN_METHOD(EXPORT_getError) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf7e8>
+    // <gltypes.Type instance at 0x10297d050>
     GLenum result;
     result = glGetError();
     v8::Handle<v8::Value> result_js = NanNew<v8::Uint32>(result);
@@ -5186,7 +5266,7 @@ NAN_METHOD(EXPORT_getIntegerv) {
 }
 NAN_METHOD(EXPORT_getString) {
     NanScope();
-    // <gltypes.UStringType instance at 0x104edfcb0>
+    // <gltypes.UStringType instance at 0x10297d518>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     const GLubyte* result;
@@ -5344,7 +5424,7 @@ NAN_METHOD(EXPORT_getTexLevelParameteriv) {
 }
 NAN_METHOD(EXPORT_isEnabled) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLboolean result;
@@ -5614,7 +5694,7 @@ NAN_METHOD(EXPORT_genTextures) {
 }
 NAN_METHOD(EXPORT_isTexture) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -6207,7 +6287,7 @@ NAN_METHOD(EXPORT_genQueries) {
 }
 NAN_METHOD(EXPORT_isQuery) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -6361,7 +6441,7 @@ NAN_METHOD(EXPORT_genBuffers) {
 }
 NAN_METHOD(EXPORT_isBuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -6462,7 +6542,7 @@ NAN_METHOD(EXPORT_getBufferSubData) {
 }
 NAN_METHOD(EXPORT_mapBuffer) {
     NanScope();
-    // <gltypes.PointerType instance at 0x10535a710>
+    // <gltypes.PointerType instance at 0x102d41fc8>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLenum arg1;
@@ -6474,7 +6554,7 @@ NAN_METHOD(EXPORT_mapBuffer) {
 }
 NAN_METHOD(EXPORT_unmapBuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLboolean result;
@@ -6631,7 +6711,7 @@ NAN_METHOD(EXPORT_compileShader) {
 }
 NAN_METHOD(EXPORT_createProgram) {
     NanScope();
-    // <gltypes.ClassType instance at 0x104edfdd0>
+    // <gltypes.ClassType instance at 0x10297d638>
     GLuint result;
     result = glCreateProgram();
     v8::Handle<v8::Value> result_js = NODE_Program::fromGLHandle(result);
@@ -6639,7 +6719,7 @@ NAN_METHOD(EXPORT_createProgram) {
 }
 NAN_METHOD(EXPORT_createShader) {
     NanScope();
-    // <gltypes.ClassType instance at 0x104edfe18>
+    // <gltypes.ClassType instance at 0x10297d680>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint result;
@@ -6889,7 +6969,7 @@ NAN_METHOD(EXPORT_getAttachedShaders) {
 }
 NAN_METHOD(EXPORT_getAttribLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf878>
+    // <gltypes.Type instance at 0x10297d0e0>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -7112,7 +7192,7 @@ NAN_METHOD(EXPORT_getShaderSource) {
 }
 NAN_METHOD(EXPORT_getUniformLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf878>
+    // <gltypes.Type instance at 0x10297d0e0>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -7272,7 +7352,7 @@ NAN_METHOD(EXPORT_getVertexAttribiv) {
 }
 NAN_METHOD(EXPORT_isProgram) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -7286,7 +7366,7 @@ NAN_METHOD(EXPORT_isProgram) {
 }
 NAN_METHOD(EXPORT_isShader) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -8787,7 +8867,7 @@ NAN_METHOD(EXPORT_disablei) {
 }
 NAN_METHOD(EXPORT_isEnabledi) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
@@ -9484,7 +9564,7 @@ NAN_METHOD(EXPORT_bindFragDataLocation) {
 }
 NAN_METHOD(EXPORT_getFragDataLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf878>
+    // <gltypes.Type instance at 0x10297d0e0>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -9864,7 +9944,7 @@ NAN_METHOD(EXPORT_clearBufferfi) {
 }
 NAN_METHOD(EXPORT_getStringi) {
     NanScope();
-    // <gltypes.UStringType instance at 0x104edfcb0>
+    // <gltypes.UStringType instance at 0x10297d518>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLuint arg1;
@@ -10090,7 +10170,7 @@ NAN_METHOD(EXPORT_blendFuncSeparatei) {
 }
 NAN_METHOD(EXPORT_isRenderbuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10174,7 +10254,7 @@ NAN_METHOD(EXPORT_getRenderbufferParameteriv) {
 }
 NAN_METHOD(EXPORT_isFramebuffer) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10217,7 +10297,7 @@ NAN_METHOD(EXPORT_genFramebuffers) {
 }
 NAN_METHOD(EXPORT_checkFramebufferStatus) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf7e8>
+    // <gltypes.Type instance at 0x10297d050>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLenum result;
@@ -10406,7 +10486,7 @@ NAN_METHOD(EXPORT_framebufferTextureLayer) {
 }
 NAN_METHOD(EXPORT_mapBufferRange) {
     NanScope();
-    // <gltypes.PointerType instance at 0x1053d7e60>
+    // <gltypes.PointerType instance at 0x102d41ef0>
     GLenum arg0;
     arg0 = args[0]->Uint32Value();
     GLintptr arg1;
@@ -10461,7 +10541,7 @@ NAN_METHOD(EXPORT_genVertexArrays) {
 }
 NAN_METHOD(EXPORT_isVertexArray) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10575,7 +10655,7 @@ NAN_METHOD(EXPORT_getActiveUniformName) {
 }
 NAN_METHOD(EXPORT_getUniformBlockIndex) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf998>
+    // <gltypes.Type instance at 0x10297d200>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10936,7 +11016,7 @@ NAN_METHOD(EXPORT_bindFragDataLocationIndexed) {
 }
 NAN_METHOD(EXPORT_getFragDataIndex) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf878>
+    // <gltypes.Type instance at 0x10297d0e0>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -10982,7 +11062,7 @@ NAN_METHOD(EXPORT_genSamplers) {
 }
 NAN_METHOD(EXPORT_isSampler) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -12026,7 +12106,7 @@ NAN_METHOD(EXPORT_getUniformdv) {
 }
 NAN_METHOD(EXPORT_getSubroutineUniformLocation) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf878>
+    // <gltypes.Type instance at 0x10297d0e0>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -12059,7 +12139,7 @@ NAN_METHOD(EXPORT_getSubroutineUniformLocation) {
 }
 NAN_METHOD(EXPORT_getSubroutineIndex) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf998>
+    // <gltypes.Type instance at 0x10297d200>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -12382,7 +12462,7 @@ NAN_METHOD(EXPORT_genTransformFeedbacks) {
 }
 NAN_METHOD(EXPORT_isTransformFeedback) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();
@@ -12767,7 +12847,7 @@ NAN_METHOD(EXPORT_genProgramPipelines) {
 }
 NAN_METHOD(EXPORT_isProgramPipeline) {
     NanScope();
-    // <gltypes.Type instance at 0x104edf710>
+    // <gltypes.Type instance at 0x10296cf38>
     GLuint arg0;
     if(args[0]->IsNumber()) {
         arg0 = args[0]->IntegerValue();

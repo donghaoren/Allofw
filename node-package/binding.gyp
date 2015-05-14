@@ -28,6 +28,7 @@
         "src/node_graphics.cpp",
         "src/node_sharedmemory.cpp",
         "src/node_opengl.cpp",
+        "src/node_omnistereo.cpp",
         "src/gl3binding/glbind.cpp"
       ]
     }

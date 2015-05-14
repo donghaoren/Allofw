@@ -40,7 +40,7 @@ void OmniAppBase::render() {
     window_->swapBuffers();
 }
 
-void OmniAppBase::onCaptureFace(const CaptureInfo& info) { }
+void OmniAppBase::onCaptureViewport(const CaptureInfo& info) { }
 
 // Window handlers.
 void OmniAppBase::onMove(int x, int y) { }

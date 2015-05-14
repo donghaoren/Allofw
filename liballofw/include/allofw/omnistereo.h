@@ -80,7 +80,7 @@ namespace ALLOFW_NS {
                 }
             };
             // Capture a face of the cubemap.
-            virtual void onCaptureFace(const CaptureInfo& info);
+            virtual void onCaptureViewport(const CaptureInfo& info);
             virtual ~Delegate() { }
         };
 

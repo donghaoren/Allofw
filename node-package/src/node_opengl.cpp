@@ -13,6 +13,7 @@ public:
     static void Init(v8::Handle<v8::Object> exports) {
         NanScope();
 
+        // New({ width:, height:, active_stereo:, fullscreen:, title:, config: (config rules all) }
         v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
         tpl->SetClassName(NanNew<v8::String>("OpenGLWindow"));
         tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -25,6 +26,7 @@ public:
         NODE_SET_PROTOTYPE_METHOD(tpl, "onFocus", NODE_onFocus);
         NODE_SET_PROTOTYPE_METHOD(tpl, "onIconify", NODE_onIconify);
         NODE_SET_PROTOTYPE_METHOD(tpl, "onFramebufferSize", NODE_onFramebufferSize);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "onKeyboard", NODE_onKeyboard);
 
         NODE_SET_PROTOTYPE_METHOD(tpl, "makeContextCurrent", NODE_makeContextCurrent);
         NODE_SET_PROTOTYPE_METHOD(tpl, "swapBuffers", NODE_swapBuffers);
@@ -85,6 +87,13 @@ public:
             NanNew(pf_onFramebufferSize)->Call(NanObjectWrapHandle(this), 2, argv);
         }
     }
+    virtual void onKeyboard(const char* key, const char* action, const char* modifiers, int scancode) {
+        if(!pf_onKeyboard.IsEmpty()) {
+            NanScope();
+            Local<Value> argv[4] = { NanNew<String>(key), NanNew<String>(action), NanNew<String>(modifiers), NanNew<Integer>(scancode) };
+            NanNew(pf_onKeyboard)->Call(NanObjectWrapHandle(this), 4, argv);
+        }
+    }
 
 private:
     explicit NODE_OpenGLWindow(allofw::OpenGLWindow* window_) : window(window_) {
@@ -98,6 +107,7 @@ private:
         NanDisposePersistent(pf_onFocus);
         NanDisposePersistent(pf_onIconify);
         NanDisposePersistent(pf_onFramebufferSize);
+        NanDisposePersistent(pf_onKeyboard);
         if(window) {
             delete window;
         }
@@ -112,6 +122,7 @@ private:
     v8::Persistent<v8::Function> pf_onFocus;
     v8::Persistent<v8::Function> pf_onIconify;
     v8::Persistent<v8::Function> pf_onFramebufferSize;
+    v8::Persistent<v8::Function> pf_onKeyboard;
 
     static NAN_METHOD(New);
 
@@ -122,6 +133,7 @@ private:
     static NAN_METHOD(NODE_onFocus);
     static NAN_METHOD(NODE_onIconify);
     static NAN_METHOD(NODE_onFramebufferSize);
+    static NAN_METHOD(NODE_onKeyboard);
 
     static NAN_METHOD(NODE_makeContextCurrent);
     static NAN_METHOD(NODE_swapBuffers);
@@ -137,9 +149,40 @@ v8::Persistent<v8::Function> NODE_OpenGLWindow::constructor;
 NAN_METHOD(NODE_OpenGLWindow::New) {
     NanScope();
     if (args.IsConstructCall()) {
-        allofw::OpenGLWindow::Hint hint;
-        std::string title("AllofwWindow");
-        allofw::OpenGLWindow* window = allofw::OpenGLWindow::Create(hint, title.c_str());
+        allofw::OpenGLWindow* window;
+        if(args[0]->IsObject()) {
+            Local<Object> params = args[0]->ToObject();
+            if(params->Has(NanNew<String>("config"))) {
+                NanUtf8String str(params->Get(NanNew<String>("config")));
+                char* argv[1] = { *str };
+                allofw::Configuration* config = allofw::Configuration::ParseArgs(1, argv);
+                window = allofw::OpenGLWindow::Create(config);
+            } else {
+                allofw::OpenGLWindow::Hint hint;
+                std::string title("AllofwWindow");
+                if(params->Has(NanNew<String>("title"))) {
+                    NanUtf8String str(params->Get(NanNew<String>("title")));
+                    title = *str;
+                }
+                if(params->Has(NanNew<String>("width"))) {
+                    hint.width = params->Get(NanNew<String>("width"))->IntegerValue();
+                }
+                if(params->Has(NanNew<String>("height"))) {
+                    hint.height = params->Get(NanNew<String>("height"))->IntegerValue();
+                }
+                if(params->Has(NanNew<String>("active_stereo"))) {
+                    hint.active_stereo = params->Get(NanNew<String>("active_stereo"))->BooleanValue();
+                }
+                if(params->Has(NanNew<String>("fullscreen"))) {
+                    hint.fullscreen = params->Get(NanNew<String>("fullscreen"))->BooleanValue();
+                }
+                window = allofw::OpenGLWindow::Create(hint, title.c_str());
+            }
+        } else {
+            allofw::OpenGLWindow::Hint hint;
+            std::string title("Allofw.js Window");
+            window = allofw::OpenGLWindow::Create(hint, title.c_str());
+        }
         NODE_OpenGLWindow* obj = new NODE_OpenGLWindow(window);
         obj->Wrap(args.This());
         NanReturnValue(args.This());
@@ -210,6 +253,15 @@ NAN_METHOD(NODE_OpenGLWindow::NODE_onFramebufferSize) {
     if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
     NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
     NanAssignPersistent(obj->pf_onFramebufferSize, args[0].As<v8::Function>());
+    NanReturnUndefined();
+}
+NAN_METHOD(NODE_OpenGLWindow::NODE_onKeyboard) {
+    NanScope();
+    if(args.Length() != 1) return NanThrowError("E_INVALID_ARGUMENTS");
+    if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
+    obj->window->enableKeyboardInput();
+    NanAssignPersistent(obj->pf_onKeyboard, args[0].As<v8::Function>());
     NanReturnUndefined();
 }
 

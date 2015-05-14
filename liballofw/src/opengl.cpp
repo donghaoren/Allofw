@@ -63,7 +63,7 @@ public:
         }
         int width = hint.width;
         int height = hint.height;
-        if(width == Hint::FULLSCREEN || height == Hint::FULLSCREEN) {
+        if(hint.fullscreen) {
             glfwWindowHint(GLFW_DECORATED, GL_FALSE);
             glfw_get_screen_size(&width, &height);
         }
@@ -76,6 +76,9 @@ public:
         }
         if(!window) {
             throw glfw_runtime_error("glfwCreateWindow() failed.");
+        }
+        if(hint.hide_cursor) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
         }
         glfwSetWindowUserPointer(window, this);
         glfwSetWindowPosCallback(window, cb_windowpos);
@@ -172,6 +175,46 @@ public:
         if(modifiers.size() > 0) modifiers = modifiers.substr(0, modifiers.size() - 1);
         impl->delegate->onKeyboard(impl->key_to_name[key].c_str(), my_action, modifiers.c_str(), scancode);
     }
+
+    static void cb_cursor_position(GLFWwindow* window, double xpos, double ypos) {
+        OpenGLWindowImpl* impl = (OpenGLWindowImpl*)glfwGetWindowUserPointer(window);
+        if(!impl->delegate) return;
+        impl->delegate->onCursorPosition(xpos, ypos);
+    }
+
+    static void cb_mouse_button(GLFWwindow* window, int button, int action, int mods) {
+        OpenGLWindowImpl* impl = (OpenGLWindowImpl*)glfwGetWindowUserPointer(window);
+        if(!impl->delegate) return;
+        const char* my_action = "UNKNOWN";
+        const char* my_button = "UNKNOWN";
+        switch(action) {
+            case GLFW_PRESS: my_action = "PRESS"; break;
+            case GLFW_RELEASE: my_action = "RELEASE"; break;
+        };
+        switch(button) {
+            case GLFW_MOUSE_BUTTON_LEFT: my_button = "LEFT"; break;
+            case GLFW_MOUSE_BUTTON_RIGHT: my_button = "RIGHT"; break;
+            case GLFW_MOUSE_BUTTON_MIDDLE: my_button = "MIDDLE"; break;
+        };
+        std::string my_mods;
+        if(mods & GLFW_MOD_SHIFT) my_mods += "SHIFT;";
+        if(mods & GLFW_MOD_CONTROL) my_mods += "CONTROL;";
+        if(mods & GLFW_MOD_ALT) my_mods += "ALT;";
+        if(mods & GLFW_MOD_SUPER) my_mods += "SUPER;";
+        if(my_mods.size() > 0) my_mods = my_mods.substr(0, my_mods.size() - 1);
+        impl->delegate->onMouseButton(my_button, my_action, my_mods.c_str());
+    }
+    static void cb_cursor_enter(GLFWwindow* window, int entered) {
+        OpenGLWindowImpl* impl = (OpenGLWindowImpl*)glfwGetWindowUserPointer(window);
+        if(!impl->delegate) return;
+        impl->delegate->onCursorEnter(entered);
+    }
+    static void cb_scroll(GLFWwindow* window, double xoffset, double yoffset) {
+        OpenGLWindowImpl* impl = (OpenGLWindowImpl*)glfwGetWindowUserPointer(window);
+        if(!impl->delegate) return;
+        impl->delegate->onScroll(xoffset, yoffset);
+    }
+
     virtual void enableKeyboardInput() {
         key_to_name[GLFW_KEY_UNKNOWN] = "UNKNOWN";
         key_to_name[GLFW_KEY_SPACE] = "SPACE";
@@ -298,6 +341,13 @@ public:
         glfwSetKeyCallback(window, cb_keyboard);
     }
 
+    virtual void enableMouseInput() {
+        glfwSetCursorPosCallback(window, cb_cursor_position);
+        glfwSetCursorEnterCallback(window, cb_cursor_enter);
+        glfwSetMouseButtonCallback(window, cb_mouse_button);
+        glfwSetScrollCallback(window, cb_scroll);
+    }
+
     virtual ~OpenGLWindowImpl() {
         glfwDestroyWindow(window);
     }
@@ -315,12 +365,9 @@ OpenGLWindow* OpenGLWindow::Create(Configuration* config) {
     OpenGLWindow::Hint hint;
     hint.width = config->getInt32("window.width", 900);
     hint.height = config->getInt32("window.height", 600);
-    if(config->getBoolean("window.fullscreen", false)) {
-        hint.fullscreen();
-    }
-    if(config->getBoolean("window.active_stereo", false)) {
-        hint.active_stereo = true;
-    }
+    hint.fullscreen = config->getBoolean("window.fullscreen", false);
+    hint.hide_cursor = config->getBoolean("window.hide_cursor", false);
+    hint.active_stereo = config->getBoolean("window.active_stereo", false);
     std::string title = config->getSTLString("window.title", "Allofw Window");
     return Create(hint, title.c_str());
 }
@@ -334,6 +381,9 @@ void OpenGLWindow::Delegate::onFocus(int focused) { }
 void OpenGLWindow::Delegate::onIconify(int iconified) { }
 void OpenGLWindow::Delegate::onFramebufferSize(int width, int height) { }
 void OpenGLWindow::Delegate::onKeyboard(char const*, const char*, char const*, int) { }
-
+void OpenGLWindow::Delegate::onCursorPosition(double x, double y) { }
+void OpenGLWindow::Delegate::onMouseButton(const char* button, const char* action, const char* modifiers) { }
+void OpenGLWindow::Delegate::onCursorEnter(bool entered) { }
+void OpenGLWindow::Delegate::onScroll(double xoffset, double yoffset) { }
 
 ALLOFW_NS_END

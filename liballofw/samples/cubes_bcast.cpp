@@ -56,7 +56,7 @@ public:
         pose() = state().pose;
     }
 
-    virtual void onCaptureFace(const CaptureInfo& info) override {
+    virtual void onCaptureViewport(const CaptureInfo& info) override {
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

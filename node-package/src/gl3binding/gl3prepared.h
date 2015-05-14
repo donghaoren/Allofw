@@ -1490,6 +1490,46 @@
 /* reuse GL_PROVOKING_VERTEX */
 #endif
 
+// Extnesions from gl3ext.h
+
+#ifndef GL_EXT_depth_bounds_test
+#define GL_DEPTH_BOUNDS_TEST_EXT          0x8890
+#define GL_DEPTH_BOUNDS_EXT               0x8891
+#endif
+
+#ifndef GL_EXT_framebuffer_multisample_blit_scaled
+#define GL_SCALED_RESOLVE_FASTEST_EXT     0x90BA
+#define GL_SCALED_RESOLVE_NICEST_EXT      0x90BB
+#endif
+
+#ifndef GL_EXT_texture_compression_s3tc
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT   0x83F0
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT  0x83F1
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT  0x83F2
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT  0x83F3
+#define GL_COMPRESSED_SRGB_S3TC_DXT1_EXT  0x8C4C
+#define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT 0x8C4D
+#define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT 0x8C4E
+#define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT 0x8C4F
+#endif
+
+#ifndef GL_EXT_texture_filter_anisotropic
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT     0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+#endif
+
+#ifndef GL_EXT_texture_mirror_clamp
+#define GL_MIRROR_CLAMP_EXT               0x8742
+#define GL_MIRROR_CLAMP_TO_EDGE_EXT       0x8743
+#define GL_MIRROR_CLAMP_TO_BORDER_EXT     0x8912
+#endif
+
+#ifndef GL_EXT_texture_sRGB_decode
+#define GL_TEXTURE_SRGB_DECODE_EXT        0x8A48
+#define GL_DECODE_EXT                     0x8A49
+#define GL_SKIP_DECODE_EXT                0x8A4A
+#endif
+
 void glCullFace (GLenum mode);
 void glFrontFace (GLenum mode);
 void glHint (GLenum target, GLenum mode);

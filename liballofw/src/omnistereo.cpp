@@ -553,7 +553,7 @@ private:
                 glDepthMask(GL_TRUE);
                 glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
                 glEnable(GL_DEPTH_TEST);
-                if(delegate_) delegate_->onCaptureFace(capture_info);
+                if(delegate_) delegate_->onCaptureViewport(capture_info);
             }
         }
         // Set viewport and depth range back.
@@ -678,13 +678,13 @@ private:
             p.texture_depth.R = textures[3];
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, p.texture_color.L);
-            setupCubemapParameters();
+            setupProjectionTextureParameters();
             glBindTexture(GL_TEXTURE_2D, p.texture_color.R);
-            setupCubemapParameters();
+            setupProjectionTextureParameters();
             glBindTexture(GL_TEXTURE_2D, p.texture_depth.L);
-            setupCubemapParameters(true);
+            setupProjectionTextureParameters(true);
             glBindTexture(GL_TEXTURE_2D, p.texture_depth.R);
-            setupCubemapParameters(true);
+            setupProjectionTextureParameters(true);
         }
 
         glutils::checkGLErrors("setup textures");
@@ -743,14 +743,14 @@ private:
                 throw exception("unable to use per-projection mode, viewport angle too large.");
             }
             float fov = std::acos(dot_max) * 2.0f;
-            logger.printf("Viewport%02d: d = (%.4f,%.4f,%.4f), fov = %.2fdegs\n", vp, direction.x, direction.y, direction.z, fov / PI * 180.0f);
             ProjectionTexture& pt = tex_projections_[vp];
             Vector3f rotation_axis = Vector3f(0, 0, -1).cross(direction);
             float rotation_angle = std::acos(Vector3f(0, 0, -1).dot(direction));
             pt.rotation = Quaternion::Rotation(rotation_axis, rotation_angle).inversion();
             pt.fov = fov;
             Size2i screen_resolution = warpblend_->getViewport(vp).screen_resolution;
-            pt.resolution = std::max(screen_resolution.w, screen_resolution.h) * preprojector_resolution_scale_;
+            pt.resolution = resolution_; // std::max(screen_resolution.w, screen_resolution.h) * preprojector_resolution_scale_;
+            logger.printf("Viewport %02d: d = (%.4f,%.4f,%.4f), fov = %.2f degs, res = %d\n", vp, direction.x, direction.y, direction.z, fov / PI * 180.0f, pt.resolution);
         }
 
     }
@@ -761,8 +761,9 @@ private:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         } else {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
         }
     }
     void allocatePerProjectionTextures() {
@@ -843,7 +844,7 @@ private:
                 glDepthMask(GL_TRUE);
                 glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
                 glEnable(GL_DEPTH_TEST);
-                if(delegate_) delegate_->onCaptureFace(capture_info);
+                if(delegate_) delegate_->onCaptureViewport(capture_info);
             }
         }
         // Set viewport and depth range back.
@@ -1004,6 +1005,6 @@ OmniStereo* OmniStereo::Create(Configuration* conf) {
     return new OmniStereoImpl(conf);
 }
 
-void OmniStereo::Delegate::onCaptureFace(const CaptureInfo& info) { }
+void OmniStereo::Delegate::onCaptureViewport(const CaptureInfo& info) { }
 
 ALLOFW_NS_END

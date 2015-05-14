@@ -7,6 +7,7 @@
 
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
+#include <OpenGL/gl3ext.h>
 #else
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -21,21 +22,18 @@ namespace ALLOFW_NS {
     public:
 
         struct Hint {
-            static const int FULLSCREEN = -1;
-
             bool active_stereo;
+            bool fullscreen;
+            bool hide_cursor;
             int width;
             int height;
 
             Hint() {
                 active_stereo = false;
+                fullscreen = false;
+                hide_cursor = false;
                 width = 900;
                 height = 600;
-            }
-
-            void fullscreen() {
-                width = FULLSCREEN;
-                height = FULLSCREEN;
             }
         };
 
@@ -51,6 +49,11 @@ namespace ALLOFW_NS {
             virtual void onFramebufferSize(int width, int height);
             // Keyboard evnets.
             virtual void onKeyboard(const char* key, const char* action, const char* modifiers, int scancode);
+            // Mouse events.
+            virtual void onCursorPosition(double x, double y);
+            virtual void onMouseButton(const char* button, const char* action, const char* modifiers);
+            virtual void onCursorEnter(bool entered);
+            virtual void onScroll(double xoffset, double yoffset);
             virtual ~Delegate() { }
         };
 
@@ -74,6 +77,7 @@ namespace ALLOFW_NS {
 
         // Input handling.
         virtual void enableKeyboardInput() = 0;
+        virtual void enableMouseInput() = 0;
 
         virtual ~OpenGLWindow() { }
 

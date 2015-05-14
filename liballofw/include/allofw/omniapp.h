@@ -29,7 +29,7 @@ namespace ALLOFW_NS {
         // Called before swapping buffers. (place for barrier).
         virtual void onPresent();
         // Omnistereo capture callback.
-        virtual void onCaptureFace(const CaptureInfo& info) override;
+        virtual void onCaptureViewport(const CaptureInfo& info) override;
 
         // Window event handlers.
         virtual void onMove(int x, int y) override;
