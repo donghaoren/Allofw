@@ -246,6 +246,9 @@ namespace {
                 } break;
             }
             SkTypeface* typeface = SkTypeface::CreateFromName(name, sty);
+            if(!typeface) {
+                typeface = SkTypeface::CreateFromName(NULL, sty);
+            }
             paint.setTypeface(typeface);
             typeface->unref();
         }
