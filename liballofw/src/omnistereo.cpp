@@ -574,6 +574,8 @@ private:
         [&](int mask) {
             glUseProgram(program_draw_);
             glUniform1i(program_draw_drawMask_, mask);
+            glDisable(GL_DEPTH_TEST);
+            glBindVertexArray(vertex_array_quad_);
         },
         [&](int eye, int vp, GLTextureID warp_texture, GLTextureID blend_texture, ProjectionTexture& projection_texture, Vector2f& position_scalers) {
             glUniform2f(program_draw_positionScalers_, position_scalers.x, position_scalers.y);
@@ -582,9 +584,6 @@ private:
             glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, blend_texture);
             glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_CUBE_MAP, tex_cubemap_.eyes[eye]);
 
-            glDisable(GL_DEPTH_TEST);
-
-            glBindVertexArray(vertex_array_quad_);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
             glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -592,6 +591,7 @@ private:
             glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0);
         },
         [&]() {
+            glBindVertexArray(0);
             glUseProgram(0);
         });
     }
@@ -794,6 +794,8 @@ private:
         [&](int mask) {
             glUseProgram(program_draw_);
             glUniform1i(program_draw_drawMask_, mask);
+            glDisable(GL_DEPTH_TEST);
+            glBindVertexArray(vertex_array_quad_);
         },
         [&](int eye, int vp, GLTextureID warp_texture, GLTextureID blend_texture, ProjectionTexture& projection_texture, Vector2f& position_scalers) {
             glUniform2f(program_draw_positionScalers_, position_scalers.x, position_scalers.y);
@@ -804,9 +806,6 @@ private:
             glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, blend_texture);
             glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, projection_texture.texture_color.eyes[eye]);
 
-            glDisable(GL_DEPTH_TEST);
-
-            glBindVertexArray(vertex_array_quad_);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
             glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, 0);
@@ -814,6 +813,7 @@ private:
             glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0);
         },
         [&]() {
+            glBindVertexArray(0);
             glUseProgram(0);
         });
     }
