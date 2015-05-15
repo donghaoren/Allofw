@@ -74,6 +74,8 @@ for dep in r:
 for lib in libraries:
     distill("MacOS/lib/%s" % lib)
 
+command("make -C MacOS/samples")
+
 deps = set()
 # Find all dependencies:
 for root, dirs, files in os.walk("MacOS/lib"):

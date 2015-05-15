@@ -24,6 +24,7 @@ R"================(
 // Pose information
 uniform vec3 omni_position;
 uniform vec4 omni_rotation;
+// This is half of the eye separation (distance between the origin and one eye).
 uniform float omni_eye;
 uniform float omni_radius;
 uniform vec4 omni_viewport_rotation;
@@ -105,12 +106,12 @@ uniform sampler2D texPanorama;
 uniform int drawMask = 0;
 
 // These constants must be the same as in the header.
-const int kDrawMask_Cubemap                   = 1 << 0;
-const int kDrawMask_Back                      = 1 << 1;
-const int kDrawMask_Front                     = 1 << 2;
-const int kDrawMask_Panorama                  = 1 << 3;
-const int kDrawMask_Panorama_Equirectangular  = 1 << 4;
-const int kDrawMask_Panorama_Cubemap          = 1 << 5;
+const int kCompositeMask_Cubemap                   = 1 << 0;
+const int kCompositeMask_Back                      = 1 << 1;
+const int kCompositeMask_Front                     = 1 << 2;
+const int kCompositeMask_Panorama                  = 1 << 3;
+const int kCompositeMask_Panorama_Equirectangular  = 1 << 4;
+const int kCompositeMask_Panorama_Cubemap          = 1 << 5;
 
 in vec2 vp_coordinates;
 layout(location = 0) out vec4 fragment_output;
@@ -144,12 +145,12 @@ uniform vec4 viewportRotation;
 uniform float tanFovDiv2;
 
 // These constants must be the same as in the header.
-const int kDrawMask_Cubemap                   = 1 << 0;
-const int kDrawMask_Back                      = 1 << 1;
-const int kDrawMask_Front                     = 1 << 2;
-const int kDrawMask_Panorama                  = 1 << 3;
-const int kDrawMask_Panorama_Equirectangular  = 1 << 4;
-const int kDrawMask_Panorama_Cubemap          = 1 << 5;
+const int kCompositeMask_Cubemap                   = 1 << 0;
+const int kCompositeMask_Back                      = 1 << 1;
+const int kCompositeMask_Front                     = 1 << 2;
+const int kCompositeMask_Panorama                  = 1 << 3;
+const int kCompositeMask_Panorama_Equirectangular  = 1 << 4;
+const int kCompositeMask_Panorama_Cubemap          = 1 << 5;
 
 in vec2 vp_coordinates;
 layout(location = 0) out vec4 fragment_output;
@@ -195,10 +196,10 @@ public:
         /**/ if(stereo_mode == "mono") stereo_mode_ = kStereoMode_Mono;
         else if(stereo_mode == "left") stereo_mode_ = kStereoMode_Left;
         else if(stereo_mode == "right") stereo_mode_ = kStereoMode_Right;
-        else if(stereo_mode == "dual_lr") stereo_mode_ = kStereoMode_DualLR;
-        else if(stereo_mode == "dual_rl") stereo_mode_ = kStereoMode_DualRL;
+        else if(stereo_mode == "dual_lr") stereo_mode_ = kStereoMode_Dual_LR;
+        else if(stereo_mode == "dual_rl") stereo_mode_ = kStereoMode_Dual_RL;
         else if(stereo_mode == "active") stereo_mode_ = kStereoMode_Active;
-        else if(stereo_mode == "anaglyph_red_cyan") stereo_mode_ = kStereoMode_AnaglyphRedCyan;
+        else if(stereo_mode == "anaglyph_red_cyan") stereo_mode_ = kStereoMode_Anaglyph_Red_Cyan;
         else stereo_mode_ = kStereoMode_Mono;
 
         stereo_enabled_ = stereo_mode_ != kStereoMode_Mono;
@@ -341,7 +342,7 @@ public:
     virtual void setUniforms(GLuint program, const Delegate::CaptureInfo& info) {
         GLint l;
         if((l = glGetUniformLocation(program, "omni_eye")) >= 0) {
-            glProgramUniform1f(program, l, info.eye_separation);
+            glProgramUniform1f(program, l, info.eye_separation / 2.0f);
         }
         if((l = glGetUniformLocation(program, "omni_radius")) >= 0) {
             glProgramUniform1f(program, l, info.sphere_radius);
@@ -569,98 +570,30 @@ private:
 
     // Draw the cubemap to the current viewport.
     virtual void compositeCubemap(const Rectangle2i& viewport, const CompositeInfo& info) {
-        int eyes = stereo_enabled_ ? 2 : 1;
-        int mask = info.mask;
-        for(int eye = 0; eye < eyes; eye++) {
-            if(!info.front.eyes[eye]) mask &= ~kDrawMask_Front;
-            if(!info.back.eyes[eye]) mask &= ~kDrawMask_Back;
-            if(!info.panorama.eyes[eye]) mask &= ~kDrawMask_Panorama;
-        }
+        _composite_common(viewport, info,
+        [&](int mask) {
+            glUseProgram(program_draw_);
+            glUniform1i(program_draw_drawMask_, mask);
+        },
+        [&](int eye, int vp, GLTextureID warp_texture, GLTextureID blend_texture, ProjectionTexture& projection_texture, Vector2f& position_scalers) {
+            glUniform2f(program_draw_positionScalers_, position_scalers.x, position_scalers.y);
 
-        glUseProgram(program_draw_);
-        glUniform1i(program_draw_drawMask_, mask);
+            glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, warp_texture);
+            glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, blend_texture);
+            glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_CUBE_MAP, tex_cubemap_.eyes[eye]);
 
-        Rectangle2i draw_viewport = viewport;
+            glDisable(GL_DEPTH_TEST);
 
-        for(int eye = 0; eye < eyes; eye++) {
-            switch(stereo_mode_) {
-                case kStereoMode_Mono: break;
-                case kStereoMode_Left: {
-                    if(eye != kEye_Left) continue;
-                } break;
-                case kStereoMode_Right: {
-                    if(eye != kEye_Right) continue;
-                } break;
-                case kStereoMode_Active: {
-                    if(eye == kEye_Left) {
-                        glDrawBuffer(GL_BACK_LEFT);
-                    } else {
-                        glDrawBuffer(GL_BACK_RIGHT);
-                    }
-                } break;
-                case kStereoMode_DualLR: {
-                    if(eye == kEye_Left) {
-                        glDrawBuffer(GL_BACK_LEFT);
-                    } else {
-                        glDrawBuffer(GL_BACK_RIGHT);
-                    }
-                } break;
-                case kStereoMode_DualRL: {
-                    if(eye == kEye_Left) {
-                        draw_viewport = Rectangle2i(viewport.x, viewport.y, viewport.w / 2, viewport.h);
-                    } else {
-                        draw_viewport = Rectangle2i(viewport.x + viewport.w / 2, viewport.y, viewport.w / 2, viewport.h);
-                    }
-                } break;
-                case kStereoMode_AnaglyphRedCyan: {
-                    if(eye == kEye_Left) {
-                        glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
-                    } else {
-                        glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
-                    }
-                } break;
-            }
-            for(int vp = 0; vp < warpblend_->getViewportCount(); vp++) {
-                WarpBlend::ViewportInfo vp_info = warpblend_->getViewport(vp);
-                Rectangle2 viewport_bounds = vp_info.viewport;
-                GLTextureID warp_texture = warpblend_->getWarpTexture(vp);
-                GLTextureID blend_texture = warpblend_->getBlendTexture(vp);
-                Rectangle2 vp_to_draw(
-                    draw_viewport.x + viewport_bounds.x * draw_viewport.w,
-                    draw_viewport.y + viewport_bounds.y * draw_viewport.h,
-                    viewport_bounds.w * draw_viewport.w,
-                    viewport_bounds.h * draw_viewport.h
-                );
-                glViewport(vp_to_draw.x, vp_to_draw.y, vp_to_draw.w, vp_to_draw.h);
-                Vector2f position_scalers(1, 1);
-                if(vp_info.enforce_aspect_ratio) {
-                    if(vp_to_draw.w / vp_to_draw.h > vp_info.aspect_ratio) {
-                        position_scalers.y = vp_to_draw.w / vp_to_draw.h / vp_info.aspect_ratio;
-                    } else {
-                        position_scalers.x = vp_to_draw.h * vp_info.aspect_ratio / vp_to_draw.w;
-                    }
-                }
-                glUniform2f(program_draw_positionScalers_, position_scalers.x, position_scalers.y);
+            glBindVertexArray(vertex_array_quad_);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-                glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, warp_texture);
-                glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, blend_texture);
-                glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_CUBE_MAP, tex_cubemap_.eyes[eye]);
-
-                glDisable(GL_DEPTH_TEST);
-
-                glBindVertexArray(vertex_array_quad_);
-                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-                glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-                glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 0);
-                glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0);
-
-            }
-        }
-        glDrawBuffer(GL_BACK);
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glUseProgram(0);
-        glutils::checkGLErrors("OmniStereo::composite");
+            glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0);
+        },
+        [&]() {
+            glUseProgram(0);
+        });
     }
 
     // PerProjection initialization.
@@ -808,11 +741,6 @@ private:
     // Capture into cubemap.
     void capturePerProjection() {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
-        // Store viewport and depth range.
-        GLint viewport[4];
-        GLfloat depth_range[2];
-        glGetIntegerv(GL_VIEWPORT, viewport);
-        glGetFloatv(GL_DEPTH_RANGE, depth_range);
 
         Delegate::CaptureInfo capture_info;
         capture_info.omnistereo = this;
@@ -825,6 +753,7 @@ private:
         int eyes = stereo_enabled_ ? 2 : 1;
 
         glDepthRange(0, 1);
+
         for(ProjectionTexture& p : tex_projections_) {
             for(int eye = 0; eye < eyes; eye++) {
                 capture_info.eye = eye;
@@ -850,9 +779,6 @@ private:
                 if(delegate_) delegate_->onCaptureViewport(capture_info);
             }
         }
-        // Set viewport and depth range back.
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-        glDepthRange(depth_range[0], depth_range[1]);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         for(ProjectionTexture& p : tex_projections_) {
             for(int eye = 0; eye < eyes; eye++) {
@@ -864,16 +790,46 @@ private:
     }
 
     void compositePerProjection(const Rectangle2i& viewport, const CompositeInfo& info) {
+        _composite_common(viewport, info,
+        [&](int mask) {
+            glUseProgram(program_draw_);
+            glUniform1i(program_draw_drawMask_, mask);
+        },
+        [&](int eye, int vp, GLTextureID warp_texture, GLTextureID blend_texture, ProjectionTexture& projection_texture, Vector2f& position_scalers) {
+            glUniform2f(program_draw_positionScalers_, position_scalers.x, position_scalers.y);
+            glUniform4f(program_draw_viewportRotation_, projection_texture.rotation.x, projection_texture.rotation.y, projection_texture.rotation.z, projection_texture.rotation.w);
+            glUniform1f(program_draw_tanFovDiv2_, std::tan(projection_texture.fov / 2.0));
+
+            glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, warp_texture);
+            glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, blend_texture);
+            glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, projection_texture.texture_color.eyes[eye]);
+
+            glDisable(GL_DEPTH_TEST);
+
+            glBindVertexArray(vertex_array_quad_);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+            glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0);
+        },
+        [&]() {
+            glUseProgram(0);
+        });
+    }
+
+    // Common code for composite.
+    template<typename InitCode, typename ViewportCode, typename FinalizeCode>
+    void _composite_common(const Rectangle2i& viewport, const CompositeInfo& info, InitCode init_code, ViewportCode viewport_code, FinalizeCode finalize_code) {
         int eyes = stereo_enabled_ ? 2 : 1;
         int mask = info.mask;
         for(int eye = 0; eye < eyes; eye++) {
-            if(!info.front.eyes[eye]) mask &= ~kDrawMask_Front;
-            if(!info.back.eyes[eye]) mask &= ~kDrawMask_Back;
-            if(!info.panorama.eyes[eye]) mask &= ~kDrawMask_Panorama;
+            if(!info.front.eyes[eye]) mask &= ~kCompositeMask_Front;
+            if(!info.back.eyes[eye]) mask &= ~kCompositeMask_Back;
+            if(!info.panorama.eyes[eye]) mask &= ~kCompositeMask_Panorama;
         }
 
-        glUseProgram(program_draw_);
-        glUniform1i(program_draw_drawMask_, mask);
+        init_code(mask);
 
         Rectangle2i draw_viewport = viewport;
 
@@ -893,21 +849,21 @@ private:
                         glDrawBuffer(GL_BACK_RIGHT);
                     }
                 } break;
-                case kStereoMode_DualLR: {
+                case kStereoMode_Dual_LR: {
                     if(eye == kEye_Left) {
                         glDrawBuffer(GL_BACK_LEFT);
                     } else {
                         glDrawBuffer(GL_BACK_RIGHT);
                     }
                 } break;
-                case kStereoMode_DualRL: {
+                case kStereoMode_Dual_RL: {
                     if(eye == kEye_Left) {
                         draw_viewport = Rectangle2i(viewport.x, viewport.y, viewport.w / 2, viewport.h);
                     } else {
                         draw_viewport = Rectangle2i(viewport.x + viewport.w / 2, viewport.y, viewport.w / 2, viewport.h);
                     }
                 } break;
-                case kStereoMode_AnaglyphRedCyan: {
+                case kStereoMode_Anaglyph_Red_Cyan: {
                     if(eye == kEye_Left) {
                         glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
                     } else {
@@ -936,28 +892,12 @@ private:
                         position_scalers.x = vp_to_draw.h * vp_info.aspect_ratio / vp_to_draw.w;
                     }
                 }
-                glUniform2f(program_draw_positionScalers_, position_scalers.x, position_scalers.y);
-                glUniform4f(program_draw_viewportRotation_, projection_texture.rotation.x, projection_texture.rotation.y, projection_texture.rotation.z, projection_texture.rotation.w);
-                glUniform1f(program_draw_tanFovDiv2_, std::tan(projection_texture.fov / 2.0));
-
-                glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, warp_texture);
-                glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, blend_texture);
-                glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, projection_texture.texture_color.eyes[eye]);
-
-                glDisable(GL_DEPTH_TEST);
-
-                glBindVertexArray(vertex_array_quad_);
-                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-                glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, 0);
-                glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 0);
-                glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0);
-
+                viewport_code(eye, vp, warp_texture, blend_texture, projection_texture, position_scalers);
             }
         }
         glDrawBuffer(GL_BACK);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glUseProgram(0);
+        finalize_code();
         glutils::checkGLErrors("OmniStereo::composite");
     }
 
