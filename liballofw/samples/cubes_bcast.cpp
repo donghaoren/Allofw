@@ -131,7 +131,7 @@ public:
 int main(int argc, char* argv[]) {
     Configuration* config = Configuration::ParseMainArgs(argc, argv);
     try {
-        if(config->getSTLString("broadcasting.role", "renderer") == "simulator") {
+        if(config->getString("broadcasting.role", "renderer") == "simulator") {
             MyAppSimulator app;
             app.initialize(config);
             app.main();

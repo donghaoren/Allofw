@@ -192,7 +192,7 @@ public:
     OmniStereoImpl(Configuration* conf) {
         LoggerScope logger(Logger::kInfo, "OmniStereo::Initialization");
 
-        std::string stereo_mode = conf->getSTLString("omnistereo.stereo_mode", "mono");
+        std::string stereo_mode = conf->getString("omnistereo.stereo_mode", "mono");
         /**/ if(stereo_mode == "mono") stereo_mode_ = kStereoMode_Mono;
         else if(stereo_mode == "left") stereo_mode_ = kStereoMode_Left;
         else if(stereo_mode == "right") stereo_mode_ = kStereoMode_Right;
@@ -209,16 +209,16 @@ public:
         near_ = conf->getFloat("omnistereo.near", 0.01);
         far_ = conf->getFloat("omnistereo.far", 100);
 
-        std::string warpblend = conf->getSTLString("omnistereo.warpblend.allosphere_calibration", "undefined");
+        std::string warpblend = conf->getString("omnistereo.warpblend.allosphere_calibration", "undefined");
         if(warpblend != "undefined") {
-            std::string hostname = conf->getSTLString("omnistereo.warpblend.allosphere_calibration_hostname", "undefined");
+            std::string hostname = conf->getString("omnistereo.warpblend.allosphere_calibration_hostname", "undefined");
             if(hostname == "undefined") {
                 warpblend_ = WarpBlend::LoadAllosphereCalibration(warpblend.c_str(), nullptr);
             } else {
                 warpblend_ = WarpBlend::LoadAllosphereCalibration(warpblend.c_str(), hostname.c_str());
             }
         } else {
-            std::string generate = conf->getSTLString("omnistereo.warpblend.generate", "equirectangular");
+            std::string generate = conf->getString("omnistereo.warpblend.generate", "equirectangular");
             if(generate == "equirectangular") {
                 warpblend_ = WarpBlend::CreateEquirectangular();
             } else if(generate == "perspective") {
@@ -227,7 +227,7 @@ public:
             }
         }
 
-        std::string capture_method = conf->getSTLString("omnistereo.capture_method", "cubemap");
+        std::string capture_method = conf->getString("omnistereo.capture_method", "cubemap");
         capture_method_ = kCaptureMethod_Cubemap;
 
         if(capture_method == "cubemap") capture_method_ = kCaptureMethod_Cubemap;

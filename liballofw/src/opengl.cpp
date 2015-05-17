@@ -368,7 +368,7 @@ OpenGLWindow* OpenGLWindow::Create(Configuration* config) {
     hint.fullscreen = config->getBoolean("window.fullscreen", false);
     hint.hide_cursor = config->getBoolean("window.hide_cursor", false);
     hint.active_stereo = config->getBoolean("window.active_stereo", false);
-    std::string title = config->getSTLString("window.title", "Allofw Window");
+    std::string title = config->getString("window.title", "Allofw Window");
     return Create(hint, title.c_str());
 }
 

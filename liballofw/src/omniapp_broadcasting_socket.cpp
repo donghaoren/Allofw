@@ -18,7 +18,7 @@ namespace {
     class BroadcastingSocketZeroMQ : public BroadcastingSocket {
     public:
         BroadcastingSocketZeroMQ(Configuration* config) {
-            std::string role = config->getSTLString("broadcasting.role", "renderer");
+            std::string role = config->getString("broadcasting.role", "renderer");
             role_ = kSimulator;
             if(role == "simulator") role_ = kSimulator;
             if(role == "renderer") role_ = kRenderer;
@@ -31,8 +31,8 @@ namespace {
                     renderer_ids_.resize(n_renderers);
                     for(int i = 0; i < n_renderers; i++) renderer_ids_[i] = i;
 
-                    std::string ep_broadcast = config->getSTLString("broadcasting.zeromq.broadcast", "tcp://127.0.0.1:55555");
-                    std::string ep_feedback = config->getSTLString("broadcasting.zeromq.feedback", "tcp://127.0.0.1:55556");
+                    std::string ep_broadcast = config->getString("broadcasting.zeromq.broadcast", "tcp://127.0.0.1:55555");
+                    std::string ep_feedback = config->getString("broadcasting.zeromq.feedback", "tcp://127.0.0.1:55556");
 
                     int r;
                     socket_pub_ = zmq_socket(zmq_context_, ZMQ_PUB);
@@ -50,8 +50,8 @@ namespace {
                 case kRenderer: {
                     renderer_id_ = config->getInt32("broadcasting.renderer_id", 0);
 
-                    std::string ep_broadcast = config->getSTLString("broadcasting.zeromq.broadcast", "tcp://127.0.0.1:55555");
-                    std::string ep_feedback = config->getSTLString("broadcasting.zeromq.feedback", "tcp://127.0.0.1:55556");
+                    std::string ep_broadcast = config->getString("broadcasting.zeromq.broadcast", "tcp://127.0.0.1:55555");
+                    std::string ep_feedback = config->getString("broadcasting.zeromq.feedback", "tcp://127.0.0.1:55556");
 
                     int r;
                     socket_sub_ = zmq_socket(zmq_context_, ZMQ_SUB);
