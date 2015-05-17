@@ -1,7 +1,5 @@
 #include "allofw/opengl_utils.h"
 #include <string>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/replace.hpp>
 
 namespace ALLOFW_NS { namespace glutils {
 

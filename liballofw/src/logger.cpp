@@ -9,7 +9,6 @@
 #include <cstdarg>
 #include <sys/types.h>
 
-
 ALLOFW_NS_BEGIN
 
 struct ScopedLogger::Details {

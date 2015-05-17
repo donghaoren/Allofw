@@ -9,7 +9,6 @@
 
   SET ( WITH_SKIA   FALSE CACHE BOOL "Build with Skia.")
 
-
 #----------------------------------------------------------------------------------------------------------------------
 # Configuration Parameters
 
@@ -18,20 +17,23 @@
   # Enable C++11 support (mandatory)
   SET ( CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}" )
 
+  # Show all warnings.
   SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
 
 #----------------------------------------------------------------------------------------------------------------------
 # Main Definitions
 
   # Put built libraries and binaries to bin and lib directories.
-  SET ( CMAKE_BUILD_TYPE "Release" )
   SET ( EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin" )
   SET ( LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib" )
 
   FIND_PACKAGE ( PkgConfig )
 
+  # OS specific configurations.
   IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
     # For linux, report error when shared libraries contains undefined references.
+    # Link c/c++ libraries statically.
+    SET ( CMAKE_EXE_LINKER_FLAGS "-Wl,--no-undefined -static-libgcc -static-libstdc++" )
     SET ( CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined -static-libgcc -static-libstdc++" )
     ADD_DEFINITIONS ( -DPLATFORM_LINUX )
   ENDIF ( )
@@ -47,27 +49,29 @@
   PKG_SEARCH_MODULE ( GLFW REQUIRED glfw3 )
   PKG_SEARCH_MODULE ( ZeroMQ REQUIRED libzmq )
 
-  # Boost C++ Libraries
-  FIND_PACKAGE ( Boost REQUIRED COMPONENTS thread system )
+  # Boost C++ Libraries (we use headers only).
+  FIND_PACKAGE ( Boost REQUIRED )
   FIND_PACKAGE ( OpenGL REQUIRED )
-  FIND_PACKAGE ( FFMPEG REQUIRED )
   FIND_PACKAGE ( GLEW REQUIRED )
-  FIND_PACKAGE ( FreeImage REQUIRED )
-  FIND_PACKAGE ( GLUT REQUIRED )
   FIND_PACKAGE ( Armadillo REQUIRED )
 
   INCLUDE_DIRECTORIES (
     ${Boost_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
+    ${GLFW_INCLUDE_DIRS}
     ${YAMLCPP_INCLUDE_DIRS}
     ${ARMADILLO_INCLUDE_DIR}
   )
 
   IF ( ${WITH_SKIA} )
     FIND_PACKAGE ( Skia REQUIRED )
+    FIND_PACKAGE ( FFMPEG REQUIRED )
+    FIND_PACKAGE ( FreeImage REQUIRED )
     INCLUDE_DIRECTORIES (
       ${Skia_INCLUDE_DIRS}
+      ${FREEIMAGE_INCLUDE_PATH}
+      ${FFMPEG_INCLUDE_DIR}
     )
   ENDIF ( )
 
@@ -119,6 +123,7 @@
   )
 
   IF ( ${WITH_SKIA} )
+
     ADD_LIBRARY ( allofw-graphics SHARED
       src/graphics_skia.cpp
       src/graphics_ffmpeg.cpp
