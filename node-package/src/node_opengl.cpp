@@ -154,7 +154,7 @@ NAN_METHOD(NODE_OpenGLWindow::New) {
             Local<Object> params = args[0]->ToObject();
             if(params->Has(NanNew<String>("config"))) {
                 NanUtf8String str(params->Get(NanNew<String>("config")));
-                allofw::Configuration* config = allofw::Configuration::ParseArgs(*str);
+                allofw::Configuration* config = allofw::Configuration::CreateFromFile(*str);
                 window = allofw::OpenGLWindow::Create(config);
             } else {
                 allofw::OpenGLWindow::Hint hint;

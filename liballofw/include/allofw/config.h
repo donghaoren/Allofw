@@ -72,7 +72,7 @@ namespace ALLOFW_NS {
         // Constructor.
         static Configuration* Create();
         static Configuration* ParseMainArgs(int argc, char* argv[]);
-        static Configuration* ParseArgs(const char* args = nullptr);
+        static Configuration* CreateFromFile(const char* args = nullptr);
     };
 
 }

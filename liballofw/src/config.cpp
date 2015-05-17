@@ -176,11 +176,11 @@ Configuration* Configuration::Create() {
 }
 
 Configuration* Configuration::ParseMainArgs(int argc, char* argv[]) {
-    if(argc == 2) return ParseArgs(argv[1]);
-    return ParseArgs();
+    if(argc == 2) return CreateFromFile(argv[1]);
+    return CreateFromFile();
 }
 
-Configuration* Configuration::ParseArgs(const char* args) {
+Configuration* Configuration::CreateFromFile(const char* args) {
     Configuration* config = Configuration::Create();
     const char* config_path = "allofw.yaml";
     if(args) config_path = args;

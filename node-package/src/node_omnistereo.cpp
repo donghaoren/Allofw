@@ -45,9 +45,9 @@ NAN_METHOD(NODE_OmniStereo::New) {
             Configuration* config;
             if(args[0]->IsString()) {
                 NanUtf8String str(args[0]);
-                config = Configuration::ParseArgs(*str);
+                config = Configuration::CreateFromFile(*str);
             } else {
-                config = Configuration::ParseArgs(nullptr);
+                config = Configuration::CreateFromFile(nullptr);
             }
             NODE_OmniStereo* obj = new NODE_OmniStereo(config);
             obj->Wrap(args.This());
