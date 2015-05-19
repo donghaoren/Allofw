@@ -536,10 +536,10 @@ namespace {
             return new Paint_Impl();
         }
         virtual void destroyPath(Path2D* path) {
-            delete (Path_Impl*)path;
+            delete dynamic_cast<Path_Impl*>(path);
         }
         virtual void destroyPaint(Paint2D* paint) {
-            delete (Paint_Impl*)paint;
+            delete dynamic_cast<Paint_Impl*>(paint);
         }
         // Draw a path.
         virtual void drawPath(Path2D* path, Paint2D* paint_) {

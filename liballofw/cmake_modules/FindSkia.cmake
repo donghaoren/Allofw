@@ -1,7 +1,7 @@
 # Skia as graphics backend.
 # Together with its dependencies.
 # This should be a custom build from source, put into /opt/build/skia
-SET ( Skia_SOURCE_DIR /opt/build/skia )
+SET ( Skia_SOURCE_DIR ${CMAKE_SOURCE_DIR}/skia/skia )
 
 SET ( Skia_INCLUDE_DIRS
   "${Skia_SOURCE_DIR}/include/config"

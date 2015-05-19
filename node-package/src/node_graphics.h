@@ -110,6 +110,7 @@ public:
 
     allofw::GraphicalContext2D* context;
     allofw::Path2D* path;
+    v8::Persistent<v8::Object> context_handle;
 
     friend class NODE_GraphicalContext2D;
 
@@ -137,6 +138,7 @@ public:
 
     allofw::GraphicalContext2D* context;
     allofw::Paint2D* paint;
+    v8::Persistent<v8::Object> context_handle;
 
     friend class NODE_GraphicalContext2D;
 

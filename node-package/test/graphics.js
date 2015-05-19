@@ -19,9 +19,16 @@ var context = new graphics.GraphicalContext2D(s);
 render(context);
 
 
-var request = require('request');
-request({ url: 'http://www.baidu.com/img/bdlogo.png', encoding: null }, function(error, response, body) {
-    var img = new graphics.Surface2D(body);
-    context.drawSurface(img, 100, 0, 1000, 1000, 100, 100, 500, 500, context.paint());
-    s.save("body.png");
-});
+// var request = require('request');
+// request({ url: 'http://www.baidu.com/img/bdlogo.png', encoding: null }, function(error, response, body) {
+//     var img = new graphics.Surface2D(body);
+//     context.drawSurface(img, 100, 0, 1000, 1000, 100, 100, 500, 500, context.paint());
+//     s.save("body.png");
+// });
+
+context = null;
+s = null;
+
+setInterval(function() {
+    console.log("interval.");
+}, 100);

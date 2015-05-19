@@ -75,12 +75,13 @@ setupBuffers = () ->
     @vertex_buffer = new GL.Buffer()
     @vertex_array = new GL.VertexArray()
 
-    GL.bindBuffer(GL.ARRAY_BUFFER, vertex_buffer)
     vertices1 = new Float32Array([
         0, 0, 0, 1, 0, 1,
         0, 1, 0, 1, 1, 1,
         1, 0, 0, 1, 1, 1
     ])
+
+    GL.bindBuffer(GL.ARRAY_BUFFER, vertex_buffer)
     GL.bufferData(GL.ARRAY_BUFFER, 4 * vertices1.length, vertices1, GL.STATIC_DRAW)
 
     GL.bindVertexArray(vertex_array)
@@ -89,6 +90,9 @@ setupBuffers = () ->
     GL.bindBuffer(GL.ARRAY_BUFFER, vertex_buffer)
     GL.vertexAttribPointer(0, 3, GL.FLOAT, GL.FALSE, 24, 0)
     GL.vertexAttribPointer(1, 3, GL.FLOAT, GL.FALSE, 24, 12)
+    GL.bindBuffer(GL.ARRAY_BUFFER, 0)
+    GL.bindVertexArray(0)
+
 
 setupRender = () ->
     compileShaders()
@@ -102,6 +106,7 @@ render = () ->
     GL.useProgram(program.id())
     GL.bindVertexArray(vertex_array)
     GL.drawArrays(GL.TRIANGLES, 0, 3)
+    GL.bindVertexArray(0)
     w.swapBuffers()
 
 setupRender()

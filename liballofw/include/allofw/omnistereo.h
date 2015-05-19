@@ -37,12 +37,11 @@ namespace ALLOFW_NS {
 
         // Composite mask.
         typedef int CompositeMask;
-        static const int kCompositeMask_Cubemap                   = 1 << 0;
+        static const int kCompositeMask_Scene                     = 1 << 0;
         static const int kCompositeMask_Back                      = 1 << 1;
         static const int kCompositeMask_Front                     = 1 << 2;
         static const int kCompositeMask_Panorama                  = 1 << 3;
         static const int kCompositeMask_Panorama_Equirectangular  = 1 << 4;
-        static const int kCompositeMask_Panorama_Cubemap          = 1 << 5;
 
         // Stereo texture.
         struct StereoTexture {
@@ -107,7 +106,7 @@ namespace ALLOFW_NS {
             CompositeMask mask;
             StereoTexture back, front;
             StereoTexture panorama;
-            CompositeInfo() : mask(kCompositeMask_Cubemap) { }
+            CompositeInfo() : mask(kCompositeMask_Scene) { }
         };
 
         // Draw internal buffers to current viewport.

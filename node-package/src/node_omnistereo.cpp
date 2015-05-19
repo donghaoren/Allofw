@@ -127,6 +127,17 @@ NAN_METHOD(NODE_OmniStereo::NODE_composite) {
         args[3]->IntegerValue()
     );
     OmniStereo::CompositeInfo composite_info;
+    if(args[4]->IsObject()) {
+        Handle<Object> obj = args[4]->ToObject();
+        if(obj->Has(NanNew<String>("panorama"))) {
+            if(obj->Get(NanNew<String>("panorama"))->IsArray()) {
+                Handle<Object> val = obj->Get(NanNew<String>("panorama"))->ToObject();
+                composite_info.panorama.L = val->Get(0)->Uint32Value();
+                composite_info.panorama.R = val->Get(1)->Uint32Value();
+                composite_info.mask |= OmniStereo::kCompositeMask_Panorama | OmniStereo::kCompositeMask_Panorama_Equirectangular;
+            }
+        }
+    }
     self->omnistereo->composite(viewport, composite_info);
     NanReturnUndefined();
 }
