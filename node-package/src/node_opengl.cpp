@@ -172,6 +172,9 @@ NAN_METHOD(NODE_OpenGLWindow::New) {
                 if(params->Has(NanNew<String>("active_stereo"))) {
                     hint.active_stereo = params->Get(NanNew<String>("active_stereo"))->BooleanValue();
                 }
+                if(params->Has(NanNew<String>("hide_cursor"))) {
+                    hint.hide_cursor = params->Get(NanNew<String>("active_stereo"))->BooleanValue();
+                }
                 if(params->Has(NanNew<String>("fullscreen"))) {
                     hint.fullscreen = params->Get(NanNew<String>("fullscreen"))->BooleanValue();
                 }
