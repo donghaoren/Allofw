@@ -7,10 +7,12 @@
 #----------------------------------------------------------------------------------------------------------------------
 # User Configuration Parameters
 
-  SET ( WITH_SKIA   FALSE CACHE BOOL "Build with Skia.")
+  SET ( WITH_SKIA   TRUE CACHE BOOL "Build with Skia.")
 
 #----------------------------------------------------------------------------------------------------------------------
 # Configuration Parameters
+
+  SET ( CMAKE_BUILD_TYPE Release )
 
   SET ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules" )
 
@@ -27,6 +29,8 @@
   SET ( EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin" )
   SET ( LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib" )
 
+  # Use libraries in the source directory if possible.
+  SET ( ENV{PKG_CONFIG_PATH} "${CMAKE_SOURCE_DIR}/dependencies/local/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}" )
   FIND_PACKAGE ( PkgConfig )
 
   # OS specific configurations.
@@ -100,12 +104,11 @@
 
   TARGET_LINK_LIBRARIES ( allofw
     LINK_PRIVATE
-      ${FFMPEG_LIBRARIES}
       ${OPENGL_LIBRARIES}
       ${GLEW_LIBRARIES}
-      ${GLFW_LIBRARIES}
+      ${GLFW_LDFLAGS}
       ${FREEIMAGE_LIBRARIES}
-      ${YAMLCPP_LIBRARIES}
+      ${YAMLCPP_LDFLAGS}
       ${ARMADILLO_LIBRARIES}
       pthread
   )
@@ -133,12 +136,12 @@
       LINK_PRIVATE
         allofw
         ${Skia_LIBRARIES}
-        ${FFMPEG_LIBRARIES}
+        ${FFMPEG_LDFLAGS}
         ${OPENGL_LIBRARIES}
         ${GLEW_LIBRARIES}
-        ${GLFW_LIBRARIES}
+        ${GLFW_LDFLAGS}
         ${FREEIMAGE_LIBRARIES}
-        ${YAMLCPP_LIBRARIES}
+        ${YAMLCPP_LDFLAGS}
         ${ARMADILLO_LIBRARIES}
     )
 
