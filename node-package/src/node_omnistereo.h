@@ -36,6 +36,10 @@ private:
     static NAN_METHOD(NODE_setUniforms);
     // getShaderCode() -> shader_code
     static NAN_METHOD(NODE_getShaderCode);
+    // compositeCustomizeShader(main_code)
+    static NAN_METHOD(NODE_compositeCustomizeShader);
+    // compositeRestoreShader()
+    static NAN_METHOD(NODE_compositeRestoreShader);
     // onCaptureViewport(callback)
     //   callback(info)
     static NAN_METHOD(NODE_onCaptureViewport);

@@ -65,6 +65,9 @@ public:
 
     allofw::GraphicalContext2D* context;
 
+    friend class NODE_Path2D;
+    friend class NODE_Paint2D;
+
 private:
     explicit NODE_GraphicalContext2D(NODE_Surface2D* surface);
     ~NODE_GraphicalContext2D();
@@ -108,9 +111,8 @@ public:
 
     static NAN_METHOD(NewInstance);
 
-    allofw::GraphicalContext2D* context;
     allofw::Path2D* path;
-    v8::Persistent<v8::Object> context_handle;
+    NODE_GraphicalContext2D* context;
 
     friend class NODE_GraphicalContext2D;
 
@@ -136,9 +138,8 @@ public:
 
     static NAN_METHOD(NewInstance);
 
-    allofw::GraphicalContext2D* context;
     allofw::Paint2D* paint;
-    v8::Persistent<v8::Object> context_handle;
+    NODE_GraphicalContext2D* context;
 
     friend class NODE_GraphicalContext2D;
 

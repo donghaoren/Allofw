@@ -20,6 +20,8 @@ void NODE_OmniStereo::Init(v8::Handle<v8::Object> exports) {
     NODE_SET_PROTOTYPE_METHOD(tpl, "composite", NODE_composite);
     NODE_SET_PROTOTYPE_METHOD(tpl, "setUniforms", NODE_setUniforms);
     NODE_SET_PROTOTYPE_METHOD(tpl, "getShaderCode", NODE_getShaderCode);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "compositeCustomizeShader", NODE_compositeCustomizeShader);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "compositeRestoreShader", NODE_compositeRestoreShader);
     NODE_SET_PROTOTYPE_METHOD(tpl, "onCaptureViewport", NODE_onCaptureViewport);
 
     NanAssignPersistent(constructor, tpl->GetFunction());
@@ -150,6 +152,16 @@ NAN_METHOD(NODE_OmniStereo::NODE_setUniforms) {
 NAN_METHOD(NODE_OmniStereo::NODE_getShaderCode) {
     NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
     NanReturnValue(NanNew<String>(self->omnistereo->getShaderCode()));
+}
+NAN_METHOD(NODE_OmniStereo::NODE_compositeCustomizeShader) {
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
+    NanUtf8String str(args[0]);
+    NanReturnValue(NanNew<Integer>(self->omnistereo->compositeCustomizeShader(*str)));
+}
+NAN_METHOD(NODE_OmniStereo::NODE_compositeRestoreShader) {
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
+    self->omnistereo->compositeRestoreShader();
+    NanReturnUndefined();
 }
 // onCaptureViewport(callback)
 //   callback(info)

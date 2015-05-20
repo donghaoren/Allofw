@@ -80,7 +80,7 @@ vec4 omni_render(vec3 v) {
 // END OmniStereo Shader Code.
 )================";
 
-const char* gShader_draw_vertex =
+const char* gShader_composite_vertex =
 R"================(#version 330
 uniform vec2 positionScalers = vec2(1, 1);
 
@@ -94,81 +94,16 @@ void main() {
 }
 )================";
 
-// For cubemap mode.
-const char* gShader_cubemap_draw_fragment =
-R"================(#version 330
+// General composite part.
+const char* gShader_composite_include =
+R"================(
 uniform sampler2D texWarp;
 uniform sampler2D texBlend;
-uniform samplerCube texCubemap;
 uniform sampler2D texBack;
 uniform sampler2D texFront;
 uniform sampler2D texPanorama;
 uniform int drawMask = 0;
 uniform vec4 panoramaRotation = vec4(0, 0, 0, 1);
-
-// These constants must be the same as in the header.
-const int kCompositeMask_Scene                     = 1 << 0;
-const int kCompositeMask_Back                      = 1 << 1;
-const int kCompositeMask_Front                     = 1 << 2;
-const int kCompositeMask_Panorama                  = 1 << 3;
-const int kCompositeMask_Panorama_Equirectangular  = 1 << 4;
-
-const float PI = 3.14159265358979323846264;
-
-in vec2 vp_coordinates;
-layout(location = 0) out vec4 fragment_output;
-
-vec3 omni_quat_rotate(vec4 q, vec3 v) {
-    float d = dot(q.xyz, v);
-    vec3 c = cross(q.xyz, v);
-    return q.w * q.w * v + (q.w + q.w) * c + d * q.xyz - cross(c, q.xyz);
-}
-
-vec4 composite_pm(vec4 src, vec4 dest) {
-    return src + dest * (1.0 - src.a);
-}
-
-void main() {
-    // Read warp and blend textures.
-    vec3 warp = texture(texWarp, vp_coordinates).xyz;
-    vec3 blend = texture(texBlend, vp_coordinates).rgb;
-
-    vec4 final_color = vec4(0, 0, 0, 0);
-
-    if((drawMask & kCompositeMask_Panorama) != 0) {
-        if((drawMask & kCompositeMask_Panorama_Equirectangular) != 0) {
-            vec3 panov = omni_quat_rotate(panoramaRotation, warp);
-            float theta = atan(-panov.x, panov.z);
-            float phi = atan(panov.y, length(panov.xz));
-            vec4 panorama_color = texture(texPanorama, vec2((theta / PI + 1.0) / 2, -phi / PI + 0.5));
-            final_color = composite_pm(panorama_color, final_color);
-        }
-    }
-
-    if((drawMask & kCompositeMask_Scene) != 0) {
-        // Read color from cubemap.
-        vec4 scene_color = texture(texCubemap, warp);
-        final_color = composite_pm(scene_color, final_color);
-    }
-
-    fragment_output = vec4(final_color.rgb * blend, 1.0);
-}
-)================";
-
-// For per projection mode.
-const char* gShader_perprojection_draw_fragment =
-R"================(#version 330
-uniform sampler2D texWarp;
-uniform sampler2D texBlend;
-uniform sampler2D texPerProjection;
-uniform sampler2D texBack;
-uniform sampler2D texFront;
-uniform sampler2D texPanorama;
-uniform int drawMask = 0;
-uniform vec4 panoramaRotation = vec4(0, 0, 0, 1);
-
-uniform vec4 viewportRotation;
-uniform float tanFovDiv2;
 
 // These constants must be the same as in the header.
 const int kCompositeMask_Scene                     = 1 << 0;
@@ -194,38 +129,77 @@ vec3 omni_quat_inverse_rotate(vec4 q, vec3 v) {
     return q.w * q.w * v - (q.w + q.w) * c + d * q.xyz - cross(c, q.xyz);
 }
 
-vec4 composite_pm(vec4 src, vec4 dest) {
+vec4 omni_blend_pm(vec4 src, vec4 dest) {
     return src + dest * (1.0 - src.a);
 }
 
-void main() {
-    // Read warp and blend textures.
-    vec3 warp = texture(texWarp, vp_coordinates).xyz;
-    vec3 blend = texture(texBlend, vp_coordinates).rgb;
+vec3 warp, blend;
 
+void omni_composite_init() {
+    warp = texture(texWarp, vp_coordinates).xyz;
+    blend = texture(texBlend, vp_coordinates).rgb;
+}
+
+void omni_composite_final(vec4 result) {
+    fragment_output = vec4(result.rgb * blend, 1.0);
+}
+
+vec4 omni_composite_panorama() {
+    vec3 panov = omni_quat_rotate(panoramaRotation, warp);
+    float theta = atan(-panov.x, panov.z);
+    float phi = atan(panov.y, length(panov.xz));
+    vec4 panorama_color = texture(texPanorama, vec2((theta / PI + 1.0) / 2, -phi / PI + 0.5));
+    return panorama_color;
+}
+
+)================";
+// For cubemap mode.
+const char* gShader_composite_cubemap_include =
+R"================(
+uniform samplerCube texCubemap;
+
+vec4 omni_composite_scene() {
+    // Read color from cubemap.
+    vec4 scene_color = texture(texCubemap, warp);
+    return scene_color;
+}
+)================";
+
+// For per projection mode.
+const char* gShader_composite_perprojection_include =
+R"================(
+uniform sampler2D texPerProjection;
+uniform vec4 viewportRotation;
+uniform float tanFovDiv2;
+
+vec4 omni_composite_scene() {
+    // Read color from per projection map.
     vec3 p_coord = omni_quat_rotate(viewportRotation, warp);
     p_coord.xy /= -p_coord.z;
     p_coord.xy /= tanFovDiv2;
+    vec4 scene_color = texture(texPerProjection, p_coord.xy / 2.0 + 0.5);
+    return scene_color;
+}
+)================";
+
+const char* gShader_composite_generic =
+R"================(
+void main() {
+    omni_composite_init();
 
     vec4 final_color = vec4(0, 0, 0, 0);
 
     if((drawMask & kCompositeMask_Panorama) != 0) {
-        if((drawMask & kCompositeMask_Panorama_Equirectangular) != 0) {
-            vec3 panov = omni_quat_rotate(panoramaRotation, warp);
-            float theta = atan(-panov.x, panov.z);
-            float phi = atan(panov.y, length(panov.xz));
-            vec4 panorama_color = texture(texPanorama, vec2((theta / PI + 1.0) / 2, -phi / PI + 0.5));
-            final_color = composite_pm(panorama_color, final_color);
-        }
+        vec4 color = omni_composite_panorama();
+        final_color = omni_blend_pm(color, final_color);
     }
 
     if((drawMask & kCompositeMask_Scene) != 0) {
-        // Read color from per projection texture.
-        vec4 scene_color = texture(texPerProjection, p_coord.xy / 2.0 + 0.5);
-        final_color = composite_pm(scene_color, final_color);
+        vec4 color = omni_composite_scene();
+        final_color = omni_blend_pm(color, final_color);
     }
 
-    fragment_output = vec4(final_color.rgb * blend, 1.0);
+    omni_composite_final(final_color);
 }
 )================";
 
@@ -374,6 +348,30 @@ public:
         }
     }
 
+    // Create a customized composite shader.
+    virtual GLuint compositeCustomizeShader(const char* code) {
+        switch(capture_method_) {
+            case kCaptureMethod_Cubemap: {
+                compositeCustomizeShaderCubemap(code);
+            } break;
+            case kCaptureMethod_PerProjection: {
+                compositeCustomizeShaderPerProjection(code);
+            } break;
+        }
+        return program_draw_;
+    }
+    // Restore the composite shader to default.
+    virtual void compositeRestoreShader() {
+        switch(capture_method_) {
+            case kCaptureMethod_Cubemap: {
+                compositeCustomizeShaderCubemap(gShader_composite_generic);
+            } break;
+            case kCaptureMethod_PerProjection: {
+                compositeCustomizeShaderPerProjection(gShader_composite_generic);
+            } break;
+        }
+    }
+
     // Necessary functions and uniforms for use in shader programs.
     // vec4 omni_transform(vec4 v)          : Transform coordinates to camera space.
     // vec3 omni_transform_normal(vec3 v)   : Transform normal to camera space.
@@ -466,7 +464,13 @@ private:
 
         glutils::checkGLErrors("generate framebuffer");
 
-        program_draw_ = glutils::compileShaderProgram(gShader_draw_vertex, gShader_cubemap_draw_fragment);
+        program_draw_ = glutils::compileShaderProgram(
+            gShader_composite_vertex,
+            ( std::string("#version 330\n") +
+              gShader_composite_include +
+              gShader_composite_cubemap_include +
+              gShader_composite_generic ).c_str()
+        );
         if(!program_draw_) {
             throw exception("Fatal: failed compile shader program.");
         }
@@ -492,6 +496,28 @@ private:
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
         glutils::checkGLErrors("vertex array");
+    }
+    void compositeCustomizeShaderCubemap(const char* code) {
+        glDeleteProgram(program_draw_);
+        program_draw_ = glutils::compileShaderProgram(
+            gShader_composite_vertex,
+            ( std::string("#version 330\n") +
+              gShader_composite_include +
+              gShader_composite_cubemap_include +
+              code ).c_str()
+        );
+        if(!program_draw_) {
+            throw exception("Fatal: failed compile shader program.");
+        }
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texWarp"), 0);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texBlend"), 1);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texCubemap"), 2);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texBack"), 3);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texFront"), 4);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanorama"), 5);
+        program_draw_drawMask_ = glGetUniformLocation(program_draw_, "drawMask");
+        program_draw_panoramaRotation_ = glGetUniformLocation(program_draw_, "panoramaRotation");
+        program_draw_positionScalers_ = glGetUniformLocation(program_draw_, "positionScalers");
     }
     void setupCubemapParameters(bool is_depth = false) {
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -627,11 +653,8 @@ private:
             glUniform1i(program_draw_drawMask_, mask);
             glDisable(GL_DEPTH_TEST);
             glBindVertexArray(vertex_array_quad_);
-
-
-
         },
-        [&](int mask, int eye, int vp, GLTextureID warp_texture, GLTextureID blend_texture, ProjectionTexture& projection_texture, Vector2f& position_scalers) {
+        [&](int mask, int eye, int vp, GLTextureID warp_texture, GLTextureID blend_texture, Vector2f& position_scalers) {
             glUniform2f(program_draw_positionScalers_, position_scalers.x, position_scalers.y);
 
             glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, warp_texture);
@@ -688,7 +711,13 @@ private:
 
         glutils::checkGLErrors("generate framebuffer");
 
-        program_draw_ = glutils::compileShaderProgram(gShader_draw_vertex, gShader_perprojection_draw_fragment);
+        program_draw_ = glutils::compileShaderProgram(
+            gShader_composite_vertex,
+            ( std::string("#version 330\n") +
+              gShader_composite_include +
+              gShader_composite_perprojection_include +
+              gShader_composite_generic ).c_str()
+        );
         if(!program_draw_) {
             throw exception("Fatal: failed compile shader program.");
         }
@@ -752,6 +781,30 @@ private:
             logger.printf("Viewport %02d: d = (%.4f,%.4f,%.4f), fov = %.2f degs, res = %d\n", vp, direction.x, direction.y, direction.z, fov / PI * 180.0f, pt.resolution);
         }
 
+    }
+    void compositeCustomizeShaderPerProjection(const char* code) {
+        glDeleteProgram(program_draw_);
+        program_draw_ = glutils::compileShaderProgram(
+            gShader_composite_vertex,
+            ( std::string("#version 330\n") +
+              gShader_composite_include +
+              gShader_composite_perprojection_include +
+              code ).c_str()
+        );
+        if(!program_draw_) {
+            throw exception("Fatal: failed compile shader program.");
+        }
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texWarp"), 0);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texBlend"), 1);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPerProjection"), 2);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texBack"), 3);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texFront"), 4);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanorama"), 5);
+        program_draw_drawMask_ = glGetUniformLocation(program_draw_, "drawMask");
+        program_draw_panoramaRotation_ = glGetUniformLocation(program_draw_, "panoramaRotation");
+        program_draw_positionScalers_ = glGetUniformLocation(program_draw_, "positionScalers");
+        program_draw_viewportRotation_ = glGetUniformLocation(program_draw_, "viewportRotation");
+        program_draw_tanFovDiv2_ = glGetUniformLocation(program_draw_, "tanFovDiv2");
     }
     void setupProjectionTextureParameters(bool is_depth = false) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -860,7 +913,8 @@ private:
             glDisable(GL_DEPTH_TEST);
             glBindVertexArray(vertex_array_quad_);
         },
-        [&](int mask, int eye, int vp, GLTextureID warp_texture, GLTextureID blend_texture, ProjectionTexture& projection_texture, Vector2f& position_scalers) {
+        [&](int mask, int eye, int vp, GLTextureID warp_texture, GLTextureID blend_texture, Vector2f& position_scalers) {
+            ProjectionTexture& projection_texture = tex_projections_[vp];
             glUniform2f(program_draw_positionScalers_, position_scalers.x, position_scalers.y);
             glUniform4f(program_draw_viewportRotation_, projection_texture.rotation.x, projection_texture.rotation.y, projection_texture.rotation.z, projection_texture.rotation.w);
             glUniform1f(program_draw_tanFovDiv2_, std::tan(projection_texture.fov / 2.0));
@@ -942,7 +996,6 @@ private:
                 } break;
             }
             for(int vp = 0; vp < warpblend_->getViewportCount(); vp++) {
-                ProjectionTexture& projection_texture = tex_projections_[vp];
                 WarpBlend::ViewportInfo vp_info = warpblend_->getViewport(vp);
                 Rectangle2 viewport_bounds = vp_info.viewport;
                 GLTextureID warp_texture = warpblend_->getWarpTexture(vp);
@@ -962,7 +1015,7 @@ private:
                         position_scalers.x = vp_to_draw.h * vp_info.aspect_ratio / vp_to_draw.w;
                     }
                 }
-                viewport_code(mask, eye, vp, warp_texture, blend_texture, projection_texture, position_scalers);
+                viewport_code(mask, eye, vp, warp_texture, blend_texture, position_scalers);
             }
         }
         glDrawBuffer(GL_BACK);

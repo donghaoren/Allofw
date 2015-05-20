@@ -1,10 +1,12 @@
 allofw = require "allofw"
+allofwutils = require "allofwutils"
 
 GL = allofw.GL3
 
 w = new allofw.OpenGLWindow();
 w.makeContextCurrent();
 omni = new allofw.OmniStereo("allofw.yaml");
+nav = new allofwutils.WindowNavigation(w, omni)
 
 vertex_shader = "#version 330\n" + omni.getShaderCode() + """
     layout(location = 0) in vec3 position;
@@ -23,6 +25,35 @@ fragment_shader = "#version 330\n" + """
         outputF = vec4(Color, 1.0);
     }
 """
+
+composite_custom_shader = """
+    uniform vec2 viewport_angles = vec2(50, 40);
+    uniform float viewport_blur = 1;
+    uniform vec3 viewport_y = vec3(0, 1, 0);
+    uniform vec3 viewport_x = vec3(1, 0, 0);
+
+    vec4 viewport_restrict(vec4 color) {
+        float blur = 1.0 / (viewport_blur / 180.0 * PI);
+        vec2 xyspan = viewport_angles / 180.0 * PI;
+        vec2 xyangle = vec2(acos(dot(normalize(warp - warp * dot(warp, viewport_y)), viewport_x)),
+                            acos(dot(normalize(warp - warp * dot(warp, viewport_x)), viewport_y)));
+        vec2 xyscale = vec2(1, 1) - max(vec2(0, 0), min(vec2(1, 1), (xyspan / 2.0 - abs(xyangle - PI / 2.0)) * blur));
+        return color * (1 - dot(xyscale, xyscale));
+    }
+
+    void main() {
+        omni_composite_init();
+        vec4 scene = omni_composite_scene();
+        scene = viewport_restrict(scene);
+        if((drawMask & kCompositeMask_Panorama) != 0) {
+            vec4 panorama = omni_composite_panorama();
+            scene = omni_blend_pm(scene, panorama);
+        }
+        omni_composite_final(scene);
+    }
+"""
+
+composite_shader_id = omni.compositeCustomizeShader(composite_custom_shader)
 
 getShaderInfoLog = (shader) ->
     buffer = new Buffer(4)
@@ -144,6 +175,7 @@ render()
 w.onRefresh(render)
 
 timer = setInterval () ->
+    nav.update()
     render()
     w.pollEvents()
 

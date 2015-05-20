@@ -80,6 +80,7 @@ namespace ALLOFW_NS {
             };
             // Capture a face of the cubemap.
             virtual void onCaptureViewport(const CaptureInfo& info);
+
             virtual ~Delegate() { }
         };
 
@@ -111,6 +112,10 @@ namespace ALLOFW_NS {
 
         // Draw internal buffers to current viewport.
         virtual void composite(const Rectangle2i& viewport, const CompositeInfo& info = CompositeInfo()) = 0;
+        // Create a customized composite shader.
+        virtual GLuint compositeCustomizeShader(const char* code) = 0;
+        // Restore the composite shader to default.
+        virtual void compositeRestoreShader() = 0;
 
         // Necessary functions and uniforms for use in shader programs.
         // vec3 omni_transform(vec3 v)          : Transform coordinates to camera space.

@@ -497,14 +497,14 @@ void NODE_Path2D::Init(Handle<Object> exports) {
 }
 
 NODE_Path2D::NODE_Path2D(NODE_GraphicalContext2D* node_context) {
-    context = node_context->context;
-    NanAssignPersistent(context_handle, node_context->handle());
+    context = node_context;
+    context->Ref();
     path = node_context->context->path();
 }
 
 NODE_Path2D::~NODE_Path2D() {
-    context->destroyPath(path);
-    NanDisposePersistent(context_handle);
+    context->context->destroyPath(path);
+    context->Unref();
 }
 
 NAN_METHOD(NODE_Path2D::New) {
@@ -594,19 +594,19 @@ void NODE_Paint2D::Init(Handle<Object> exports) {
 }
 
 NODE_Paint2D::NODE_Paint2D(NODE_GraphicalContext2D* node_context) {
-    context = node_context->context;
-    NanAssignPersistent(context_handle, node_context->handle());
-    paint = node_context->context->paint();
+    context = node_context;
+    context->Ref();
+    paint = context->context->paint();
 }
 NODE_Paint2D::NODE_Paint2D(NODE_Paint2D* paint_) {
     context = paint_->context;
-    NanAssignPersistent(context_handle, paint_->context_handle);
+    context->Ref();
     paint = paint_->paint->clone();
 }
 
 NODE_Paint2D::~NODE_Paint2D() {
-    context->destroyPaint(paint);
-    NanDisposePersistent(context_handle);
+    context->context->destroyPaint(paint);
+    context->Unref();
 }
 
 NAN_METHOD(NODE_Paint2D::New) {
