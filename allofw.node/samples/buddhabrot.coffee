@@ -1,6 +1,7 @@
 allofw = require "allofw"
 
 GL = allofw.GL3
+graphics = allofw.graphics;
 
 w = new allofw.OpenGLWindow({ width: 600, height: 600 });
 w.makeContextCurrent();
@@ -46,6 +47,7 @@ geometry_shader = """
                 if(length(z) >= 10) break;
                 if(t > 0) {
                     gl_Position = vec4(z / 2, 0, 1);
+                    gl_Position.x += 0.2;
                     EmitVertex();
                 }
                 t += 1;
@@ -65,24 +67,29 @@ fragment_shader = """
 
 composite_vertex_shader = """
     #version 330
+    uniform float x_scale;
+    uniform float y_scale;
     layout(location = 0) in vec2 pos;
     out vec2 tex_coord;
     void main() {
         tex_coord = vec2(1.0 - pos.y, pos.x);
         gl_Position = vec4(pos * 2.0 - 1.0, 0, 1);
+        gl_Position.x *= x_scale;
+        gl_Position.y *= y_scale;
     }
 """
 
 composite_fragment_shader = """
     #version 330
     uniform sampler2D texCounter;
+    uniform sampler2D texColormap;
     uniform float max_counter;
     in vec2 tex_coord;
     layout(location = 0) out vec4 fragment_output;
     void main() {
         vec4 counter = texture(texCounter, tex_coord);
         float v = counter.r / max_counter;
-        fragment_output = vec4(v, v, v, 1);
+        fragment_output = texture(texColormap, vec2(v, 0.5));
     }
 """
 
@@ -222,12 +229,16 @@ setupBuffers = () ->
     GL.bindBuffer(GL.ARRAY_BUFFER, 0)
     GL.bindVertexArray(0)
 
+    @colormap_image = graphics.loadImageData(require("fs").readFileSync(__dirname + "/buddhabrot_colormap.png"));
+    colormap_image.uploadTexture()
+
 
 setupRender = () ->
     @program = compileShaders3(vertex_shader, geometry_shader, fragment_shader)
     @program_composite = compileShaders3(composite_vertex_shader, undefined, composite_fragment_shader)
     GL.useProgram(program_composite)
     GL.uniform1i(GL.getUniformLocation(program_composite, "texCounter"), 0)
+    GL.uniform1i(GL.getUniformLocation(program_composite, "texColormap"), 1)
     GL.useProgram(0)
     setupBuffers()
 
@@ -271,13 +282,25 @@ render = () ->
     sz = w.getFramebufferSize()
     GL.viewport(0, 0, sz[0], sz[1])
     GL.useProgram(program_composite)
-    GL.uniform1f(GL.getUniformLocation(program_composite, "max_counter"), n / 5)
+
+    GL.uniform1f(GL.getUniformLocation(program_composite, "max_counter"), n / 10)
+    if sz[0] < sz[1]
+        y_scale = sz[0] / sz[1]
+        x_scale = 1
+    else
+        x_scale = sz[1] / sz[0]
+        y_scale = 1
+    GL.uniform1f(GL.getUniformLocation(program_composite, "y_scale"), y_scale)
+    GL.uniform1f(GL.getUniformLocation(program_composite, "x_scale"), x_scale)
     GL.disable(GL.BLEND)
     GL.clear(GL.COLOR_BUFFER_BIT)
     GL.bindVertexArray(quad_array)
     GL.activeTexture(GL.TEXTURE0)
     GL.bindTexture(GL.TEXTURE_2D, framebuffer_texture)
+    colormap_image.bindTexture(1)
     GL.drawArrays(GL.TRIANGLE_STRIP, 0, 4)
+    colormap_image.unbindTexture(1)
+    GL.activeTexture(GL.TEXTURE0)
     GL.bindTexture(GL.TEXTURE_2D, 0)
     GL.bindVertexArray(0)
     GL.useProgram(0)
