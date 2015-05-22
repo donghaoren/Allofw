@@ -4,6 +4,8 @@ var math = require("./math/math.js");
 var Vector3 = math.Vector3;
 var Quaternion = math.Quaternion;
 
+exports.math = math;
+
 exports.WindowNavigation = function(window, omnistereo) {
     var pose = {
         position: new Vector3(0, 0, 0),
