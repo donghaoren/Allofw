@@ -89,7 +89,8 @@ composite_fragment_shader = """
     void main() {
         vec4 counter = texture(texCounter, tex_coord);
         float v = counter.r / max_counter;
-        fragment_output = texture(texColormap, vec2(v, 0.5));
+        float p = 1 - exp(-v * 2);
+        fragment_output = texture(texColormap, vec2(p, 0.5));
     }
 """
 

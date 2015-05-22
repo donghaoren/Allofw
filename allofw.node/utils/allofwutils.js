@@ -24,6 +24,8 @@ exports.WindowNavigation = function(window, omnistereo) {
     };
     var velocity_prev = [ 0, 0, 0, 0, 0 ];
 
+    var pose_target = null;
+
     var update = function(dt) {
         var vs = [ 0, 0, 0, 0, 0 ];
         for(var key in keys) {
@@ -40,6 +42,12 @@ exports.WindowNavigation = function(window, omnistereo) {
         pose.position = pose.position.add(pose.rotation.rotate(new Vector3(vs[0], vs[1], vs[2])).scale(speed * dt))
         pose.rotation = Quaternion.rotation(new Vector3(0, 1, 0), vs[3] * dt).mul(pose.rotation)
         pose.rotation = pose.rotation.mul(Quaternion.rotation(new Vector3(1, 0, 0), vs[4] * dt))
+
+        if(pose_target) {
+            pose.position = pose.position.interp(pose_target.position, 1 - blend);
+            pose.rotation = pose.rotation.slerp(pose_target.rotation, 1 - blend);
+        }
+
         omnistereo.setPose(pose.position.x, pose.position.y, pose.position.z,
                            pose.rotation.v.x, pose.rotation.v.y, pose.rotation.v.z, pose.rotation.w);
     };
@@ -53,13 +61,14 @@ exports.WindowNavigation = function(window, omnistereo) {
 
     window.onKeyboard(function(key, action, modifiers, scancode) {
         if(key == "O") {
-            pose = {
+            pose_target = {
                 position: new Vector3(0, 0, 0),
                 rotation: new Quaternion(new Vector3(0, 0, 0), 1)
             };
             velocity_prev = [ 0, 0, 0, 0, 0 ];
         }
         if(action == "PRESS") {
+            pose_target = null;
             if(keys[key]) {
                 keys[key][0] = 1;
             }

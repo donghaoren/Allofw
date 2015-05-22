@@ -68,4 +68,26 @@ NS.Quaternion.prototype.rotate = function(vector) {
 NS.Quaternion.rotation = function(axis, angle) {
     return new NS.Quaternion(axis.normalize().scale(Math.sin(angle / 2)), Math.cos(angle / 2));
 };
-
+NS.Quaternion.slerp = function(q1, q2, t) {
+    var omega = Math.acos(q1.v.x * q2.v.x + q1.v.y * q2.v.y + q1.v.z * q2.v.z + q1.w * q2.w);
+    var st0, st1;
+    if(Math.abs(omega) < 1e-10) {
+        st0 = 1 - t;
+        st1 = t;
+    } else {
+        var som = Math.sin(omega);
+        st0 = Math.sin((1 - t) * omega) / som;
+        st1 = Math.sin(t * omega) / som;
+    }
+    return new NS.Quaternion(
+        new NS.Vector3(
+            q1.v.x * st0 + q2.v.x * st1,
+            q1.v.y * st0 + q2.v.y * st1,
+            q1.v.z * st0 + q2.v.z * st1
+        ),
+        q1.w * st0 + q2.w * st1
+    );
+};
+NS.Quaternion.prototype.slerp = function(q2, t) {
+    return NS.Quaternion.slerp(this, q2, t);
+};
