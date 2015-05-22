@@ -68,7 +68,7 @@ NS.Quaternion.prototype.rotate = function(vector) {
 NS.Quaternion.rotation = function(axis, angle) {
     return new NS.Quaternion(axis.normalize().scale(Math.sin(angle / 2)), Math.cos(angle / 2));
 };
-NS.Quaternion.normalize = function() {
+NS.Quaternion.prototype.normalize = function() {
     var s = 1.0 / Math.sqrt(this.v.x * this.v.x + this.v.y * this.v.y + this.v.z * this.v.z + this.w * this.w);
     return new NS.Quaternion(this.v.scale(s), this.w * s);
 };
