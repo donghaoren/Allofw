@@ -31,12 +31,14 @@ struct Quaternion_ {
     static inline Quaternion_ Rotation(const Vector3_<T>& v, double alpha) {
         return Quaternion_(v.unit() * std::sin(alpha / 2), std::cos(alpha / 2));
     }
-    static inline Quaternion_ One() {
-        return Quaternion_(0, 0, 0, 1);
-    }
+
+    static inline Quaternion_ Zero() { return Quaternion_(0, 0, 0, 0); }
+    static inline Quaternion_ One() { return Quaternion_(0, 0, 0, 1); }
+
     inline T len() const{
         return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z + w * w);
     }
+
     inline Quaternion_ operator + (const Quaternion_& q) const {
         return Quaternion_(v + q.v, w + q.w);
     }
@@ -54,10 +56,10 @@ struct Quaternion_ {
     }
     inline Quaternion_ unit() const {
         T l = len();
-        return *this * (1.0 / l);
+        return *this / l;
     }
     inline Quaternion_ operator * (const Quaternion_& q) const {
-        return Quaternion_(v * q.v + q.v * w + v * q.w, w * q.w - v.dot(q.v));
+        return Quaternion_(v.cross(q.v) + q.v * w + v * q.w, w * q.w - v.dot(q.v));
     }
     template<typename T1>
     inline Quaternion_ operator * (const Vector3_<T1>& v) const {

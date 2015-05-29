@@ -96,7 +96,6 @@ struct Vector3_ {
             x * v.y - y * v.x
         );
     }
-    inline Vector3_ operator * (const Vector3_& v) const { return this->cross(v); }
 
     friend inline Vector3_ operator * (number_t s, const Vector3_& v) { return v * s; }
 
