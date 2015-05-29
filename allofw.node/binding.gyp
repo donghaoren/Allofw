@@ -3,11 +3,11 @@
     {
       "target_name": "allofw",
       "include_dirs": [
-        "../allofw_install/include",
-         "<!(node -e \"require('nan')\")"
+        "<!@(pkg-config liballofw --cflags-only-I | sed s/-I//g)",
+        "<!(node -e \"require('nan')\")"
       ],
       "libraries": [
-        "-L../../allofw_install/lib", "-lallofw", "-lallofw-graphics"
+        "<!@(pkg-config liballofw --libs)",
       ],
       "cflags!": [ "-fno-exceptions", "-fno-rtti" ],
       "cflags_cc!": [ "-fno-exceptions", "-fno-rtti" ],
