@@ -348,6 +348,10 @@ public:
         glfwSetScrollCallback(window, cb_scroll);
     }
 
+    virtual void close() {
+        glfwSetWindowShouldClose(window, true);
+    }
+
     virtual ~OpenGLWindowImpl() {
         glfwDestroyWindow(window);
     }

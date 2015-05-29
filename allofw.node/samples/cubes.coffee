@@ -172,6 +172,7 @@ render = () ->
 
 setupRender()
 render()
+
 w.onRefresh(render)
 
 timer = setInterval () ->
@@ -179,7 +180,4 @@ timer = setInterval () ->
     render()
     w.pollEvents()
 
-w.onClose () ->
-    clearInterval(timer)
-
-
+w.onClose () -> clearInterval(timer)

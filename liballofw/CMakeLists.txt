@@ -174,6 +174,14 @@
   ADD_SAMPLE_EXECUTABLE ( cubes_bcast cubes_bcast.cpp )
 
 #----------------------------------------------------------------------------------------------------------------------
+# PKG-Config File
+
+  CONFIGURE_FILE ( liballofw.pc.in
+    ${LIBRARY_OUTPUT_PATH}/pkgconfig/liballofw.pc
+    @ONLY
+  )
+
+#----------------------------------------------------------------------------------------------------------------------
 # Install
 
   INSTALL (
@@ -190,4 +198,11 @@
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
+  )
+
+  INSTALL (
+    FILES
+      ${LIBRARY_OUTPUT_PATH}/pkgconfig/liballofw.pc
+    DESTINATION
+      lib/pkgconfig
   )

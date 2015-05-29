@@ -1,0 +1,9 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: liballofw
+Description: Allofw C++ Libraries
+Version: 0.0.1
+Libs: -L${libdir} -lallofw -lallofw-graphics
+Cflags: -I${includedir}

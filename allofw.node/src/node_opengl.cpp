@@ -33,6 +33,7 @@ public:
         NODE_SET_PROTOTYPE_METHOD(tpl, "pollEvents", NODE_pollEvents);
         NODE_SET_PROTOTYPE_METHOD(tpl, "waitEvents", NODE_waitEvents);
         NODE_SET_PROTOTYPE_METHOD(tpl, "getFramebufferSize", NODE_getFramebufferSize);
+        NODE_SET_PROTOTYPE_METHOD(tpl, "close", NODE_close);
 
         NanAssignPersistent(constructor, tpl->GetFunction());
 
@@ -140,6 +141,7 @@ private:
     static NAN_METHOD(NODE_pollEvents);
     static NAN_METHOD(NODE_waitEvents);
     static NAN_METHOD(NODE_getFramebufferSize);
+    static NAN_METHOD(NODE_close);
 
     static v8::Persistent<v8::Function> constructor;
 };
@@ -299,6 +301,12 @@ NAN_METHOD(NODE_OpenGLWindow::NODE_getFramebufferSize) {
     r->Set(0, NanNew<Integer>(result.x));
     r->Set(1, NanNew<Integer>(result.y));
     NanReturnValue(r);
+}
+NAN_METHOD(NODE_OpenGLWindow::NODE_close) {
+    NanScope();
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
+    obj->window->close();
+    NanReturnUndefined();
 }
 
 void NODE_OpenGL_Init(v8::Handle<v8::Object> exports) {
