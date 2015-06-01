@@ -1,147 +1,307 @@
-// liballofw: A lightweight framework for graphics.
-// See LICENSE.md for license information.
-//
-// omnistereo.cpp
-//
-// Implements Omnistereo rendering class.
-//
-// Author(s):
-//   Donghao Ren (donghaoren@cs.ucsb.edu)
-//
-
-#include "allofw/omniapp.h"
 #include "allofw/logger.h"
 #include "allofw/utils.h"
+#include "allofw/omniapp.h"
 #include <unistd.h>
+#include <string.h>
+#include <zmq.h>
+#include <pthread.h>
 
 ALLOFW_NS_BEGIN
 
-OmniAppBase::OmniAppBase() { }
+namespace details {
 
-void OmniAppBase::onInitialize() { }
-
-void OmniAppBase::onFrame(double dt) { }
-
-void OmniAppBase::onPresent() { }
-
-void OmniAppBase::render() {
-    // Compute dt.
-    double t = get_time_seconds();
-    double dt = t - t_previous_frame_;
-    t_previous_frame_ = t;
-    onFrame(dt);
-    Size2i viewport_size = window_->getFramebufferSize();
-    OmniStereo::CompositeInfo info;
-    Rectangle2i viewport(0, 0, viewport_size.w, viewport_size.h);
-    omni_->setPose(pose_);
-    omni_->capture();
-    omni_->composite(viewport, info);
-    onPresent();
-    window_->swapBuffers();
-}
-
-void OmniAppBase::onCaptureViewport(const CaptureInfo& info) { }
-
-// Window handlers.
-void OmniAppBase::onMove(int x, int y) { }
-
-void OmniAppBase::onResize(int width, int height) { }
-
-void OmniAppBase::onClose() {
-    closing_ = true;
-}
-void OmniAppBase::onRefresh() {
-    render();
-}
-void OmniAppBase::onFocus(int focused) { }
-
-void OmniAppBase::onIconify(int iconified) { }
-
-void OmniAppBase::onFramebufferSize(int width, int height) {
-    render();
-}
-
-// Input events.
-void OmniAppBase::onKeyboard(const char* c_key, const char* c_action, const char* c_modifiers, int scancode) { }
-
-void OmniAppBase::initialize(Configuration* config) {
-    config_ = config;
-    window_ = OpenGLWindow::Create(config_);
-    window_->makeContextCurrent();
-    omni_ = OmniStereo::Create(config_);
-    omni_->setDelegate(this);
-    window_->setDelegate(this);
-    closing_ = false;
-    window_->enableKeyboardInput();
-
-    onInitialize();
-    t_previous_frame_ = get_time_seconds();
-}
-
-// Start the main loop.
-void OmniAppBase::main() {
-    while(!closing_) {
-        tick();
-    }
-}
-void OmniAppBase::tick() {
-    if(!closing_) {
-        render();
-        window_->pollEvents();
-    }
-}
-
-OmniAppBase::~OmniAppBase() {
-    OmniStereo::Destroy(omni_);
-    OpenGLWindow::Destroy(window_);
-}
-
-OmniAppMixin_Navigation::OmniAppMixin_Navigation() {
-    translation_speeds_.resize(6);
-    translation_speeds_[0] = Vector4(+1, 0, 0, 0);
-    translation_speeds_[1] = Vector4(-1, 0, 0, 0);
-    translation_speeds_[2] = Vector4(0, +1, 0, 0);
-    translation_speeds_[3] = Vector4(0, -1, 0, 0);
-    translation_speeds_[4] = Vector4(0, 0, +1, 0);
-    translation_speeds_[5] = Vector4(0, 0, -1, 0);
-    rotation_speed_ = Vector4(0, 0, 0, 0);
-}
-
-void OmniAppMixin_Navigation::onKeyboard(const char* c_key, const char* c_action, const char* c_modifiers, int scancode) {
-    std::string key(c_key), action(c_action), modifiers(c_modifiers);
-
-    double* target = nullptr;;
-    if(key == "UP") target = &translation_speeds_[5].w;
-    if(key == "DOWN") target = &translation_speeds_[4].w;
-    if(key == "LEFT") target = &translation_speeds_[1].w;
-    if(key == "RIGHT") target = &translation_speeds_[0].w;
-    if(key == "Q") target = &translation_speeds_[2].w;
-    if(key == "Z") target = &translation_speeds_[3].w;
-    if(key == "A") target = &rotation_speed_.x;
-    if(key == "D") target = &rotation_speed_.y;
-    if(key == "W") target = &rotation_speed_.z;
-    if(key == "X") target = &rotation_speed_.w;
-    if(target) {
-        if(action == "PRESS") *target = 1;
-        if(action == "RELEASE") *target = 0;
-    }
-    if(action == "PRESS") {
-        if(key == "GRAVE_ACCENT") {
-            pose() = Pose();
+    void* global_zmq_context = nullptr;
+    void* get_global_zmq_context() {
+        if(!global_zmq_context) {
+            global_zmq_context = zmq_ctx_new();
         }
+        return global_zmq_context;
     }
-}
-void OmniAppMixin_Navigation::onFrame(double dt) {
-    Vector3 translation_speed(0, 0, 0);
-    for(Vector4 v : translation_speeds_) {
-        translation_speed += v.xyz() * v.w;
-    }
-    pose().position += pose().rotation.rotate(translation_speed * dt);
 
-    Quaternion r1 = Quaternion::Rotation(Vector3(0, 1, 0), dt * (rotation_speed_.x - rotation_speed_.y));
-    Quaternion r2 = Quaternion::Rotation(Vector3(1, 0, 0), dt * (rotation_speed_.z - rotation_speed_.w));
-    pose().rotation = r1 * pose().rotation * r2;
-    pose().rotation = pose().rotation.unit();
+    struct FrameHeader {
+        int frame_id;
+        double dt;
+    };
+
+    struct FPSControl {
+        FPSControl(double fps) {
+            min_dt = 1.0 / fps;
+            t0 = 0;
+        }
+        void tick() {
+            while(1) {
+                double t = get_time_seconds();
+                double dt = t - t0;
+                if(dt >= min_dt) break;
+                usleep(1);
+            }
+            t0 = get_time_seconds();
+        }
+        double min_dt;
+        double t0;
+    };
+
+    struct FeedbackMessage {
+        enum Type {
+            kRegister = 0,
+            kKeepalive = 1
+        };
+        int type;
+        int client_id;
+        int frame_id;
+    };
+
+    template<typename T>
+    void zmq_send_struct(void* socket, const T& data) {
+        zmq_msg_t msg;
+        zmq_msg_init_size(&msg, sizeof(T));
+        memcpy(zmq_msg_data(&msg), &data, sizeof(T));
+        zmq_msg_send(&msg, socket, 0);
+    }
+    template<typename T>
+    void zmq_recv_struct(void* socket, T& data) {
+        zmq_msg_t msg;
+        zmq_msg_init(&msg);
+        zmq_msg_recv(&msg, socket, 0);
+        memcpy(&data, zmq_msg_data(&msg), sizeof(T));
+        zmq_msg_close(&msg);
+    }
+
+    class OmniAppRendererBase::Details : public OmniStereo::Delegate {
+    public:
+        Details(OmniAppRendererBase* self, Configuration* config) {
+            self_ = self;
+            config_ = config;
+            initialized_ = false;
+        }
+        ~Details() {
+            if(initialized_) {
+                OpenGLWindow::Destroy(window_);
+                zmq_close(socket_broadcast);
+            }
+        }
+        void doInitialize() {
+            socket_broadcast = zmq_socket(get_global_zmq_context(), ZMQ_SUB);
+            zmq_connect(socket_broadcast, config_->getString("omniapp.broadcast", "inproc://omniapp_broadcast").c_str());
+            zmq_setsockopt(socket_broadcast, ZMQ_SUBSCRIBE, "", 0);
+
+            window_ = OpenGLWindow::Create(config_);
+            window_->makeContextCurrent();
+            omni_ = OmniStereo::Create(config_);
+            omni_->setDelegate(this);
+
+            t_last = -1;
+
+            self_->onInitialize();
+
+            initialized_ = true;
+        }
+        void doTick() {
+            FrameHeader header;
+            { // Receive state.
+                zmq_msg_t msg;
+                zmq_msg_init(&msg);
+                zmq_msg_recv(&msg, socket_broadcast, 0);
+                memcpy(&header, zmq_msg_data(&msg), sizeof(FrameHeader));
+                memcpy(self_->getState(), ((FrameHeader*)zmq_msg_data(&msg)) + 1, self_->getStateSize());
+                zmq_msg_close(&msg);
+            }
+
+            { // Update, capture, and composite scene.
+                self_->onFrame(header.dt);
+
+                omni_->capture();
+
+                Size2i size = window_->getFramebufferSize();
+                omni_->composite(Rectangle2i(0, 0, size.w, size.h));
+
+                glFlush();
+            }
+
+            { // Swap buffers.
+                window_->swapBuffers();
+                window_->pollEvents();
+            }
+        }
+        bool shouldStop() {
+            return false;
+        }
+
+        void onCaptureViewport(const CaptureInfo& info) {
+            self_->onCaptureViewport(info);
+        }
+
+        Configuration* config_;
+        OpenGLWindow* window_;
+        OmniStereo* omni_;
+        OmniAppRendererBase* self_;
+        double t_last;
+
+        void* socket_broadcast;
+
+        bool initialized_;
+    };
+
+    OmniAppRendererBase::OmniAppRendererBase(Configuration* config) {
+        details_ = new Details(this, config);
+    }
+
+    void OmniAppRendererBase::onInitialize() { }
+    void OmniAppRendererBase::onFrame(double dt) { }
+    void OmniAppRendererBase::onCaptureViewport(const OmniStereo::Delegate::CaptureInfo& info) { }
+    void OmniAppRendererBase::onPresent() { }
+    void OmniAppRendererBase::doInitialize() { details_->doInitialize(); }
+    void OmniAppRendererBase::doTick() { details_->doTick(); }
+    bool OmniAppRendererBase::shouldStop() { return details_->shouldStop(); }
+
+    OmniStereo* OmniAppRendererBase::omni() { return details_->omni_; }
+    OmniAppRendererBase::~OmniAppRendererBase() {
+        delete details_;
+    }
+
+    class OmniAppSimulatorBase::Details {
+    public:
+        Details(OmniAppSimulatorBase* self, Configuration* config) : fps(60) {
+            self_ = self;
+            config_ = config;
+            initialized_ = false;
+        }
+        void doInitialize() {
+            socket_broadcast = zmq_socket(get_global_zmq_context(), ZMQ_PUB);
+            zmq_bind(socket_broadcast, config_->getString("omniapp.broadcast", "inproc://omniapp_broadcast").c_str());
+
+            t_last = -1;
+            frame_id = 0;
+            self_->onInitialize();
+            initialized_ = true;
+        }
+        void doTick() {
+            // Call onFrame.
+            double t = get_time_seconds();
+            if(t_last == -1) t_last = t - 1.0 / 60;
+            double dt = t - t_last;
+            self_->onFrame(dt);
+            t_last = t;
+
+            // Send control message.
+            FrameHeader header;
+            header.frame_id = frame_id;
+            header.dt = dt;
+
+            zmq_msg_t msg;
+            zmq_msg_init_size(&msg, self_->getStateSize() + sizeof(FrameHeader));
+            memcpy(zmq_msg_data(&msg), &header, sizeof(FrameHeader));
+            memcpy(((FrameHeader*)zmq_msg_data(&msg)) + 1, self_->getState(), self_->getStateSize());
+            zmq_msg_send(&msg, socket_broadcast, 0);
+
+            frame_id += 1;
+            fps.tick();
+        }
+        bool shouldStop() {
+            return false;
+        }
+        Configuration* config_;
+        OmniAppSimulatorBase* self_;
+        double t_last;
+        int frame_id;
+
+        void* socket_broadcast;
+
+        FPSControl fps;
+
+        bool initialized_;
+    };
+
+    OmniAppSimulatorBase::OmniAppSimulatorBase(Configuration* config) {
+        details_ = new Details(this, config);
+    }
+    void OmniAppSimulatorBase::onInitialize() { }
+    void OmniAppSimulatorBase::onFrame(double dt) { }
+    void OmniAppSimulatorBase::doInitialize() { details_->doInitialize(); }
+    void OmniAppSimulatorBase::doTick() { details_->doTick(); }
+    bool OmniAppSimulatorBase::shouldStop() { return details_->shouldStop(); }
+    OmniAppSimulatorBase::~OmniAppSimulatorBase() {
+        delete details_;
+    }
+
+    class OmniAppRunnerBase::Details {
+    public:
+        Details(OmniAppRunnerBase* self, int argc, char* argv[]) {
+            self_ = self;
+            config_ = Configuration::ParseMainArgs(argc, argv);
+            simulator_ = nullptr;
+            renderer_ = nullptr;
+        }
+        ~Details() {
+            if(simulator_) {
+                self_->destroySimulator(simulator_);
+            }
+            if(renderer_) {
+                self_->destroyRenderer(renderer_);
+            }
+        }
+
+        static void* simulator_thread(void* ptr) {
+            Details* self = (Details*)ptr;
+            self->simulator_ = self->self_->createSimulator(self->config_);
+            self->simulator_->doInitialize();
+            while(1) {
+                self->simulator_->doTick();
+                if(self->simulator_->shouldStop()) {
+                    break;
+                }
+            }
+            return nullptr;
+        }
+
+        static void* renderer_thread(void* ptr) {
+            Details* self = (Details*)ptr;
+            self->renderer_ = self->self_->createRenderer(self->config_);
+            self->renderer_->doInitialize();
+            while(1) {
+                self->renderer_->doTick();
+                if(self->renderer_->shouldStop()) {
+                    break;
+                }
+            }
+            return nullptr;
+        }
+
+        void run() {
+            get_global_zmq_context();
+            std::string role = config_->getString("omniapp.role", "both");
+            pthread_t thread_s;
+            bool run_simulator = (role == "simulator" || role == "both");
+            bool run_renderer = (role == "renderer" || role == "both");
+            if(run_simulator) {
+                pthread_create(&thread_s, 0, simulator_thread, this);
+            }
+            if(run_renderer) {
+                renderer_thread(this);
+            }
+            if(run_simulator) {
+                pthread_join(thread_s, 0);
+            }
+        }
+
+        OmniAppRendererBase* renderer_;
+        OmniAppSimulatorBase* simulator_;
+        Configuration* config_;
+        OmniAppRunnerBase* self_;
+    };
+
+    OmniAppRunnerBase::OmniAppRunnerBase(int argc, char* argv[]) {
+        details_ = new Details(this, argc, argv);
+    }
+
+    OmniAppRunnerBase::~OmniAppRunnerBase() {
+        delete details_;
+    }
+
+    void OmniAppRunnerBase::run() {
+        details_->run();
+    }
+
 }
 
 ALLOFW_NS_END

@@ -115,14 +115,13 @@
 
   ADD_LIBRARY ( allofw-omniapp SHARED
     src/omniapp.cpp
-    src/omniapp_broadcasting.cpp
-    src/omniapp_broadcasting_socket.cpp
   )
 
   TARGET_LINK_LIBRARIES ( allofw-omniapp
     LINK_PRIVATE
       allofw
       ${ZeroMQ_LIBRARIES}
+      ${OPENGL_LIBRARIES}
   )
 
   IF ( ${WITH_SKIA} )
@@ -171,7 +170,6 @@
   ENDFUNCTION(ADD_SAMPLE_EXECUTABLE)
 
   ADD_SAMPLE_EXECUTABLE ( cubes cubes.cpp )
-  ADD_SAMPLE_EXECUTABLE ( cubes_bcast cubes_bcast.cpp )
 
 #----------------------------------------------------------------------------------------------------------------------
 # PKG-Config File

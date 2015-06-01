@@ -26,25 +26,34 @@ void main() {
 }
 )================";
 
-class MyApp : public OmniApp<OmniAppMixin_Navigation> {
+struct State {
+    Pose pose;
+    float size;
+    float spacing;
+};
+
+class MyApp : public OmniAppRenderer<State> {
 public:
+    MyApp(Configuration* config) : OmniAppRenderer(config) { }
+
     struct VertexData {
         float x, y, z;
         float r, g, b;
     };
 
-    MyApp() {
-    }
-
     virtual void onInitialize() override {
-        OmniApp::onInitialize();
         program_ = glutils::compileShaderProgram(
             (std::string("#version 330\n") + omni()->getShaderCode() + vertex_code).c_str(),
             (std::string("#version 330\n") + omni()->getShaderCode() + fragment_code).c_str()
         );
         setupBuffers();
     }
-    virtual void onCaptureViewport(const CaptureInfo& info) override {
+
+    virtual void onFrame(double dt) override {
+        omni()->setPose(state().pose);
+    }
+
+    virtual void onCaptureViewport(const OmniStereo::Delegate::CaptureInfo& info) override {
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -54,6 +63,7 @@ public:
         glBindVertexArray(vertex_buffer_);
         glDrawArrays(GL_TRIANGLES, 0, vertices_count_);
     }
+
     void addCube(std::vector<VertexData>& vs, float x, float y, float z, float size) {
         float c0 = 0.3, c1 = 0.7;
         VertexData v0 = { x - size / 2, y - size / 2, z - size / 2, c0, c0, c0 };
@@ -71,6 +81,7 @@ public:
         vs.push_back(v5); vs.push_back(v4); vs.push_back(v6); vs.push_back(v5); vs.push_back(v6); vs.push_back(v7); // 5467;
         vs.push_back(v0); vs.push_back(v2); vs.push_back(v6); vs.push_back(v0); vs.push_back(v6); vs.push_back(v4); // 0264;
     }
+
     void setupBuffers() {
         // Generate cubes.
         std::vector<VertexData> vertices;
@@ -103,9 +114,18 @@ public:
     GLuint program_;
 };
 
+class MyAppSimulator : public OmniAppSimulator<State> {
+public:
+    MyAppSimulator(Configuration* config) : OmniAppSimulator(config) { }
+
+    virtual void onInitialize() override {
+    }
+    virtual void onFrame(double dt) override {
+        state().pose.rotation = state().pose.rotation * Quaternion::Rotation(Vector3(0, 0, 1), dt * 1);
+    }
+};
+
 int main(int argc, char* argv[]) {
-    Configuration* config = Configuration::ParseMainArgs(argc, argv);
-    MyApp app;
-    app.initialize(config);
-    app.main();
+    OmniAppRunner<MyApp, MyAppSimulator> runner(argc, argv);
+    runner.run();
 }
