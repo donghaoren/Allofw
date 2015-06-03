@@ -122,6 +122,7 @@
       allofw
       ${ZeroMQ_LIBRARIES}
       ${OPENGL_LIBRARIES}
+      pthread
   )
 
   IF ( ${WITH_SKIA} )
