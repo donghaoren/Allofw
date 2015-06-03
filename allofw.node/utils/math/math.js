@@ -73,7 +73,10 @@ NS.Quaternion.prototype.normalize = function() {
     return new NS.Quaternion(this.v.scale(s), this.w * s);
 };
 NS.Quaternion.slerp = function(q1, q2, t) {
-    var omega = Math.acos(q1.v.x * q2.v.x + q1.v.y * q2.v.y + q1.v.z * q2.v.z + q1.w * q2.w);
+    var acos_arg = q1.v.x * q2.v.x + q1.v.y * q2.v.y + q1.v.z * q2.v.z + q1.w * q2.w;
+    if(acos_arg > 1) acos_arg = 1;
+    if(acos_arg < -1) acos_arg = -1;
+    var omega = Math.acos(acos_arg);
     var st0, st1;
     if(Math.abs(omega) < 1e-10) {
         st0 = 1 - t;
