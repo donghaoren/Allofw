@@ -102,6 +102,7 @@ uniform sampler2D texBlend;
 uniform sampler2D texBack;
 uniform sampler2D texFront;
 uniform sampler2D texPanorama;
+uniform samplerCube texPanoramaCubemap;
 uniform int drawMask = 0;
 uniform vec4 panoramaRotation = vec4(0, 0, 0, 1);
 
@@ -111,6 +112,7 @@ const int kCompositeMask_Back                      = 1 << 1;
 const int kCompositeMask_Front                     = 1 << 2;
 const int kCompositeMask_Panorama                  = 1 << 3;
 const int kCompositeMask_Panorama_Equirectangular  = 1 << 4;
+const int kCompositeMask_Panorama_Cubemap          = 1 << 5;
 
 const float PI = 3.14159265358979323846264;
 
@@ -145,11 +147,19 @@ void omni_composite_final(vec4 result) {
 }
 
 vec4 omni_composite_panorama() {
-    vec3 panov = omni_quat_rotate(panoramaRotation, warp);
-    float theta = atan(-panov.x, panov.z);
-    float phi = atan(panov.y, length(panov.xz));
-    vec4 panorama_color = texture(texPanorama, vec2((theta / PI + 1.0) / 2, -phi / PI + 0.5));
-    return panorama_color;
+    if((drawMask & kCompositeMask_Panorama_Equirectangular) != 0) {
+        vec3 panov = omni_quat_rotate(panoramaRotation, warp);
+        float theta = atan(-panov.x, panov.z);
+        float phi = atan(panov.y, length(panov.xz));
+        vec4 panorama_color = texture(texPanorama, vec2((theta / PI + 1.0) / 2, -phi / PI + 0.5));
+        return panorama_color;
+    }
+    if((drawMask & kCompositeMask_Panorama_Cubemap) != 0) {
+        vec3 panov = omni_quat_rotate(panoramaRotation, warp);
+        vec4 panorama_color = texture(texPanoramaCubemap, panov);
+        return panorama_color;
+    }
+    return vec4(0, 0, 0, 0);
 }
 
 )================";
@@ -480,6 +490,7 @@ private:
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texBack"), 3);
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texFront"), 4);
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanorama"), 5);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanoramaCubemap"), 6);
         program_draw_drawMask_ = glGetUniformLocation(program_draw_, "drawMask");
         program_draw_panoramaRotation_ = glGetUniformLocation(program_draw_, "panoramaRotation");
         program_draw_positionScalers_ = glGetUniformLocation(program_draw_, "positionScalers");
@@ -515,6 +526,7 @@ private:
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texBack"), 3);
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texFront"), 4);
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanorama"), 5);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanoramaCubemap"), 6);
         program_draw_drawMask_ = glGetUniformLocation(program_draw_, "drawMask");
         program_draw_panoramaRotation_ = glGetUniformLocation(program_draw_, "panoramaRotation");
         program_draw_positionScalers_ = glGetUniformLocation(program_draw_, "positionScalers");
@@ -666,11 +678,15 @@ private:
                     glUniform4f(program_draw_panoramaRotation_, pose_.rotation.x, pose_.rotation.y, pose_.rotation.z, pose_.rotation.w);
                     glActiveTexture(GL_TEXTURE5); glBindTexture(GL_TEXTURE_2D, info.panorama.eyes[eye]);
                 }
+                if(mask & kCompositeMask_Panorama_Cubemap) {
+                    glUniform4f(program_draw_panoramaRotation_, pose_.rotation.x, pose_.rotation.y, pose_.rotation.z, pose_.rotation.w);
+                    glActiveTexture(GL_TEXTURE6); glBindTexture(GL_TEXTURE_CUBE_MAP, info.panorama.eyes[eye]);
+                }
             }
 
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-            glActiveTexture(GL_TEXTURE5); glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE5); glBindTexture(GL_TEXTURE_2D, 0); glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 0);
             glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0);
@@ -727,6 +743,7 @@ private:
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texBack"), 3);
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texFront"), 4);
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanorama"), 5);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanoramaCubemap"), 6);
         program_draw_drawMask_ = glGetUniformLocation(program_draw_, "drawMask");
         program_draw_panoramaRotation_ = glGetUniformLocation(program_draw_, "panoramaRotation");
         program_draw_positionScalers_ = glGetUniformLocation(program_draw_, "positionScalers");
@@ -800,6 +817,7 @@ private:
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texBack"), 3);
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texFront"), 4);
         glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanorama"), 5);
+        glProgramUniform1i(program_draw_, glGetUniformLocation(program_draw_, "texPanoramaCubemap"), 6);
         program_draw_drawMask_ = glGetUniformLocation(program_draw_, "drawMask");
         program_draw_panoramaRotation_ = glGetUniformLocation(program_draw_, "panoramaRotation");
         program_draw_positionScalers_ = glGetUniformLocation(program_draw_, "positionScalers");
@@ -928,10 +946,15 @@ private:
                     glUniform4f(program_draw_panoramaRotation_, pose_.rotation.x, pose_.rotation.y, pose_.rotation.z, pose_.rotation.w);
                     glActiveTexture(GL_TEXTURE5); glBindTexture(GL_TEXTURE_2D, info.panorama.eyes[eye]);
                 }
+                if(mask & kCompositeMask_Panorama_Cubemap) {
+                    glUniform4f(program_draw_panoramaRotation_, pose_.rotation.x, pose_.rotation.y, pose_.rotation.z, pose_.rotation.w);
+                    glActiveTexture(GL_TEXTURE6); glBindTexture(GL_TEXTURE_CUBE_MAP, info.panorama.eyes[eye]);
+                }
             }
 
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+            glActiveTexture(GL_TEXTURE5); glBindTexture(GL_TEXTURE_2D, 0); glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, 0);
             glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, 0);
             glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0);

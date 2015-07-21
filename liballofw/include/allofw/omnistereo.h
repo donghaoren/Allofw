@@ -42,6 +42,7 @@ namespace ALLOFW_NS {
         static const int kCompositeMask_Front                     = 1 << 2;
         static const int kCompositeMask_Panorama                  = 1 << 3;
         static const int kCompositeMask_Panorama_Equirectangular  = 1 << 4;
+        static const int kCompositeMask_Panorama_Cubemap          = 1 << 5;
 
         // Stereo texture.
         struct StereoTexture {

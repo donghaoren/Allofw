@@ -136,7 +136,13 @@ NAN_METHOD(NODE_OmniStereo::NODE_composite) {
                 Handle<Object> val = obj->Get(NanNew<String>("panorama"))->ToObject();
                 composite_info.panorama.L = val->Get(0)->Uint32Value();
                 composite_info.panorama.R = val->Get(1)->Uint32Value();
-                composite_info.mask |= OmniStereo::kCompositeMask_Panorama | OmniStereo::kCompositeMask_Panorama_Equirectangular;
+                NanUtf8String str(val->Get(2));
+                std::string s = *str;
+                if(s == "cubemap") {
+                    composite_info.mask |= OmniStereo::kCompositeMask_Panorama | OmniStereo::kCompositeMask_Panorama_Cubemap;
+                } else {
+                    composite_info.mask |= OmniStereo::kCompositeMask_Panorama | OmniStereo::kCompositeMask_Panorama_Equirectangular;
+                }
             }
         }
     }
