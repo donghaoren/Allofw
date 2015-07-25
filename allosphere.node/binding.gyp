@@ -4,7 +4,7 @@
       "target_name": "node_phasespace",
       "include_dirs": [
         "include",
-        "/opt/allofw/include",
+        "<!@(pkg-config liballofw --cflags-only-I | sed s/-I//g)",
         "<!(node -e \"require('nan')\")"
       ],
       "libraries": [
