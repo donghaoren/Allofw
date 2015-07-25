@@ -4,7 +4,7 @@
       "target_name": "node_phasespace",
       "include_dirs": [
         "include",
-        "../allofw_install/include",
+        "/opt/allofw/include",
         "<!(node -e \"require('nan')\")"
       ],
       "libraries": [
