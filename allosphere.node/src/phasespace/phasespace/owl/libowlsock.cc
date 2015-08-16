@@ -1108,13 +1108,14 @@ int owlInit(const char *server, int flags)
   nonblock(_client.sock);
 
   send_init(flags);
+  cerr << "owl init : send_init" << endl;
 
   int ret = 0;
   int c = 1;
   while(_owl.init == 0)
     {
       ret = owl_read();
-
+      cerr << "owl init : owl_read = " << ret << endl;
       if(ret < 0) {
         cerr << "error: owl_read" << endl;
           return -1;
@@ -1124,7 +1125,10 @@ int owlInit(const char *server, int flags)
 
       owl_delay(1);
 
-      if(c++ > 30000) return -2;
+      if(c++ > 30000) {
+        cerr << "too much retries..." << endl;
+        return -2;
+      }
     }
 
 
