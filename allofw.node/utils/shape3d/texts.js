@@ -44,21 +44,37 @@ TextObject.prototype.style = function(f) {
 
 TextObject.prototype.data = function(data) {
     var self = this;
-    this.textcache.clear();
-    this.data2text = new WeakMap();
-    data.forEach(function(d) {
-        self.data2text.set(d,
-            self.textcache.addText(
-                self.text_value.get(d),
-                self.font_value.get(d),
-                self.style_value.get(d)
-            )
-        );
-    });
+    try {
+        self.textcache.updated = false;
+        this.data2text = new WeakMap();
+        data.forEach(function(d) {
+            self.data2text.set(d,
+                self.textcache.addText(
+                    self.text_value.get(d),
+                    self.font_value.get(d),
+                    self.style_value.get(d)
+                )
+            );
+        });
+    } catch(e) {
+        this.textcache.clear();
+        self.textcache.updated = true;
+        this.data2text = new WeakMap();
+        data.forEach(function(d) {
+            self.data2text.set(d,
+                self.textcache.addText(
+                    self.text_value.get(d),
+                    self.font_value.get(d),
+                    self.style_value.get(d)
+                )
+            );
+        });
+    }
+    if(self.textcache.updated) {
+        this.textcache.surface.uploadTexture();
+    }
 
     ShapeObject.prototype.data.call(this, data);
-
-    this.textcache.surface.uploadTexture();
 
     return this;
 };

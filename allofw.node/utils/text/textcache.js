@@ -122,6 +122,7 @@ TextCache.prototype.addText = function(text, font, style) {
             this.context.drawText(text, draw_x, draw_y, this.paint);
         }
     }
+    this.updated = true;
     // this.paint.setColor(0, 0, 0, 1);
     // this.paint.setStrokeWidth(1);
     // this.paint.setMode(graphics.PAINTMODE_STROKE);

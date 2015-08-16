@@ -85,8 +85,8 @@ struct _RPDClient : public buffer<char> {
 
   int _write, _read, _send, _recv, _max_size;
 
-  _RPDClient(size_t buffer_size, size_t erase_delay) : 
-    buffer<char>(buffer_size, erase_delay), sock(-1), fd(-1), _mode(0), 
+  _RPDClient(size_t buffer_size, size_t erase_delay) :
+    buffer<char>(buffer_size, erase_delay), sock(-1), fd(-1), _mode(0),
     _write(0), _read(0), _send(0), _recv(0), _max_size(0) { }
   ~_RPDClient() { Close(); }
 
@@ -100,7 +100,7 @@ struct _RPDClient : public buffer<char> {
 struct RecordState {
   size_t startTime;
   size_t index;
-  float freq;  
+  float freq;
 
   vector< vector<OWLMarker> > frames;
 
@@ -113,7 +113,7 @@ struct RecordState {
     Reset();
     cout << "loading c3d file; " << server << endl;
     int ret = load_c3d(server, frames);
-    
+
     if(ret > 0)
       {
         ret = frequency_c3d(server, &freq);
@@ -135,7 +135,7 @@ struct RecordState {
 
   bool frameAvailable()
   {
-#if 0    
+#if 0
     size_t now = timer;
     size_t totalTime = now - startTime;
     size_t frameTime = (size_t)((1 / freq) * 1000000);
@@ -185,7 +185,7 @@ struct _OWLState {
   {
     InitClientState();
   }
-  
+
   operator void*() { return init > 0 ? (void*)(-1) : (void*)0; }
   int operator!() { return init > 0 ? 0 : 1; }
 
@@ -199,7 +199,7 @@ struct _OWLState {
     pose[3] = p_stack[0][3] = p_stack[1][3] = 1;
     scale = 1;
     convert_pm(pose, m);
-    
+
     frameNumber = 0;
     exiting = 0;
     lastAck = 0;
@@ -311,7 +311,7 @@ public:
         ret = udp_recv(sock, &addr, in_buffer.end(), in_buffer.available());
         //if(ret) cout << "udp_recv=" << ret << " of " << in_buffer.available() << endl;
         if(ret < 0) Close();
-        if(ret > 0) in_buffer += ret;        
+        if(ret > 0) in_buffer += ret;
       }
     else if(sock > -1)
       {
@@ -335,7 +335,7 @@ public:
     if(in_buffer.size() <= sizeof(_OWLHeader)) return 0;
 
     _OWLHeader *h = (_OWLHeader*)in_buffer.begin();
-    
+
     assert(h->size >= 0);
 
     size_t count = sizeof(_OWLHeader) + h->size;
@@ -379,7 +379,7 @@ void add_string(OWLenum pname, const char *param, size_t count, int reuse=0);
 int _owl_get_sock()
 {
   if(!_owl) return -1;
-  
+
   return _client.sock;
 }
 
@@ -476,11 +476,11 @@ int owl_read()
             if(ret < 0) break;
           }
       }
-	 
+
   } while(count);
 
   if(ret < 0) _owl.errors.push_back(ret);
-  
+
   return ret < 0 ? ret : 0;
 }
 
@@ -503,19 +503,19 @@ int owl_parse(_OWLHeader *p)
       DBG(cout << "pInit" << endl);
       int flags = *INT(p->data+0);
       size_t version = *ENUM(p->data+4);
-	  
+
       assert(_owl.init == 0);
 
-      cout << "server version: " 
-           << ((version&0xFF0000)>>16) << "." 
+      cout << "server version: "
+           << ((version&0xFF0000)>>16) << "."
            << ((version&0x00FF00)>>8) << "."
            << ((version&0x0000FF)>>0) << endl;
-	  
+
       size_t rversion = OWL_PROTOCOL_VERSION;
       if(version != rversion)
         {
           cerr << "warning: server version does not match client version: "
-               << ((rversion&0xFF0000)>>16) << "." 
+               << ((rversion&0xFF0000)>>16) << "."
                << ((rversion&0x00FF00)>>8) << "."
                << ((rversion&0x0000FF)>>0) << endl;
         }
@@ -535,7 +535,7 @@ int owl_parse(_OWLHeader *p)
   else if(p->type == pDone)
     {
       DBG(cout << "pDone" << endl);
-	  
+
       _owl.exiting = 1;
 
       return -1;
@@ -605,7 +605,7 @@ int owl_parse(_OWLHeader *p)
     }
   else
     {
-      cerr << "error: owl_read: unhandled packet type: 0x" 
+      cerr << "error: owl_read: unhandled packet type: 0x"
            << hex << p->type << dec << endl;
     }
 
@@ -654,7 +654,7 @@ void copy_images(OWLImage &img, const _OWLImageData &d, int frame)
   img.detector = d.detector;
   img.width = d.width;
   img.flag = d.flag;
-  
+
   img.pos = d.pos;
   img.amp = d.amp;
 }
@@ -714,20 +714,20 @@ int add_c3dmarkers()
 int add_markers(_OWLHeader *p)
 {
   int n = p->size/sizeof(_OWLMarkerData);
-  
+
   assert(n < 1024);
-  
+
   if(_owl.markers.size() > 1024*4)
     {
-      //cerr << "error: owl_read: marker storage exceeded" << endl; 
+      //cerr << "error: owl_read: marker storage exceeded" << endl;
       return -1;
     }
-  
+
   _owl.markers.push_back(vector<OWLMarker>());
-  
+
   _OWLMarkerData *data = (_OWLMarkerData*)p->data;
   vector<OWLMarker> &markers = _owl.markers.back();
-  
+
   markers.resize(n);
   for(int i = 0; i < n; i++)
     copy_marker(markers[i], data[i], p->frame);
@@ -740,7 +740,7 @@ int add_rigids(_OWLHeader *p)
   int n = p->size/sizeof(_OWLRigidData);
 
   assert(n < 1024);
-	      
+
   if(_owl.rigids.size() > 1024)
     {
       //cerr << "error: owl_read: rigid storage exceeded" << endl;
@@ -748,10 +748,10 @@ int add_rigids(_OWLHeader *p)
     }
 
   _owl.rigids.push_back(vector<OWLRigid>());
-	
+
   _OWLRigidData *data = (_OWLRigidData*)p->data;
   vector<OWLRigid> &rigids = _owl.rigids.back();
-	      
+
   rigids.resize(n);
   for(int i = 0; i < n; i++)
     copy_rigid(rigids[i], data[i], p->frame);
@@ -762,11 +762,11 @@ int add_rigids(_OWLHeader *p)
 int add_cameras(_OWLHeader *p)
 {
   int n = p->size/sizeof(_OWLCameraData);
-	      
+
   assert(n < 256);
-  
+
   _OWLCameraData *data = (_OWLCameraData*)p->data;
-  
+
   _owl.cameras.resize(n);
   for(int i = 0; i < n; i++)
     copy_camera(_owl.cameras[i], data[i]);
@@ -777,7 +777,7 @@ int add_cameras(_OWLHeader *p)
 int add_images(_OWLHeader *p)
 {
   int n = p->size/sizeof(_OWLImageData);
-  
+
   assert(n < 16384);
 
   if(_owl.images.size() > 1024)
@@ -801,7 +801,7 @@ int add_images(_OWLHeader *p)
 int add_detectors(_OWLHeader *p)
 {
   int n = p->size/sizeof(_OWLDetectorsData);
-  
+
   assert(n < 1024);
 
   if(_owl.detectors.size() > 1024)
@@ -825,7 +825,7 @@ int add_detectors(_OWLHeader *p)
 int add_planes(_OWLHeader *p)
 {
   int n = p->size/sizeof(_OWLPlaneData);
-  
+
   assert(n < 1024);
 
   if(_owl.planes.size() > 1024)
@@ -849,10 +849,10 @@ int add_planes(_OWLHeader *p)
 int add_config(_OWLHeader *p)
 {
   int n = p->size/sizeof(_OWLConfigData);
-	      
+
   assert(n < 256);
 
-#if 0 
+#if 0
   _OWLConfigData *data = (_OWLConfigData*)p->data;
 
   cout << "Config: trackers=" << n << endl;
@@ -879,7 +879,7 @@ int add_floats(_OWLHeader *p)
       //cerr << "error: owl_read: float storage exceeded" << endl;
       return -1;
     }
-  
+
   OWLenum pname = *ENUM(p->data+0);
   int reuse = 0;
 
@@ -892,7 +892,7 @@ int add_floats(_OWLHeader *p)
   DBG(cout << " add_float " << hex << pname << dec << " " << (p->size-4)/sizeof(float) << endl);
 
   add_float(pname, FLOAT(p->data+4), (p->size-4)/sizeof(float), reuse);
-  
+
   return n;
 }
 
@@ -907,10 +907,10 @@ int add_integers(_OWLHeader *p)
       //cerr << "error: owl_read: integer storage exceeded" << endl;
       return -1;
     }
-  
+
   OWLenum pname = *ENUM(p->data+0);
   int reuse = 0;
-  
+
   if(pname == OWL_STREAMING) reuse = 1;
   if(pname == OWL_BROADCAST) reuse = 1;
   if(pname == OWL_INTERPOLATION) reuse = 1;
@@ -938,10 +938,10 @@ int add_string(_OWLHeader *p)
       //cerr << "error: owl_read: string storage exceeded" << endl;
       return -1;
     }
-  
+
   OWLenum pname = *ENUM(p->data+0);
   int reuse = 0;
-  
+
   add_string(pname, (char*)p->data+4, p->size-4, reuse);
 
   return n;
@@ -962,9 +962,9 @@ void add_param(list<T> &l, OWLenum pname, const void *param, size_t count, int r
 	  return;
 	}
     }
-  
+
   l.push_back(T(pname, _owl.frameNumber));
-  
+
   T &n = l.back();
   n.data.resize(count);
   memcpy(&*n.data.begin(), param, count * sizeof(typename T::type));
@@ -1001,9 +1001,9 @@ void send_init(int flags)
 void send_request(size_t type)
 {
   _OWLHeader *p = _client.Out(pRequest, 4);
-  
+
   *ENUM(p->data+0) = type;
-  
+
   _client.Send();
 }
 
@@ -1011,10 +1011,10 @@ void send_request(size_t type)
 void owl_send_data(packet_t type, OWLenum pname, const void *data, size_t bytes)
 {
   _OWLHeader *p = _client.Out(type, 4+bytes);
-  
+
   *ENUM(p->data+0) = pname;
   if(bytes && data) memcpy(p->data+4, data, bytes);
-  
+
   _client.Send();
 }
 
@@ -1025,7 +1025,7 @@ void owl_send_data(packet_t type, int number, OWLenum pname, const void *data, s
   *INT(p->data+0) = number;
   *ENUM(p->data+4) = pname;
   if(bytes && data) memcpy(p->data+8, data, bytes);
-  
+
   _client.Send();
 }
 
@@ -1043,7 +1043,7 @@ int owlInit(const char *server, int flags)
     }
 
   _owl.InitClientState();
-  
+
   float f = 0;
   add_float(OWL_FREQUENCY, &f, 1, 1);
 
@@ -1080,15 +1080,15 @@ int owlInit(const char *server, int flags)
   char name[1024] = "localhost";
   int port = 0;
 
-  if(server) 
+  if(server)
     {
       char *ptr = (char*)strchr(server, ':');
       int size = ptr ? ptr - server : strlen(server);
-      
-      if(size) memcpy(name, server, size), name[size] = 0; 
+
+      if(size) memcpy(name, server, size), name[size] = 0;
       if(ptr) sscanf(ptr, ":%d", &port);
     }
-  
+
   _client.sock = connect_tcp(name, 8000+port);
 
   if(_client.sock == -1)
@@ -1099,7 +1099,7 @@ int owlInit(const char *server, int flags)
 #else
       _owl.errors.push_back(-WSAGetLastError());
 #endif
-
+      cerr << "error: connect_tcp" << endl;
       return -1;
     }
 
@@ -1115,7 +1115,10 @@ int owlInit(const char *server, int flags)
     {
       ret = owl_read();
 
-      if(ret < 0) return -1;
+      if(ret < 0) {
+        cerr << "error: owl_read" << endl;
+          return -1;
+      }
 
       if(_owl.errors.size() > 0) return -1;
 
@@ -1153,9 +1156,9 @@ void owlDone(void)
       //cout << "done" << endl;
       _OWLHeader *p = _client.Out(pDone, 4);
       *INT(p->data+0) = 0;
-      
+
       _client.Send();
-      
+
       // wait for server to get the command
       owl_delay(10);
     }
@@ -1192,7 +1195,7 @@ void owlSetFloatv(OWLenum pname, const float *param)
 
   if(pname == OWL_TRANSFORM)
     {
-      owl_send_data(pSetFloatv, pname, param, 7*4); 
+      owl_send_data(pSetFloatv, pname, param, 7*4);
       send_request(OWL_REQUEST_CAMERAS);
     }
   else
@@ -1232,14 +1235,14 @@ void owlTrackerf(int tracker, OWLenum pname, float param)
 void owlTrackeri(int tracker, OWLenum pname, int param)
 {
   if(!_owl) { _owl.errors.push_back(OWL_INVALID_OPERATION); return; }
-  
+
   owl_send_data(pTrackeriv, tracker, pname, &param, 4);
 }
 
 void owlTrackerfv(int tracker, OWLenum pname, const float *param)
 {
   if(!_owl) { _owl.errors.push_back(OWL_INVALID_OPERATION); return; }
-  
+
   if(pname == OWL_SET_FILTER)
     owl_send_data(pTrackerfv, tracker, pname, param, 4*4);
   else
@@ -1327,7 +1330,7 @@ int owlGetStatus(void)
 
   _owl.lastAck = 0;
   send_request(OWL_REQUEST_ACK);
- 
+
   int ret = 0;
   while(_owl.lastAck != pRequest)
     {
@@ -1357,7 +1360,7 @@ int owlGetError(void)
       _owl.errors.pop_front();
       return e;
     }
-  
+
   return OWL_NO_ERROR;
 }
 
@@ -1370,7 +1373,7 @@ int owlGetMarkers(OWLMarker *markers, uint_t count)
   if(!_owl) { _owl.errors.push_back(OWL_INVALID_OPERATION); return -1; }
 
   owl_read();
-  
+
   size_t n = 0;
 
   if(_owl.markers.size() > 0)
@@ -1378,28 +1381,28 @@ int owlGetMarkers(OWLMarker *markers, uint_t count)
       vector<OWLMarker> &m = _owl.markers.front();
 
       n = m.size();
-      
+
       if(n > count) n = count;
-      
+
       for(size_t i = 0; i < n; i++)
 	{
 	  markers[i] = m[i];
-	  
+
 	  if(markers[i].cond > 0)
 	    {
 	      // scale
 	      m[i].x *= _owl.scale;
 	      m[i].y *= _owl.scale;
 	      m[i].z *= _owl.scale;
-	      
+
 	      // transform
 	      mult_mv3_v3(_owl.m, &m[i].x, &markers[i].x);
 	    }
 	}
-      
+
       _owl.markers.pop_front();
     }
-  
+
   return n;
 }
 
@@ -1414,7 +1417,7 @@ int owlGetRigids(OWLRigid *rigid, uint_t count)
   if(_owl.rigids.size() > 0)
     {
       vector<OWLRigid> &r = _owl.rigids.front();
-      
+
       n = r.size();
 
       if(n > count) n = count;
@@ -1429,9 +1432,9 @@ int owlGetRigids(OWLRigid *rigid, uint_t count)
 	      rigid[i].pose[0] *= _owl.scale;
 	      rigid[i].pose[1] *= _owl.scale;
 	      rigid[i].pose[2] *= _owl.scale;
-	      
+
 	      float p[7];  copy_v<7>(rigid[i].pose, p);
-	      
+
 	      mult_pp(_owl.pose, p, rigid[i].pose);
 	    }
 	}
@@ -1457,13 +1460,13 @@ int owlGetCameras(OWLCamera *cameras, uint_t count)
   owl_read();
 
   size_t n = 0;
-  
+
   for(n = 0; n < _owl.cameras.size() && n < count; n++)
     {
       cameras[n].id = _owl.cameras[n].id;
-      
+
       copy_v<7>(_owl.cameras[n].pose, cameras[n].pose);
-      
+
       cameras[n].cond = _owl.cameras[n].cond;
 
       if(cameras[n].cond > 0)
@@ -1472,9 +1475,9 @@ int owlGetCameras(OWLCamera *cameras, uint_t count)
 	  cameras[n].pose[0] *= _owl.scale;
 	  cameras[n].pose[1] *= _owl.scale;
 	  cameras[n].pose[2] *= _owl.scale;
-	  
+
 	  float p[7];  copy_v<7>(cameras[n].pose, p);
-	  
+
 	  mult_pp(_owl.pose, p, cameras[n].pose);
 	}
     }
@@ -1494,9 +1497,9 @@ int owlGetImages(OWLImage *images, uint_t count)
   if(_owl.images.size() > 0)
     {
       vector<OWLImage> &p = _owl.images.front();
-      
+
       n = p.size();
-      
+
       if(n > count) n = count;
 
       for(size_t i = 0; i < n; i++) images[i] = p[i];
@@ -1518,9 +1521,9 @@ int owlGetDetectors(OWLDetectors *detectors, uint_t count)
   if(_owl.detectors.size() > 0)
     {
       vector<OWLDetectors> &p = _owl.detectors.front();
-      
+
       n = p.size();
-      
+
       if(n > count) n = count;
 
       for(size_t i = 0; i < n; i++) detectors[i] = p[i];
@@ -1542,7 +1545,7 @@ int owlGetPlanes(OWLPlane *planes, uint_t count)
   if(_owl.planes.size() > 0)
     {
       vector<OWLPlane> &p = _owl.planes.front();
-      
+
       n = p.size();
 
       if(n > count) n = count;
@@ -1550,11 +1553,11 @@ int owlGetPlanes(OWLPlane *planes, uint_t count)
       for(size_t i = 0; i < n; i++)
 	{
 	  planes[i] = p[i];
-	  
+
 	  if(planes[i].cond > 0)
 	    {
 	      extern void mult_mitv_v(const float *a, const float *b, float *ab);
-	      
+
 	      // scale
 	      p[i].plane[3] *= _owl.scale;
 
@@ -1562,7 +1565,7 @@ int owlGetPlanes(OWLPlane *planes, uint_t count)
 	      mult_mitv_v(_owl.m, p[i].plane, planes[i].plane);
 	    }
 	}
-      
+
       _owl.planes.pop_front();
     }
 
@@ -1713,8 +1716,8 @@ void owlRPDClose()
   _rpd_client.Disconnect();
 
   // flush
-  while(_rpd_client._mode == OWL_RPD_SAVE && 
-	_rpd_client.sock > -1 && 
+  while(_rpd_client._mode == OWL_RPD_SAVE &&
+	_rpd_client.sock > -1 &&
 	_rpd_client.Recv() >= 0);
 
   if(_rpd_client.sock > -1) _rpd_client.Close();
@@ -1743,7 +1746,7 @@ int owlRPDRecv()
 int _RPDClient::Open(const char *servername, const char *filename, int mode)
 {
   Close();
-  
+
   if(mode == OWL_RPD_SAVE)
     {
 #ifdef WIN32
@@ -1774,7 +1777,7 @@ int _RPDClient::Open(const char *servername, const char *filename, int mode)
     }
 
   _mode = mode;
-  
+
   clear();
 
 #if 0
@@ -1788,7 +1791,7 @@ int _RPDClient::Open(const char *servername, const char *filename, int mode)
 	  cerr << "lseek failed: " << strerror(errno) << endl;
 	  return -5;
 	}
-      
+
       // allocate space
       reserve(fsize);
       if(available() < (size_t)fsize)
@@ -1820,13 +1823,13 @@ int _RPDClient::Open(const char *servername, const char *filename, int mode)
     {
       char *ptr = (char*)strchr(servername, ':');
       int size = ptr ? ptr - servername : strlen(servername);
-      
+
       if(size) memcpy(name, servername, size), name[size] = 0;
       if(ptr) sscanf(ptr, ":%d", &port);
     }
 
   sock = connect_tcp(name, 9000+port);
-  
+
   if(sock < 0)
     {
       cerr << "error: could not connect to " << servername << endl;
@@ -1842,7 +1845,7 @@ int _RPDClient::Open(const char *servername, const char *filename, int mode)
       cerr << "error: failed to send mode" << endl;
       return -4;
     }
-  
+
   if(mode == OWL_RPD_LOAD)
     {
       cout << "sending RPD header" << endl;
@@ -1852,7 +1855,7 @@ int _RPDClient::Open(const char *servername, const char *filename, int mode)
     }
 
   cout << "RPD: opened with " << mode << endl;
-  
+
   return 1;
 }
 
@@ -1884,7 +1887,7 @@ void _RPDClient::Close()
   clear();
 
   if(_write || _read || _send || _recv)
-    cout << "rpd: write=" << _write << " read=" << _read << " send=" << _send << " recv=" << _recv 
+    cout << "rpd: write=" << _write << " read=" << _read << " send=" << _send << " recv=" << _recv
          << " max_size=" << _max_size << endl;
   cout << "RPD: closed" << endl;
 
@@ -1894,7 +1897,7 @@ void _RPDClient::Close()
 int _RPDClient::Recv()
 {
   if(_mode != OWL_RPD_SAVE) return -1;
-  
+
   int ret = owl_recv(sock, end(), available());
 
   if(ret < 0 && size() == 0) return ret;
@@ -1910,11 +1913,11 @@ int _RPDClient::Recv()
     ret = write(fd, begin(), _rpd_chunk_size);
   else
     ret = 0;
-    
+
   if(ret < 0) return ret;
-  
+
   if(ret > 0) (*this) -= ret, _write += ret;
-  
+
   return ret;
 }
 
@@ -1933,12 +1936,12 @@ int _RPDClient::Send(size_t retry, size_t txsize)
   ret = owl_select(0, sock, 0);
 
   if(ret <= 0) return ret;
-  
+
   ret = owl_send(sock, begin(), txsize, retry);
 
   if(ret < 0) return ret;
 
   if(ret > 0) (*this) -= ret, _send += ret;
-  
+
   return ret;
 }
