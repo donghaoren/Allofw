@@ -1141,7 +1141,7 @@ int owlInit(const char *server, int flags)
         DBG(cout << "broadcast listener: " << _broadcast.sock << endl);
       }
   }
-  //cout << "owlInit done" << endl;
+  cout << "owlInit done" << endl;
 
   return _owl.flags;
 }
