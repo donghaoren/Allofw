@@ -97,7 +97,7 @@ public:
 
         if (owlInit(SERVER_NAME, initFlags) < 0){
             owl_print_error("Couldn't initialize: \n", owlGetError());
-            // return -1;
+            return -1;
         }
         else{
 
