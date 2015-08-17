@@ -1121,7 +1121,10 @@ int owlInit(const char *server, int flags)
           return -1;
       }
 
-      if(_owl.errors.size() > 0) return -1;
+      if(_owl.errors.size() > 0) {
+        cerr << "something happened, _owl.errors.size() > 0" << endl;
+        return -1;
+      }
 
       owl_delay(1);
 
