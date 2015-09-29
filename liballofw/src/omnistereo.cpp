@@ -282,7 +282,7 @@ public:
         }
     }
     // Set cubemap resolution, allocate the cubemap.
-    virtual void setResolution(int size) {
+    virtual void setResolution(int size) override {
         if(capture_method_ == kCaptureMethod_Cubemap) {
             if(resolution_ != size) {
                 resolution_ = size;
@@ -292,7 +292,7 @@ public:
     }
 
     // Enable stereo or not.
-    virtual void setStereoMode(StereoMode stereo_mode) {
+    virtual void setStereoMode(StereoMode stereo_mode) override {
         if(stereo_mode_ != stereo_mode) {
             stereo_mode_ = stereo_mode;
             stereo_enabled_ = stereo_mode_ != kStereoMode_Mono;
@@ -308,27 +308,27 @@ public:
     }
 
     // Pose and eye separation.
-    virtual void setPose(const Pose& pose) {
+    virtual void setPose(const Pose& pose) override {
         pose_ = pose;
     }
-    virtual void setLens(float eye_separation = 0.0f, float sphere_radius = 1.0f) {
+    virtual void setLens(float eye_separation = 0.0f, float sphere_radius = 1.0f) override {
         eye_separation_ = eye_separation;
         sphere_radius_ = sphere_radius;
     }
-    virtual void setClipRange(float near, float far) {
+    virtual void setClipRange(float near, float far) override {
         near_ = near;
         far_ = far;
     }
 
     // Get the cubemap.
-    virtual StereoTexture getCubemapTexture() {
+    virtual StereoTexture getCubemapTexture() override {
         if(capture_method_ == kCaptureMethod_Cubemap) {
             return tex_cubemap_;
         } else {
             throw exception("cubemap not available in current capture method.");
         }
     }
-    virtual StereoTexture getDepthCubemapTexture() {
+    virtual StereoTexture getDepthCubemapTexture() override {
         if(capture_method_ == kCaptureMethod_Cubemap) {
             return tex_cubemap_depth_;
         } else {
@@ -347,7 +347,7 @@ public:
         }
     }
 
-    virtual void composite(const Rectangle2i& viewport, const CompositeInfo& info) {
+    virtual void composite(const Rectangle2i& viewport, const CompositeInfo& info) override {
         switch(capture_method_) {
             case kCaptureMethod_Cubemap: {
                 compositeCubemap(viewport, info);
@@ -359,7 +359,7 @@ public:
     }
 
     // Create a customized composite shader.
-    virtual GLuint compositeCustomizeShader(const char* code) {
+    virtual GLuint compositeCustomizeShader(const char* code) override {
         switch(capture_method_) {
             case kCaptureMethod_Cubemap: {
                 compositeCustomizeShaderCubemap(code);
@@ -371,7 +371,7 @@ public:
         return program_draw_;
     }
     // Restore the composite shader to default.
-    virtual void compositeRestoreShader() {
+    virtual void compositeRestoreShader() override {
         switch(capture_method_) {
             case kCaptureMethod_Cubemap: {
                 compositeCustomizeShaderCubemap(gShader_composite_generic);
@@ -393,11 +393,11 @@ public:
     // omni_near, omni_far
     // omni_position, omni_rotation
     // These uniforms are automatically set before calling capture().
-    virtual const char* getShaderCode() {
+    virtual const char* getShaderCode() override {
         return gShader_omnistereo_include;
     }
 
-    virtual void setUniforms(GLuint program, const Delegate::CaptureInfo& info) {
+    virtual void setUniforms(GLuint program, const Delegate::CaptureInfo& info) override {
         GLint l;
         if((l = glGetUniformLocation(program, "omni_eye")) >= 0) {
             glProgramUniform1f(program, l, info.eye_separation / 2.0f);
@@ -425,7 +425,7 @@ public:
     }
 
     // Set the delegate.
-    virtual void setDelegate(Delegate* delegate) {
+    virtual void setDelegate(Delegate* delegate) override {
         delegate_ = delegate;
     }
 
