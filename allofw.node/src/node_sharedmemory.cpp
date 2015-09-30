@@ -15,26 +15,26 @@
 using namespace v8;
 
 void NODE_SharedMemory::Init(Handle<Object> exports) {
-    Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
-    tpl->SetClassName(NanNew<String>("SharedMemory"));
+    Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
+    tpl->SetClassName(Nan::New<String>("SharedMemory").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
     // Prototype
-    NODE_SET_PROTOTYPE_METHOD(tpl, "size", NODE_size);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "shmid", NODE_shmid);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "semid", NODE_semid);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "buffer", NODE_buffer);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "close", NODE_close);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "writeLock", NODE_writeLock);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "writeUnlock", NODE_writeUnlock);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "readLock", NODE_readLock);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "readUnlock", NODE_readUnlock);
+    Nan::SetPrototypeMethod(tpl, "size", NODE_size);
+    Nan::SetPrototypeMethod(tpl, "shmid", NODE_shmid);
+    Nan::SetPrototypeMethod(tpl, "semid", NODE_semid);
+    Nan::SetPrototypeMethod(tpl, "buffer", NODE_buffer);
+    Nan::SetPrototypeMethod(tpl, "delete", NODE_delete);
+    Nan::SetPrototypeMethod(tpl, "close", NODE_close);
+    Nan::SetPrototypeMethod(tpl, "writeLock", NODE_writeLock);
+    Nan::SetPrototypeMethod(tpl, "writeUnlock", NODE_writeUnlock);
+    Nan::SetPrototypeMethod(tpl, "readLock", NODE_readLock);
+    Nan::SetPrototypeMethod(tpl, "readUnlock", NODE_readUnlock);
 
-    NanAssignPersistent(constructor, tpl->GetFunction());
+    constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    exports->Set(NanNew<String>("SharedMemory"), tpl->GetFunction());
+    Nan::Set(exports, Nan::New<String>("SharedMemory").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 int shmrm(key_t key) {
@@ -113,86 +113,86 @@ NODE_SharedMemory::~NODE_SharedMemory() {
 }
 
 NAN_METHOD(NODE_SharedMemory::New) {
-    NanScope();
-    if(args.IsConstructCall()) {
-        if(args.Length() == 3) {
-            int key = args[0]->IntegerValue();
-            int size = args[1]->IntegerValue();
-            bool is_create = args[2]->BooleanValue();
+    Nan::HandleScope scope;
+    if(info.IsConstructCall()) {
+        if(info.Length() == 3) {
+            int key = info[0]->IntegerValue();
+            int size = info[1]->IntegerValue();
+            bool is_create = info[2]->BooleanValue();
             NODE_SharedMemory* obj = new NODE_SharedMemory(key, size, is_create);
             if(obj->shm_id < 0 || obj->sem_id < 0) {
-                NanThrowError("SharedMemory: shmget()/semget() failed.");
+                Nan::ThrowError("SharedMemory: shmget()/semget() failed.");
             }
-            obj->Wrap(args.This());
-            NanReturnThis();
-        } else if(args.Length() == 4) {
-            int shmid = args[0]->IntegerValue();
-            int semid = args[1]->IntegerValue();
-            int size = args[2]->IntegerValue();
-            bool is_create = args[3]->BooleanValue();
+            obj->Wrap(info.This());
+            info.GetReturnValue().Set(info.This());
+        } else if(info.Length() == 4) {
+            int shmid = info[0]->IntegerValue();
+            int semid = info[1]->IntegerValue();
+            int size = info[2]->IntegerValue();
+            bool is_create = info[3]->BooleanValue();
             NODE_SharedMemory* obj = new NODE_SharedMemory(shmid, semid, size, is_create);
             if(obj->shm_id < 0 || obj->sem_id < 0) {
-                NanThrowError("SharedMemory: shmget()/semget() failed.");
+                Nan::ThrowError("SharedMemory: shmget()/semget() failed.");
             }
-            obj->Wrap(args.This());
-            NanReturnThis();
+            obj->Wrap(info.This());
+            info.GetReturnValue().Set(info.This());
         } else {
-            NanThrowError("SharedMemory: invalid arguments.");
+            Nan::ThrowError("SharedMemory: invalid arguments.");
         }
     } else {
         // Invoked as plain function `MyObject(...)`, turn into construct call.
         const int argc = 3;
-        Local<Value> argv[argc] = { args[0], args[1], args[2] };
-        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+        Local<Value> argv[argc] = { info[0], info[1], info[2] };
+        info.GetReturnValue().Set(Nan::New(constructor)->NewInstance(argc, argv));
     }
 }
 
 NAN_METHOD(NODE_SharedMemory::NODE_size) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
-    NanReturnValue(NanNew<Integer>(obj->size));
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
+    info.GetReturnValue().Set(Nan::New<Integer>(obj->size));
 }
 
 NAN_METHOD(NODE_SharedMemory::NODE_shmid) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
-    NanReturnValue(NanNew<Integer>(obj->shm_id));
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
+    info.GetReturnValue().Set(Nan::New<Integer>(obj->shm_id));
 }
 
 NAN_METHOD(NODE_SharedMemory::NODE_semid) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
-    NanReturnValue(NanNew<Integer>(obj->sem_id));
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
+    info.GetReturnValue().Set(Nan::New<Integer>(obj->sem_id));
 }
 
 void do_nothing_free_callback(char* data, void* hint) { }
 
 NAN_METHOD(NODE_SharedMemory::NODE_buffer) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
     if(obj->shm_data) {
-        int start = args[0]->IsUndefined() ? 0 : args[0]->IntegerValue();
-        int length = args[1]->IsUndefined() ? obj->size : args[1]->IntegerValue();
-        NanReturnValue(NanNewBufferHandle((char*)obj->shm_data + start, length, do_nothing_free_callback, NULL));
+        int start = info[0]->IsUndefined() ? 0 : info[0]->IntegerValue();
+        int length = info[1]->IsUndefined() ? obj->size : info[1]->IntegerValue();
+        info.GetReturnValue().Set(Nan::NewBuffer((char*)obj->shm_data + start, length, do_nothing_free_callback, NULL).ToLocalChecked());
     } else {
-        NanThrowError("buffer: shared memory deleted or not opened.");
+        Nan::ThrowError("buffer: shared memory deleted or not opened.");
     }
 }
 
 NAN_METHOD(NODE_SharedMemory::NODE_delete) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
     if(obj->sem_id >= 0) semctl(obj->sem_id, 0, IPC_RMID, 0);
     if(obj->shm_id >= 0) shmctl(obj->shm_id, IPC_RMID, 0);
     obj->shm_id = -1;
     obj->sem_id = -1;
     obj->shm_data = NULL;
-    NanReturnThis();
+    info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(NODE_SharedMemory::NODE_close) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
     shmdt(obj->shm_data);
-    NanReturnThis();
+    info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(NODE_SharedMemory::NODE_writeLock) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
     sembuf operations[2];
     operations[0].sem_num = 1;  // wait for reads to be zero.
     operations[0].sem_op = 0;
@@ -200,22 +200,28 @@ NAN_METHOD(NODE_SharedMemory::NODE_writeLock) {
     operations[1].sem_num = 0;  // increment writes.
     operations[1].sem_op = 1;
     operations[1].sem_flg = 0;
-    if(semop(obj->sem_id, operations, 2) == 0) NanReturnThis();
-    NanThrowError("writeLock: semop() failed.");
+    if(semop(obj->sem_id, operations, 2) == 0) {
+        info.GetReturnValue().Set(info.This());
+    } else {
+        Nan::ThrowError("writeLock: semop() failed.");
+    }
 }
 
 NAN_METHOD(NODE_SharedMemory::NODE_writeUnlock) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
     sembuf operations[1];
     operations[0].sem_num = 0;  // decrement writes.
     operations[0].sem_op = -1;
     operations[0].sem_flg = 0;
-    if(semop(obj->sem_id, operations, 1) == 0) NanReturnThis();
-    NanThrowError("writeUnlock: semop() failed.");
+    if(semop(obj->sem_id, operations, 1) == 0) {
+        info.GetReturnValue().Set(info.This());
+    } else {
+        Nan::ThrowError("writeUnlock: semop() failed.");
+    }
 }
 
 NAN_METHOD(NODE_SharedMemory::NODE_readLock) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
     sembuf operations[2];
     operations[0].sem_num = 0;  // wait for writes to be zero.
     operations[0].sem_op = 0;
@@ -223,18 +229,24 @@ NAN_METHOD(NODE_SharedMemory::NODE_readLock) {
     operations[1].sem_num = 1;  // increment reads.
     operations[1].sem_op = 1;
     operations[1].sem_flg = 0;
-    if(semop(obj->sem_id, operations, 2) == 0) NanReturnThis();
-    NanThrowError("readUnlock: semop() failed.");
+    if(semop(obj->sem_id, operations, 2) == 0) {
+        info.GetReturnValue().Set(info.This());
+    } else {
+        Nan::ThrowError("readUnlock: semop() failed.");
+    }
 }
 
 NAN_METHOD(NODE_SharedMemory::NODE_readUnlock) {
-    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(args.This());
+    NODE_SharedMemory* obj = node::ObjectWrap::Unwrap<NODE_SharedMemory>(info.This());
     sembuf operations[1];
     operations[0].sem_num = 1;  // decrement reads.
     operations[0].sem_op = -1;
     operations[0].sem_flg = 0;
-    if(semop(obj->sem_id, operations, 1) == 0) NanReturnThis();
-    NanThrowError("readUnlock: semop() failed.");
+    if(semop(obj->sem_id, operations, 1) == 0) {
+        info.GetReturnValue().Set(info.This());
+    } else {
+        Nan::ThrowError("readUnlock: semop() failed.");
+    }
 }
 
-v8::Persistent<v8::Function> NODE_SharedMemory::constructor;
+Nan::Persistent<v8::Function> NODE_SharedMemory::constructor;

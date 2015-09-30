@@ -14,37 +14,36 @@ NAN_METHOD(EXPORT_start) {
         phasespace = allofw::Phasespace::Create();
         phasespace->start();
     }
-    NanReturnUndefined();
 }
 
 NAN_METHOD(EXPORT_getMarkers) {
-    NanScope();
-    if(!phasespace) NanReturnUndefined();
+    Nan::HandleScope scope;
+    if(!phasespace) return;
 
 
-    int start = args[0]->IntegerValue();
-    int count = args[1]->IntegerValue();
+    int start = info[0]->IntegerValue();
+    int count = info[1]->IntegerValue();
     vector<allofw::Vector3> v(count);
     vector<int> s(count);
     phasespace->getMarkers(&v[0], &s[0], start, count);
 
-    Local<Array> array = NanNew<Array>(count);
+    Local<Array> array = Nan::New<Array>(count);
     for(int i = 0; i < count; i++) {
-        Local<Object> obj = NanNew<Array>(4);
-        obj->Set(0, NanNew<Number>(v[i].x));
-        obj->Set(1, NanNew<Number>(v[i].y));
-        obj->Set(2, NanNew<Number>(v[i].z));
-        obj->Set(3, NanNew<Integer>(s[i]));
+        Local<Object> obj = Nan::New<Array>(4);
+        obj->Set(0, Nan::New<Number>(v[i].x));
+        obj->Set(1, Nan::New<Number>(v[i].y));
+        obj->Set(2, Nan::New<Number>(v[i].z));
+        obj->Set(3, Nan::New<Integer>(s[i]));
         array->Set(i, obj);
     }
-    NanReturnValue(array);
+    info.GetReturnValue().Set(array);
 }
 
 
 void NODE_init(Handle<Object> exports) {
-    exports->Set(NanNew<String>("start"), NanNew<FunctionTemplate>(EXPORT_start)->GetFunction());
+    Nan::Set(exports, Nan::New<String>("start").ToLocalChecked(), Nan::New<FunctionTemplate>(EXPORT_start)->GetFunction());
     // getMarkers(start, count) -> [ [ x, y, z, last_seen ], ... ]
-    exports->Set(NanNew<String>("getMarkers"), NanNew<FunctionTemplate>(EXPORT_getMarkers)->GetFunction());
+    Nan::Set(exports, Nan::New<String>("getMarkers").ToLocalChecked(), Nan::New<FunctionTemplate>(EXPORT_getMarkers)->GetFunction());
 }
 
 NODE_MODULE(node_phasespace, NODE_init)

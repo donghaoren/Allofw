@@ -12,29 +12,29 @@
 using namespace v8;
 
 NAN_METHOD(NODE_log) {
-    NanUtf8String str(args[1]);
-    allofw::Logger::Default()->print(args[0]->IntegerValue(), *str);
+    Nan::Utf8String str(info[1]);
+    allofw::Logger::Default()->print(info[0]->IntegerValue(), *str);
 }
 
-void NODE_init(Handle<Object> exports) {
-    NanScope();
+NAN_MODULE_INIT(NODE_init) {
+    Nan::HandleScope();
 
     allofw::allofwInit();
 
-    exports->Set(NanNew<String>("kInfo"), NanNew<Uint32>(allofw::Logger::kInfo));
-    exports->Set(NanNew<String>("kWarning"), NanNew<Uint32>(allofw::Logger::kWarning));
-    exports->Set(NanNew<String>("kError"), NanNew<Uint32>(allofw::Logger::kError));
-    exports->Set(NanNew<String>("kFatal"), NanNew<Uint32>(allofw::Logger::kFatal));
-    exports->Set(NanNew<String>("log"), NanNew<FunctionTemplate>(NODE_log)->GetFunction());
+    Nan::Set(target, Nan::New<String>("kInfo").ToLocalChecked(), Nan::New<Uint32>(allofw::Logger::kInfo));
+    Nan::Set(target, Nan::New<String>("kWarning").ToLocalChecked(), Nan::New<Uint32>(allofw::Logger::kWarning));
+    Nan::Set(target, Nan::New<String>("kError").ToLocalChecked(), Nan::New<Uint32>(allofw::Logger::kError));
+    Nan::Set(target, Nan::New<String>("kFatal").ToLocalChecked(), Nan::New<Uint32>(allofw::Logger::kFatal));
+    Nan::Set(target, Nan::New<String>("log").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(NODE_log)).ToLocalChecked());
 
-    NODE_SharedMemory::Init(exports);
-    NODE_OpenGL_Init(exports);
+    NODE_SharedMemory::Init(target);
+    NODE_OpenGL_Init(target);
 
-    NODE_OmniStereo_init(exports);
+    NODE_OmniStereo_init(target);
 
-    Local<Object> graphics = NanNew<Object>();
+    Local<Object> graphics = Nan::New<Object>();
     NODE_Graphics_init(graphics);
-    exports->Set(NanNew<String>("graphics"), graphics);
+    Nan::Set(target, Nan::New<String>("graphics").ToLocalChecked(), graphics);
 }
 
 NODE_MODULE(allofw, NODE_init);

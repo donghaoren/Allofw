@@ -52,7 +52,7 @@ for line in prepared:
 
         code_lines = []
 
-        code_lines.append("NanScope();")
+        code_lines.append("Nan::HandleScope scope;")
 
         code_lines.append("// " + repr(return_type))
 
@@ -62,20 +62,20 @@ for line in prepared:
             argtype, argname = arg
 
             code_lines += argtype.define_c_variable("arg%d" % index)
-            define, cleanup = argtype.assign_c_variable("args[%d]" % index, "arg%d" % index)
+            define, cleanup = argtype.assign_c_variable("info[%d]" % index, "arg%d" % index)
             code_lines += define
             cleanup_lines += cleanup
 
         if return_type == None:
             code_lines.append(name + "(" + ", ".join(map(lambda index: "arg%d" % index, range(len(args)))) + ");")
             code_lines += cleanup_lines
-            code_lines.append("NanReturnUndefined();")
+            code_lines.append("return;")
         else:
             code_lines += return_type.define_c_variable("result")
             code_lines.append("result = " + name + "(" + ", ".join(map(lambda index: "arg%d" % index, range(len(args)))) + ");")
             code_lines += return_type.convert_to_js_variable("result", "result_js")
             code_lines += cleanup_lines
-            code_lines.append("NanReturnValue(result_js);")
+            code_lines.append("return info.GetReturnValue().Set(result_js);")
 
         DefineFunction(name[2].lower() + name[3:], "\n".join(map(lambda x: "    " + x, code_lines)))
         #print return_type, name, args
@@ -84,14 +84,14 @@ for line in prepared:
     print line
 
 DefineFunction("shaderSource", """
-    GLuint shader = node::ObjectWrap::Unwrap<NODE_Shader>(args[0]->ToObject())->gl_handle;
-    v8::Handle<v8::Array> sources = v8::Handle<v8::Array>::Cast(args[1]);
+    GLuint shader = Nan::ObjectWrap::Unwrap<NODE_Shader>(info[0]->ToObject())->gl_handle;
+    v8::Handle<v8::Array> sources = v8::Handle<v8::Array>::Cast(info[1]);
     GLsizei count = sources->Length();
     const GLchar* *strings = new const GLchar*[count];
     GLint* lengths = new GLint[count];
-    NanUtf8String **jstrings = new NanUtf8String*[count];
+    Nan::Utf8String **jstrings = new Nan::Utf8String*[count];
     for(GLsizei i = 0; i < count; i++) {
-        jstrings[i] = new NanUtf8String(sources->Get(i));
+        jstrings[i] = new Nan::Utf8String(sources->Get(i));
         strings[i] = (const char*)*(*jstrings[i]);
         lengths[i] = jstrings[i]->length();
     }
@@ -102,7 +102,6 @@ DefineFunction("shaderSource", """
         delete jstrings[i];
     }
     delete [] jstrings;
-    NanReturnUndefined();
 """)
 
 code = GenerateCode()

@@ -30,5 +30,5 @@ private:
     static NAN_METHOD(NODE_readLock);
     static NAN_METHOD(NODE_readUnlock);
 
-    static v8::Persistent<v8::Function> constructor;
+    static Nan::Persistent<v8::Function> constructor;
 };

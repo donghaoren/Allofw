@@ -11,88 +11,88 @@ using namespace v8;
 class NODE_OpenGLWindow : public node::ObjectWrap, public allofw::OpenGLWindow::Delegate {
 public:
     static void Init(v8::Handle<v8::Object> exports) {
-        NanScope();
+        Nan::HandleScope scope;
 
         // New({ width:, height:, active_stereo:, fullscreen:, title:, config: (config rules all) }
-        v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
-        tpl->SetClassName(NanNew<v8::String>("OpenGLWindow"));
+        v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
+        tpl->SetClassName(Nan::New<v8::String>("OpenGLWindow").ToLocalChecked());
         tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
         // Prototype.
-        NODE_SET_PROTOTYPE_METHOD(tpl, "onMove", NODE_onMove);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "onResize", NODE_onResize);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "onClose", NODE_onClose);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "onRefresh", NODE_onRefresh);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "onFocus", NODE_onFocus);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "onIconify", NODE_onIconify);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "onFramebufferSize", NODE_onFramebufferSize);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "onKeyboard", NODE_onKeyboard);
+        Nan::SetPrototypeMethod(tpl, "onMove", NODE_onMove);
+        Nan::SetPrototypeMethod(tpl, "onResize", NODE_onResize);
+        Nan::SetPrototypeMethod(tpl, "onClose", NODE_onClose);
+        Nan::SetPrototypeMethod(tpl, "onRefresh", NODE_onRefresh);
+        Nan::SetPrototypeMethod(tpl, "onFocus", NODE_onFocus);
+        Nan::SetPrototypeMethod(tpl, "onIconify", NODE_onIconify);
+        Nan::SetPrototypeMethod(tpl, "onFramebufferSize", NODE_onFramebufferSize);
+        Nan::SetPrototypeMethod(tpl, "onKeyboard", NODE_onKeyboard);
 
-        NODE_SET_PROTOTYPE_METHOD(tpl, "makeContextCurrent", NODE_makeContextCurrent);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "swapBuffers", NODE_swapBuffers);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "pollEvents", NODE_pollEvents);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "waitEvents", NODE_waitEvents);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "getFramebufferSize", NODE_getFramebufferSize);
-        NODE_SET_PROTOTYPE_METHOD(tpl, "close", NODE_close);
+        Nan::SetPrototypeMethod(tpl, "makeContextCurrent", NODE_makeContextCurrent);
+        Nan::SetPrototypeMethod(tpl, "swapBuffers", NODE_swapBuffers);
+        Nan::SetPrototypeMethod(tpl, "pollEvents", NODE_pollEvents);
+        Nan::SetPrototypeMethod(tpl, "waitEvents", NODE_waitEvents);
+        Nan::SetPrototypeMethod(tpl, "getFramebufferSize", NODE_getFramebufferSize);
+        Nan::SetPrototypeMethod(tpl, "close", NODE_close);
 
-        NanAssignPersistent(constructor, tpl->GetFunction());
+        constructor.Reset(tpl->GetFunction());
 
         // Export constructor.
-        exports->Set(NanNew<v8::String>("OpenGLWindow"), tpl->GetFunction());
+        Nan::Set(exports, Nan::New<v8::String>("OpenGLWindow").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
     }
 
     virtual void onMove(int x, int y) override {
         if(!pf_onMove.IsEmpty()) {
-            NanScope();
-            Local<Value> argv[2] = { NanNew<Integer>(x), NanNew<Integer>(y) };
-            NanNew(pf_onMove)->Call(NanObjectWrapHandle(this), 2, argv);
+            Nan::HandleScope scope;
+            Local<Value> argv[2] = { Nan::New<Integer>(x), Nan::New<Integer>(y) };
+            Nan::New(pf_onMove)->Call(handle(), 2, argv);
         }
     }
     virtual void onResize(int width, int height) override {
         if(!pf_onResize.IsEmpty()) {
-            NanScope();
-            Local<Value> argv[2] = { NanNew<Integer>(width), NanNew<Integer>(height) };
-            NanNew(pf_onResize)->Call(NanObjectWrapHandle(this), 2, argv);
+            Nan::HandleScope scope;
+            Local<Value> argv[2] = { Nan::New<Integer>(width), Nan::New<Integer>(height) };
+            Nan::New(pf_onResize)->Call(handle(), 2, argv);
         }
     }
     virtual void onClose() override {
         if(!pf_onClose.IsEmpty()) {
-            NanScope();
-            NanNew(pf_onClose)->Call(NanObjectWrapHandle(this), 0, NULL);
+            Nan::HandleScope scope;
+            Nan::New(pf_onClose)->Call(handle(), 0, NULL);
         }
     }
     virtual void onRefresh() override {
         if(!pf_onRefresh.IsEmpty()) {
-            NanScope();
-            NanNew(pf_onRefresh)->Call(NanObjectWrapHandle(this), 0, NULL);
+            Nan::HandleScope scope;
+            Nan::New(pf_onRefresh)->Call(handle(), 0, NULL);
         }
     }
     virtual void onFocus(int focused) override {
         if(!pf_onFocus.IsEmpty()) {
-            NanScope();
-            Local<Value> argv[1] = { NanNew<Boolean>(focused == GL_TRUE) };
-            NanNew(pf_onFocus)->Call(NanObjectWrapHandle(this), 1, argv);
+            Nan::HandleScope scope;
+            Local<Value> argv[1] = { Nan::New<Boolean>(focused == GL_TRUE) };
+            Nan::New(pf_onFocus)->Call(handle(), 1, argv);
         }
     }
     virtual void onIconify(int iconified) override {
         if(!pf_onIconify.IsEmpty()) {
-            NanScope();
-            Local<Value> argv[1] = { NanNew<Boolean>(iconified == GL_TRUE) };
-            NanNew(pf_onIconify)->Call(NanObjectWrapHandle(this), 1, argv);
+            Nan::HandleScope scope;
+            Local<Value> argv[1] = { Nan::New<Boolean>(iconified == GL_TRUE) };
+            Nan::New(pf_onIconify)->Call(handle(), 1, argv);
         }
     }
     virtual void onFramebufferSize(int width, int height) override {
         if(!pf_onFramebufferSize.IsEmpty()) {
-            NanScope();
-            Local<Value> argv[2] = { NanNew<Integer>(width), NanNew<Integer>(height) };
-            NanNew(pf_onFramebufferSize)->Call(NanObjectWrapHandle(this), 2, argv);
+            Nan::HandleScope scope;
+            Local<Value> argv[2] = { Nan::New<Integer>(width), Nan::New<Integer>(height) };
+            Nan::New(pf_onFramebufferSize)->Call(handle(), 2, argv);
         }
     }
-    virtual void onKeyboard(const char* key, const char* action, const char* modifiers, int scancode) {
+    virtual void onKeyboard(const char* key, const char* action, const char* modifiers, int scancode) override {
         if(!pf_onKeyboard.IsEmpty()) {
-            NanScope();
-            Local<Value> argv[4] = { NanNew<String>(key), NanNew<String>(action), NanNew<String>(modifiers), NanNew<Integer>(scancode) };
-            NanNew(pf_onKeyboard)->Call(NanObjectWrapHandle(this), 4, argv);
+            Nan::HandleScope scope;
+            Local<Value> argv[4] = { Nan::New<String>(key).ToLocalChecked(), Nan::New<String>(action).ToLocalChecked(), Nan::New<String>(modifiers).ToLocalChecked(), Nan::New<Integer>(scancode) };
+            Nan::New(pf_onKeyboard)->Call(handle(), 4, argv);
         }
     }
 
@@ -101,14 +101,14 @@ private:
         window->setDelegate(this);
     }
     ~NODE_OpenGLWindow() {
-        NanDisposePersistent(pf_onMove);
-        NanDisposePersistent(pf_onResize);
-        NanDisposePersistent(pf_onClose);
-        NanDisposePersistent(pf_onRefresh);
-        NanDisposePersistent(pf_onFocus);
-        NanDisposePersistent(pf_onIconify);
-        NanDisposePersistent(pf_onFramebufferSize);
-        NanDisposePersistent(pf_onKeyboard);
+        pf_onMove.Reset();
+        pf_onResize.Reset();
+        pf_onClose.Reset();
+        pf_onRefresh.Reset();
+        pf_onFocus.Reset();
+        pf_onIconify.Reset();
+        pf_onFramebufferSize.Reset();
+        pf_onKeyboard.Reset();
         if(window) {
             allofw::OpenGLWindow::Destroy(window);
         }
@@ -116,14 +116,14 @@ private:
 
     allofw::OpenGLWindow* window;
 
-    v8::Persistent<v8::Function> pf_onMove;
-    v8::Persistent<v8::Function> pf_onResize;
-    v8::Persistent<v8::Function> pf_onClose;
-    v8::Persistent<v8::Function> pf_onRefresh;
-    v8::Persistent<v8::Function> pf_onFocus;
-    v8::Persistent<v8::Function> pf_onIconify;
-    v8::Persistent<v8::Function> pf_onFramebufferSize;
-    v8::Persistent<v8::Function> pf_onKeyboard;
+    Nan::Persistent<v8::Function> pf_onMove;
+    Nan::Persistent<v8::Function> pf_onResize;
+    Nan::Persistent<v8::Function> pf_onClose;
+    Nan::Persistent<v8::Function> pf_onRefresh;
+    Nan::Persistent<v8::Function> pf_onFocus;
+    Nan::Persistent<v8::Function> pf_onIconify;
+    Nan::Persistent<v8::Function> pf_onFramebufferSize;
+    Nan::Persistent<v8::Function> pf_onKeyboard;
 
     static NAN_METHOD(New);
 
@@ -143,42 +143,42 @@ private:
     static NAN_METHOD(NODE_getFramebufferSize);
     static NAN_METHOD(NODE_close);
 
-    static v8::Persistent<v8::Function> constructor;
+    static Nan::Persistent<v8::Function> constructor;
 };
 
-v8::Persistent<v8::Function> NODE_OpenGLWindow::constructor;
+Nan::Persistent<v8::Function> NODE_OpenGLWindow::constructor;
 
 NAN_METHOD(NODE_OpenGLWindow::New) {
-    NanScope();
-    if (args.IsConstructCall()) {
+    Nan::HandleScope scope;
+    if (info.IsConstructCall()) {
         allofw::OpenGLWindow* window;
-        if(args[0]->IsObject()) {
-            Local<Object> params = args[0]->ToObject();
-            if(params->Has(NanNew<String>("config"))) {
-                NanUtf8String str(params->Get(NanNew<String>("config")));
+        if(info[0]->IsObject()) {
+            Local<Object> params = info[0]->ToObject();
+            if(Nan::Has(params, Nan::New<String>("config").ToLocalChecked()).FromMaybe(false)) {
+                Nan::Utf8String str(Nan::Get(params, Nan::New<String>("config").ToLocalChecked()).ToLocalChecked());
                 allofw::Configuration* config = allofw::Configuration::CreateFromFile(*str);
                 window = allofw::OpenGLWindow::Create(config);
             } else {
                 allofw::OpenGLWindow::Hint hint;
                 std::string title("AllofwWindow");
-                if(params->Has(NanNew<String>("title"))) {
-                    NanUtf8String str(params->Get(NanNew<String>("title")));
+                if(Nan::Has(params, Nan::New<String>("title").ToLocalChecked()).FromMaybe(false)) {
+                    Nan::Utf8String str(Nan::Get(params, Nan::New<String>("title").ToLocalChecked()).ToLocalChecked());
                     title = *str;
                 }
-                if(params->Has(NanNew<String>("width"))) {
-                    hint.width = params->Get(NanNew<String>("width"))->IntegerValue();
+                if(Nan::Has(params, Nan::New<String>("width").ToLocalChecked()).FromMaybe(false)) {
+                    hint.width = Nan::Get(params, Nan::New<String>("width").ToLocalChecked()).ToLocalChecked()->IntegerValue();
                 }
-                if(params->Has(NanNew<String>("height"))) {
-                    hint.height = params->Get(NanNew<String>("height"))->IntegerValue();
+                if(Nan::Has(params, Nan::New<String>("height").ToLocalChecked()).FromMaybe(false)) {
+                    hint.height = Nan::Get(params, Nan::New<String>("height").ToLocalChecked()).ToLocalChecked()->IntegerValue();
                 }
-                if(params->Has(NanNew<String>("active_stereo"))) {
-                    hint.active_stereo = params->Get(NanNew<String>("active_stereo"))->BooleanValue();
+                if(Nan::Has(params, Nan::New<String>("active_stereo").ToLocalChecked()).FromMaybe(false)) {
+                    hint.active_stereo = Nan::Get(params, Nan::New<String>("active_stereo").ToLocalChecked()).ToLocalChecked()->BooleanValue();
                 }
-                if(params->Has(NanNew<String>("hide_cursor"))) {
-                    hint.hide_cursor = params->Get(NanNew<String>("active_stereo"))->BooleanValue();
+                if(Nan::Has(params, Nan::New<String>("hide_cursor").ToLocalChecked()).FromMaybe(false)) {
+                    hint.hide_cursor = Nan::Get(params, Nan::New<String>("active_stereo").ToLocalChecked()).ToLocalChecked()->BooleanValue();
                 }
-                if(params->Has(NanNew<String>("fullscreen"))) {
-                    hint.fullscreen = params->Get(NanNew<String>("fullscreen"))->BooleanValue();
+                if(Nan::Has(params, Nan::New<String>("fullscreen").ToLocalChecked()).FromMaybe(false)) {
+                    hint.fullscreen = Nan::Get(params, Nan::New<String>("fullscreen").ToLocalChecked()).ToLocalChecked()->BooleanValue();
                 }
                 window = allofw::OpenGLWindow::Create(hint, title.c_str());
             }
@@ -188,125 +188,112 @@ NAN_METHOD(NODE_OpenGLWindow::New) {
             window = allofw::OpenGLWindow::Create(hint, title.c_str());
         }
         NODE_OpenGLWindow* obj = new NODE_OpenGLWindow(window);
-        obj->Wrap(args.This());
-        NanReturnValue(args.This());
+        obj->Wrap(info.This());
+        info.GetReturnValue().Set(info.This());
     }
     else {
-        v8::Local<v8::Function> cons = NanNew<v8::Function>(constructor);
-        NanReturnValue(cons->NewInstance());
+        v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
+        info.GetReturnValue().Set(cons->NewInstance());
     }
 }
 
 NAN_METHOD(NODE_OpenGLWindow::NODE_onMove) {
-    NanScope();
-    if(args.Length() != 1) return NanThrowError("E_INVALID_ARGUMENTS");
-    if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
-    NanAssignPersistent(obj->pf_onMove, args[0].As<v8::Function>());
-    NanReturnUndefined();
+    Nan::HandleScope scope;
+    if(info.Length() != 1) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    if(!info[0]->IsFunction()) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
+    obj->pf_onMove.Reset(info[0].As<v8::Function>());
 }
 
 NAN_METHOD(NODE_OpenGLWindow::NODE_onResize) {
-    NanScope();
-    if(args.Length() != 1) return NanThrowError("E_INVALID_ARGUMENTS");
-    if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
-    NanAssignPersistent(obj->pf_onResize, args[0].As<v8::Function>());
-    NanReturnUndefined();
+    Nan::HandleScope scope;
+    if(info.Length() != 1) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    if(!info[0]->IsFunction()) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
+    obj->pf_onResize.Reset(info[0].As<v8::Function>());
 }
 
 NAN_METHOD(NODE_OpenGLWindow::NODE_onClose) {
-    NanScope();
-    if(args.Length() != 1) return NanThrowError("E_INVALID_ARGUMENTS");
-    if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
-    NanAssignPersistent(obj->pf_onClose, args[0].As<v8::Function>());
-    NanReturnUndefined();
+    Nan::HandleScope scope;
+    if(info.Length() != 1) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    if(!info[0]->IsFunction()) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
+    obj->pf_onClose.Reset(info[0].As<v8::Function>());
 }
 
 NAN_METHOD(NODE_OpenGLWindow::NODE_onRefresh) {
-    NanScope();
-    if(args.Length() != 1) return NanThrowError("E_INVALID_ARGUMENTS");
-    if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
-    NanAssignPersistent(obj->pf_onRefresh, args[0].As<v8::Function>());
-    NanReturnUndefined();
+    Nan::HandleScope scope;
+    if(info.Length() != 1) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    if(!info[0]->IsFunction()) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
+    obj->pf_onRefresh.Reset(info[0].As<v8::Function>());
 }
 
 NAN_METHOD(NODE_OpenGLWindow::NODE_onFocus) {
-    NanScope();
-    if(args.Length() != 1) return NanThrowError("E_INVALID_ARGUMENTS");
-    if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
-    NanAssignPersistent(obj->pf_onFocus, args[0].As<v8::Function>());
-    NanReturnUndefined();
+    Nan::HandleScope scope;
+    if(info.Length() != 1) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    if(!info[0]->IsFunction()) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
+    obj->pf_onFocus.Reset(info[0].As<v8::Function>());
 }
 
 NAN_METHOD(NODE_OpenGLWindow::NODE_onIconify) {
-    NanScope();
-    if(args.Length() != 1) return NanThrowError("E_INVALID_ARGUMENTS");
-    if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
-    NanAssignPersistent(obj->pf_onIconify, args[0].As<v8::Function>());
-    NanReturnUndefined();
+    Nan::HandleScope scope;
+    if(info.Length() != 1) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    if(!info[0]->IsFunction()) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
+    obj->pf_onIconify.Reset(info[0].As<v8::Function>());
 }
 
 NAN_METHOD(NODE_OpenGLWindow::NODE_onFramebufferSize) {
-    NanScope();
-    if(args.Length() != 1) return NanThrowError("E_INVALID_ARGUMENTS");
-    if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
-    NanAssignPersistent(obj->pf_onFramebufferSize, args[0].As<v8::Function>());
-    NanReturnUndefined();
+    Nan::HandleScope scope;
+    if(info.Length() != 1) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    if(!info[0]->IsFunction()) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
+    obj->pf_onFramebufferSize.Reset(info[0].As<v8::Function>());
 }
 NAN_METHOD(NODE_OpenGLWindow::NODE_onKeyboard) {
-    NanScope();
-    if(args.Length() != 1) return NanThrowError("E_INVALID_ARGUMENTS");
-    if(!args[0]->IsFunction()) return NanThrowError("E_INVALID_ARGUMENTS");
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
+    Nan::HandleScope scope;
+    if(info.Length() != 1) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    if(!info[0]->IsFunction()) return Nan::ThrowError("E_INVALID_ARGUMENTS");
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
     obj->window->enableKeyboardInput();
-    NanAssignPersistent(obj->pf_onKeyboard, args[0].As<v8::Function>());
-    NanReturnUndefined();
+    obj->pf_onKeyboard.Reset(info[0].As<v8::Function>());
 }
 
 NAN_METHOD(NODE_OpenGLWindow::NODE_makeContextCurrent) {
-    NanScope();
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
+    Nan::HandleScope scope;
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
     obj->window->makeContextCurrent();
-    NanReturnUndefined();
 }
 NAN_METHOD(NODE_OpenGLWindow::NODE_swapBuffers) {
-    NanScope();
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
+    Nan::HandleScope scope;
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
     obj->window->swapBuffers();
-    NanReturnUndefined();
 }
 NAN_METHOD(NODE_OpenGLWindow::NODE_pollEvents) {
-    NanScope();
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
+    Nan::HandleScope scope;
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
     obj->window->pollEvents();
-    NanReturnUndefined();
 }
 NAN_METHOD(NODE_OpenGLWindow::NODE_waitEvents) {
-    NanScope();
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
+    Nan::HandleScope scope;
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
     obj->window->waitEvents();
-    NanReturnUndefined();
 }
 NAN_METHOD(NODE_OpenGLWindow::NODE_getFramebufferSize) {
-    NanScope();
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
+    Nan::HandleScope scope;
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
     allofw::Size2i result = obj->window->getFramebufferSize();
-    v8::Local<Array> r = NanNew<Array>(2);
-    r->Set(0, NanNew<Integer>(result.x));
-    r->Set(1, NanNew<Integer>(result.y));
-    NanReturnValue(r);
+    v8::Local<Array> r = Nan::New<Array>(2);
+    r->Set(0, Nan::New<Integer>(result.x));
+    r->Set(1, Nan::New<Integer>(result.y));
+    info.GetReturnValue().Set(r);
 }
 NAN_METHOD(NODE_OpenGLWindow::NODE_close) {
-    NanScope();
-    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(args.This());
+    Nan::HandleScope scope;
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
     obj->window->close();
-    NanReturnUndefined();
 }
 
 void NODE_OpenGL_Init(v8::Handle<v8::Object> exports) {

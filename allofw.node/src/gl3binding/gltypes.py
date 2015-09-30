@@ -13,7 +13,7 @@ class ConstPointerType:
         return (map(lambda x: x.format(c = c, js = js, name = self.name, construct_name = self.name if self.name != "GLvoid" else "GLubyte"), [
             "{construct_name}* {c}_nonconst = NULL;",
             "if({js}->IsString()) {{",
-            "    NanUtf8String {c}_utf8({js});",
+            "    Nan::Utf8String {c}_utf8({js});",
             "    {c} = (const {name}*)(*{c}_utf8);",
             "}} else if({js}->IsArray()) {{",
             "    v8::Handle<v8::Array> {c}_array = v8::Handle<v8::Array>::Cast({js});",
@@ -50,7 +50,7 @@ class PointerType:
         return (map(lambda x: x.format(c = c, js = js, name = self.name, construct_name = self.name if self.name != "GLvoid" else "GLubyte"), [
             "{construct_name}* {c}_nonconst = NULL;",
             "if({js}->IsString()) {{",
-            "    NanUtf8String {c}_utf8({js});",
+            "    Nan::Utf8String {c}_utf8({js});",
             "    {c} = ({name}*)(*{c}_utf8);",
             "}} else if({js}->IsArray()) {{",
             "    v8::Handle<v8::Array> {c}_array = v8::Handle<v8::Array>::Cast({js});",
@@ -68,7 +68,7 @@ class PointerType:
         ]))
 
     def convert_to_js_variable(self, c, js):
-        return ["v8::Handle<v8::Value> %s = NanNewBufferHandle((char*)%s, 0, do_nothing_release_callback, NULL);" % (js, c)]
+        return ["v8::Handle<v8::Value> %s = Nan::NewBuffer((char*)%s, 0, do_nothing_release_callback, NULL).ToLocalChecked();" % (js, c)]
 
     def pointer(self):
         raise Exception("Invalid")
@@ -105,22 +105,22 @@ def typedef(name, c2js, js2c):
     types[name] = Type(name, c2js, js2c)
 
 def typedef_s32(name):
-    typedef(name, "NanNew<v8::Int32>(value)", "value->Int32Value()")
+    typedef(name, "Nan::New<v8::Int32>(value)", "value->Int32Value()")
 
 def typedef_u32(name):
-    typedef(name, "NanNew<v8::Uint32>(value)", "value->Uint32Value()")
+    typedef(name, "Nan::New<v8::Uint32>(value)", "value->Uint32Value()")
 
 def typedef_s64(name):
-    typedef(name, "NanNew<v8::IntegerValue>(value)", "value->IntegerValue()")
+    typedef(name, "Nan::New<v8::IntegerValue>(value)", "value->IntegerValue()")
 
 def typedef_u64(name):
-    typedef(name, "NanNew<v8::IntegerValue>(value)", "(uint64_t)value->IntegerValue()")
+    typedef(name, "Nan::New<v8::IntegerValue>(value)", "(uint64_t)value->IntegerValue()")
 
 def typedef_f32(name):
-    typedef(name, "NanNew<v8::NumberValue>((double)value)", "(float)value->NumberValue()")
+    typedef(name, "Nan::New<v8::NumberValue>((double)value)", "(float)value->NumberValue()")
 
 def typedef_f64(name):
-    typedef(name, "NanNew<v8::NumberValue>(value)", "value->NumberValue()")
+    typedef(name, "Nan::New<v8::NumberValue>(value)", "value->NumberValue()")
 
 typedef("GLvoid", "", "")
 typedef_u32("GLbitfield")
@@ -152,7 +152,7 @@ class UStringType:
 
     def assign_c_variable(self, js, c):
         return ([
-            "NanUtf8String %s_utf8(%s);" % (c, js),
+            "Nan::Utf8String %s_utf8(%s);" % (c, js),
             "%s = (GLubyte*)*%s_utf8;" % (c, c)
         ], [])
 
@@ -160,9 +160,9 @@ class UStringType:
         return [
             "v8::Handle<v8::Value> %s;" % js,
             "if(%s) {" % c,
-            "    %s = NanNew<v8::String>((const char*)%s, strlen((const char*)%s));" % (js, c, c),
+            "    %s = Nan::New<v8::String>((const char*)%s, strlen((const char*)%s)).ToLocalChecked();" % (js, c, c),
             "} else {",
-            "    %s = NanUndefined();" % js,
+            "    %s = Nan::Undefined();" % js,
             "}"
         ]
 
@@ -178,12 +178,12 @@ class CStringType:
 
     def assign_c_variable(self, js, c):
         return ([
-            "NanUtf8String %s_utf8(%s);" % (c, js),
+            "Nan::Utf8String %s_utf8(%s);" % (c, js),
             "%s = (GLchar*)*%s_utf8;" % (c, c)
         ], [])
 
     def convert_to_js_variable(self, c, js):
-        return ["v8::Handle<v8::Value> %s = NanNew<v8::String>((const char*)%s, strlen((const char*)%s));" % (js, c, c)]
+        return ["v8::Handle<v8::Value> %s = Nan::New<v8::String>((const char*)%s, strlen((const char*)%s)).ToLocalChecked();" % (js, c, c)]
 
     def pointer(self):
         raise Exception("Invalid")
@@ -227,7 +227,7 @@ class ClassTypeInputArray:
             "v8::Handle<v8::Array> {jsr}_array = v8::Handle<v8::Array>::Cast({js});",
             "{c} = new GLuint[{jsr}_array->Length()];",
             "for(uint32_t i = 0; i < {jsr}_array->Length(); i++) {{",
-            "    {c}[i] = node::ObjectWrap::Unwrap<NODE_{classname}>({jsr}_array->Get(i)->ToObject())->gl_handle;"
+            "    {c}[i] = Nan::ObjectWrap::Unwrap<NODE_{classname}>({jsr}_array->Get(i)->ToObject())->gl_handle;"
             "}}",
         ]
         free = [
@@ -253,7 +253,7 @@ class ClassType:
             "if({js}->IsNumber()) {{".format(c = c, js = js, classname = self.name),
             "    {c} = {js}->IntegerValue();".format(c = c, js = js, classname = self.name),
             "} else {",
-            "    {c} = node::ObjectWrap::Unwrap<NODE_{classname}>({js}->ToObject())->gl_handle;".format(c = c, js = js, classname = self.name),
+            "    {c} = Nan::ObjectWrap::Unwrap<NODE_{classname}>({js}->ToObject())->gl_handle;".format(c = c, js = js, classname = self.name),
             "}"
         ], [])
 
@@ -265,15 +265,15 @@ class ClassType:
 
     def class_code(self):
         c = """
-        class NODE_{{classname}} : public node::ObjectWrap {
+        class NODE_{{classname}} : public Nan::ObjectWrap {
         public:
             static void Init(v8::Handle<v8::ObjectTemplate> exports);
             GLuint gl_handle;
 
             static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
                 const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { NanNew<v8::Integer>(handle) };
-                return NanNew(constructor)->NewInstance(argc, argv);
+                v8::Local<v8::Value> argv[argc] = { Nan::New<v8::Integer>(handle) };
+                return Nan::New(constructor)->NewInstance(argc, argv);
             }
 
         private:
@@ -287,68 +287,67 @@ class ClassType:
             static NAN_METHOD(NODE_delete);
             static NAN_METHOD(NODE_toString);
 
-            static v8::Persistent<v8::Function> constructor;
+            static Nan::Persistent<v8::Function> constructor;
         };
 
-        v8::Persistent<v8::Function> NODE_{{classname}}::constructor;
+        Nan::Persistent<v8::Function> NODE_{{classname}}::constructor;
 
         void NODE_{{classname}}::Init(v8::Handle<v8::ObjectTemplate> exports) {
-            v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);
-            tpl->SetClassName(NanNew<v8::String>("{{classname}}"));
+            v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
+            tpl->SetClassName(Nan::New<v8::String>("{{classname}}").ToLocalChecked());
             tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
             // Prototype
-            NODE_SET_PROTOTYPE_METHOD(tpl, "id", NODE_id);
-            NODE_SET_PROTOTYPE_METHOD(tpl, "toString", NODE_toString);
-            NODE_SET_PROTOTYPE_METHOD(tpl, "inspect", NODE_toString);
+            Nan::SetPrototypeMethod(tpl, "id", NODE_id);
+            Nan::SetPrototypeMethod(tpl, "toString", NODE_toString);
+            Nan::SetPrototypeMethod(tpl, "inspect", NODE_toString);
 
-            NODE_SET_PROTOTYPE_METHOD(tpl, "delete", NODE_delete);
+            Nan::SetPrototypeMethod(tpl, "delete", NODE_delete);
 
-            NanAssignPersistent(constructor, tpl->GetFunction());
+            constructor.Reset(tpl->GetFunction());
 
             // Export constructor.
-            exports->Set(NanNew<v8::String>("{{classname}}"), tpl->GetFunction());
+            Nan::SetTemplate(exports, "{{classname}}", Nan::GetFunction(tpl).ToLocalChecked());
         }
 
         NAN_METHOD(NODE_{{classname}}::New) {
-            NanScope();
+            Nan::HandleScope scope;
 
-            if(args.IsConstructCall()) {
-                if(args.Length() == 0) {
+            if(info.IsConstructCall()) {
+                if(info.Length() == 0) {
                     NODE_{{classname}}* obj = new NODE_{{classname}}();
-                    obj->Wrap(args.This());
-                    NanReturnThis();
+                    obj->Wrap(info.This());
+                    info.GetReturnValue().Set(info.This());
                 } else {
-                    NODE_{{classname}}* obj = new NODE_{{classname}}(args[0]->Uint32Value());
-                    obj->Wrap(args.This());
-                    NanReturnThis();
+                    NODE_{{classname}}* obj = new NODE_{{classname}}(info[0]->Uint32Value());
+                    obj->Wrap(info.This());
+                    info.GetReturnValue().Set(info.This());
                 }
             } else {
                 // Invoked as plain function `MyObject(...)`, turn into construct call.
                 const int argc = 1;
-                v8::Local<v8::Value> argv[argc] = { args[0] };
-                NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+                v8::Local<v8::Value> argv[argc] = { info[0] };
+                info.GetReturnValue().Set(Nan::New(constructor)->NewInstance(argc, argv));
             }
         }
 
         NAN_METHOD(NODE_{{classname}}::NODE_id) {
-            NODE_{{classname}}* obj = ObjectWrap::Unwrap<NODE_{{classname}}>(args.This());
-            NanReturnValue(NanNew<v8::Uint32>(obj->gl_handle));
+            NODE_{{classname}}* obj = Nan::ObjectWrap::Unwrap<NODE_{{classname}}>(info.This());
+            info.GetReturnValue().Set(Nan::New<v8::Uint32>(obj->gl_handle));
         }
 
         NAN_METHOD(NODE_{{classname}}::NODE_delete) {
-            NODE_{{classname}}* obj = ObjectWrap::Unwrap<NODE_{{classname}}>(args.This());
+            NODE_{{classname}}* obj = Nan::ObjectWrap::Unwrap<NODE_{{classname}}>(info.This());
             GLuint gl_handle = obj->gl_handle;
             {{release_code}}
             obj->gl_handle = 0;
-            NanReturnUndefined();
         }
 
         NAN_METHOD(NODE_{{classname}}::NODE_toString) {
-            NODE_{{classname}}* obj = ObjectWrap::Unwrap<NODE_{{classname}}>(args.This());
+            NODE_{{classname}}* obj = Nan::ObjectWrap::Unwrap<NODE_{{classname}}>(info.This());
             char buf[64];
             sprintf(buf, "{{classname}}:%d", obj->gl_handle);
-            NanReturnValue(NanNew<v8::String>(buf));
+            info.GetReturnValue().Set(Nan::New<v8::String>(buf).ToLocalChecked());
         }
         """
         items = {

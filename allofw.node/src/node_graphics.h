@@ -4,7 +4,7 @@
 
 #include <allofw/graphics.h>
 
-class NODE_Surface2D : public node::ObjectWrap {
+class NODE_Surface2D : public Nan::ObjectWrap {
 public:
 
     static const int SURFACETYPE_RASTER = 0;
@@ -32,10 +32,10 @@ private:
     static NAN_METHOD(NODE_unbindTexture);
     static NAN_METHOD(NODE_save);
 
-    static v8::Persistent<v8::Function> constructor;
+    static Nan::Persistent<v8::Function> constructor;
 };
 
-class NODE_VideoSurface2D : public node::ObjectWrap {
+class NODE_VideoSurface2D : public Nan::ObjectWrap {
 public:
 
     static void Init(v8::Handle<v8::Object> exports);
@@ -56,10 +56,10 @@ private:
     static NAN_METHOD(NODE_seek);
     static NAN_METHOD(NODE_pixels);
 
-    static v8::Persistent<v8::Function> constructor;
+    static Nan::Persistent<v8::Function> constructor;
 };
 
-class NODE_GraphicalContext2D : public node::ObjectWrap {
+class NODE_GraphicalContext2D : public Nan::ObjectWrap {
 public:
     static void Init(v8::Handle<v8::Object> exports);
 
@@ -102,10 +102,10 @@ private:
 
     static NAN_METHOD(NODE_flush);
 
-    static v8::Persistent<v8::Function> constructor;
+    static Nan::Persistent<v8::Function> constructor;
 };
 
-class NODE_Path2D : public node::ObjectWrap {
+class NODE_Path2D : public Nan::ObjectWrap {
 public:
     static void Init(v8::Handle<v8::Object> exports);
 
@@ -129,10 +129,10 @@ private:
     static NAN_METHOD(NODE_arc);
     static NAN_METHOD(NODE_close);
 
-    static v8::Persistent<v8::Function> constructor;
+    static Nan::Persistent<v8::Function> constructor;
 };
 
-class NODE_Paint2D : public node::ObjectWrap {
+class NODE_Paint2D : public Nan::ObjectWrap {
 public:
     static void Init(v8::Handle<v8::Object> exports);
 
@@ -169,7 +169,7 @@ private:
 
     static NAN_METHOD(NODE_clone);
 
-    static v8::Persistent<v8::Function> constructor;
+    static Nan::Persistent<v8::Function> constructor;
 };
 
 NAN_METHOD(NODE_loadImageData);

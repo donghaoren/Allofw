@@ -4,30 +4,30 @@ using namespace v8;
 using namespace allofw;
 
 void NODE_OmniStereo::Init(v8::Handle<v8::Object> exports) {
-    NanScope();
+    Nan::HandleScope scope;
     // Prepare constructor template
-    Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
-    tpl->SetClassName(NanNew<String>("OmniStereo"));
+    Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
+    tpl->SetClassName(Nan::New<String>("OmniStereo").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
     // Prototype
-    NODE_SET_PROTOTYPE_METHOD(tpl, "setPose", NODE_setPose);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "setLens", NODE_setLens);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "setClipRange", NODE_setClipRange);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "getCubemapTexture", NODE_getCubemapTexture);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "getDepthCubemapTexture", NODE_getDepthCubemapTexture);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "capture", NODE_capture);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "composite", NODE_composite);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "setUniforms", NODE_setUniforms);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "getShaderCode", NODE_getShaderCode);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "compositeCustomizeShader", NODE_compositeCustomizeShader);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "compositeRestoreShader", NODE_compositeRestoreShader);
-    NODE_SET_PROTOTYPE_METHOD(tpl, "onCaptureViewport", NODE_onCaptureViewport);
+    Nan::SetPrototypeMethod(tpl, "setPose", NODE_setPose);
+    Nan::SetPrototypeMethod(tpl, "setLens", NODE_setLens);
+    Nan::SetPrototypeMethod(tpl, "setClipRange", NODE_setClipRange);
+    Nan::SetPrototypeMethod(tpl, "getCubemapTexture", NODE_getCubemapTexture);
+    Nan::SetPrototypeMethod(tpl, "getDepthCubemapTexture", NODE_getDepthCubemapTexture);
+    Nan::SetPrototypeMethod(tpl, "capture", NODE_capture);
+    Nan::SetPrototypeMethod(tpl, "composite", NODE_composite);
+    Nan::SetPrototypeMethod(tpl, "setUniforms", NODE_setUniforms);
+    Nan::SetPrototypeMethod(tpl, "getShaderCode", NODE_getShaderCode);
+    Nan::SetPrototypeMethod(tpl, "compositeCustomizeShader", NODE_compositeCustomizeShader);
+    Nan::SetPrototypeMethod(tpl, "compositeRestoreShader", NODE_compositeRestoreShader);
+    Nan::SetPrototypeMethod(tpl, "onCaptureViewport", NODE_onCaptureViewport);
 
-    NanAssignPersistent(constructor, tpl->GetFunction());
+    constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    exports->Set(NanNew<String>("OmniStereo"), tpl->GetFunction());
+    Nan::Set(exports, Nan::New<String>("OmniStereo").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NODE_OmniStereo::NODE_OmniStereo(Configuration* config) {
@@ -40,103 +40,99 @@ NODE_OmniStereo::~NODE_OmniStereo() {
 }
 
 NAN_METHOD(NODE_OmniStereo::New) {
-    NanScope();
+    Nan::HandleScope scope;
 
-    if(args.IsConstructCall()) {
+    if(info.IsConstructCall()) {
         try {
             Configuration* config;
-            if(args[0]->IsString()) {
-                NanUtf8String str(args[0]);
+            if(info[0]->IsString()) {
+                Nan::Utf8String str(info[0]);
                 config = Configuration::CreateFromFile(*str);
             } else {
                 config = Configuration::CreateFromFile(nullptr);
             }
             NODE_OmniStereo* obj = new NODE_OmniStereo(config);
-            obj->Wrap(args.This());
-            NanReturnValue(args.This());
+            obj->Wrap(info.This());
+            return info.GetReturnValue().Set(info.This());
         } catch(const allofw::exception& e) {
-            NanThrowError(e.what());
+            return Nan::ThrowError(e.what());
         } catch(...) {
-            NanThrowError("unknown exception");
+            return Nan::ThrowError("unknown exception");
         }
     } else {
         // Invoked as plain function `MyObject(...)`, turn into construct call.
         const int argc = 2;
-        Local<Value> argv[argc] = { args[0], args[1] };
-        NanReturnValue(NanNew(constructor)->NewInstance(argc, argv));
+        Local<Value> argv[argc] = { info[0], info[1] };
+        return info.GetReturnValue().Set(Nan::New(constructor)->NewInstance(argc, argv));
     }
 }
 
 // setPose(x, y, z, qx, qy, qz, qw)
 NAN_METHOD(NODE_OmniStereo::NODE_setPose) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
     Pose pose;
-    pose.position.x = args[0]->NumberValue();
-    pose.position.y = args[1]->NumberValue();
-    pose.position.z = args[2]->NumberValue();
-    pose.rotation.x = args[3]->NumberValue();
-    pose.rotation.y = args[4]->NumberValue();
-    pose.rotation.z = args[5]->NumberValue();
-    pose.rotation.w = args[6]->NumberValue();
+    pose.position.x = info[0]->NumberValue();
+    pose.position.y = info[1]->NumberValue();
+    pose.position.z = info[2]->NumberValue();
+    pose.rotation.x = info[3]->NumberValue();
+    pose.rotation.y = info[4]->NumberValue();
+    pose.rotation.z = info[5]->NumberValue();
+    pose.rotation.w = info[6]->NumberValue();
     self->omnistereo->setPose(pose);
-    NanReturnUndefined();
 }
 // setLens(eye_separation, sphere_radius)
 NAN_METHOD(NODE_OmniStereo::NODE_setLens) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
-    self->omnistereo->setLens(args[0]->NumberValue(), args[1]->NumberValue());
-    NanReturnUndefined();
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
+    self->omnistereo->setLens(info[0]->NumberValue(), info[1]->NumberValue());
 }
 // setClipRange(near, far)
 NAN_METHOD(NODE_OmniStereo::NODE_setClipRange) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
-    self->omnistereo->setClipRange(args[0]->NumberValue(), args[1]->NumberValue());
-    NanReturnUndefined();
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
+    self->omnistereo->setClipRange(info[0]->NumberValue(), info[1]->NumberValue());
 }
 // getCubemapTexture() -> [ left_id, right_id ]
 NAN_METHOD(NODE_OmniStereo::NODE_getCubemapTexture) {
-    NanScope();
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
+    Nan::HandleScope scope;
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
     OmniStereo::StereoTexture texture = self->omnistereo->getCubemapTexture();
-    Local<Array> array = NanNew<Array>(2);
-    array->Set(0, NanNew<Integer>(texture.L));
-    array->Set(1, NanNew<Integer>(texture.R));
-    NanReturnValue(array);
+    Local<Array> array = Nan::New<Array>(2);
+    array->Set(0, Nan::New<Integer>(texture.L));
+    array->Set(1, Nan::New<Integer>(texture.R));
+    info.GetReturnValue().Set(array);
 }
 // getDepthCubemapTexture() -> [ left_id, right_id ]
 NAN_METHOD(NODE_OmniStereo::NODE_getDepthCubemapTexture) {
-    NanScope();
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
+    Nan::HandleScope scope;
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
     OmniStereo::StereoTexture texture = self->omnistereo->getDepthCubemapTexture();
-    Local<Array> array = NanNew<Array>(2);
-    array->Set(0, NanNew<Integer>(texture.L));
-    array->Set(1, NanNew<Integer>(texture.R));
-    NanReturnValue(array);
+    Local<Array> array = Nan::New<Array>(2);
+    array->Set(0, Nan::New<Integer>(texture.L));
+    array->Set(1, Nan::New<Integer>(texture.R));
+    info.GetReturnValue().Set(array);
 }
 // capture()
 NAN_METHOD(NODE_OmniStereo::NODE_capture) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
     self->omnistereo->capture();
-    NanReturnUndefined();
 }
 // composite(x, y, w, h)
 NAN_METHOD(NODE_OmniStereo::NODE_composite) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
     Rectangle2i viewport(
-        args[0]->IntegerValue(),
-        args[1]->IntegerValue(),
-        args[2]->IntegerValue(),
-        args[3]->IntegerValue()
+        info[0]->IntegerValue(),
+        info[1]->IntegerValue(),
+        info[2]->IntegerValue(),
+        info[3]->IntegerValue()
     );
     OmniStereo::CompositeInfo composite_info;
-    if(args[4]->IsObject()) {
-        Handle<Object> obj = args[4]->ToObject();
-        if(obj->Has(NanNew<String>("panorama"))) {
-            if(obj->Get(NanNew<String>("panorama"))->IsArray()) {
-                Handle<Object> val = obj->Get(NanNew<String>("panorama"))->ToObject();
+    if(info[4]->IsObject()) {
+        Handle<Object> obj = info[4]->ToObject();
+        if(Nan::Has(obj, Nan::New<String>("panorama").ToLocalChecked()).FromMaybe(false)) {
+            if(Nan::Get(obj, Nan::New<String>("panorama").ToLocalChecked()).ToLocalChecked()->IsArray()) {
+                Handle<Object> val = Nan::Get(obj, Nan::New<String>("panorama").ToLocalChecked()).ToLocalChecked()->ToObject();
                 composite_info.panorama.L = val->Get(0)->Uint32Value();
                 composite_info.panorama.R = val->Get(1)->Uint32Value();
-                NanUtf8String str(val->Get(2));
+                Nan::Utf8String str(val->Get(2));
                 std::string s = *str;
                 if(s == "cubemap") {
                     composite_info.mask |= OmniStereo::kCompositeMask_Panorama | OmniStereo::kCompositeMask_Panorama_Cubemap;
@@ -147,42 +143,39 @@ NAN_METHOD(NODE_OmniStereo::NODE_composite) {
         }
     }
     self->omnistereo->composite(viewport, composite_info);
-    NanReturnUndefined();
 }
 // setUniforms(shader_id)
 NAN_METHOD(NODE_OmniStereo::NODE_setUniforms) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
-    self->omnistereo->setUniforms(args[0]->IntegerValue(), *self->current_capture_info);
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
+    self->omnistereo->setUniforms(info[0]->IntegerValue(), *self->current_capture_info);
 }
 // getShaderCode() -> shader_code
 NAN_METHOD(NODE_OmniStereo::NODE_getShaderCode) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
-    NanReturnValue(NanNew<String>(self->omnistereo->getShaderCode()));
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
+    info.GetReturnValue().Set(Nan::New<String>(self->omnistereo->getShaderCode()).ToLocalChecked());
 }
 NAN_METHOD(NODE_OmniStereo::NODE_compositeCustomizeShader) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
-    NanUtf8String str(args[0]);
-    NanReturnValue(NanNew<Integer>(self->omnistereo->compositeCustomizeShader(*str)));
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
+    Nan::Utf8String str(info[0]);
+    info.GetReturnValue().Set(Nan::New<Integer>(self->omnistereo->compositeCustomizeShader(*str)));
 }
 NAN_METHOD(NODE_OmniStereo::NODE_compositeRestoreShader) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
     self->omnistereo->compositeRestoreShader();
-    NanReturnUndefined();
 }
 // onCaptureViewport(callback)
 //   callback(info)
 NAN_METHOD(NODE_OmniStereo::NODE_onCaptureViewport) {
-    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(args.This());
-    NanAssignPersistent(self->onCaptureViewport_callback, args[0].As<Function>());
-    NanReturnUndefined();
+    NODE_OmniStereo* self = ObjectWrap::Unwrap<NODE_OmniStereo>(info.This());
+    self->onCaptureViewport_callback.Reset(info[0].As<Function>());
 }
 
 void NODE_OmniStereo::onCaptureViewport(const CaptureInfo& info) {
     current_capture_info = &info;
-    NanNew(onCaptureViewport_callback)->Call(NanObjectWrapHandle(this), 0, NULL);
+    Nan::New(onCaptureViewport_callback)->Call(handle(), 0, NULL);
 }
 
-v8::Persistent<v8::Function> NODE_OmniStereo::constructor;
+Nan::Persistent<v8::Function> NODE_OmniStereo::constructor;
 
 void NODE_OmniStereo_init(v8::Handle<v8::Object> exports) {
     NODE_OmniStereo::Init(exports);
