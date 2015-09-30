@@ -1115,21 +1115,21 @@ int owlInit(const char *server, int flags)
   while(_owl.init == 0)
     {
       ret = owl_read();
-      cerr << "owl init : owl_read = " << ret << endl;
+      // cerr << "owl init : owl_read = " << ret << endl;
       if(ret < 0) {
-        cerr << "error: owl_read" << endl;
+        // cerr << "error: owl_read" << endl;
           return -1;
       }
 
       if(_owl.errors.size() > 0) {
-        cerr << "something happened, _owl.errors.size() > 0" << endl;
+        // cerr << "something happened, _owl.errors.size() > 0" << endl;
         return -1;
       }
 
       owl_delay(1);
 
       if(c++ > 30000) {
-        cerr << "too much retries..." << endl;
+        // cerr << "too much retries..." << endl;
         return -2;
       }
     }
@@ -1148,7 +1148,7 @@ int owlInit(const char *server, int flags)
         DBG(cout << "broadcast listener: " << _broadcast.sock << endl);
       }
   }
-  cout << "owlInit done" << endl;
+  // cout << "owlInit done" << endl;
 
   return _owl.flags;
 }
