@@ -120,7 +120,7 @@
   TARGET_LINK_LIBRARIES ( allofw-omniapp
     LINK_PRIVATE
       allofw
-      ${ZeroMQ_LIBRARIES}
+      ${ZeroMQ_LDFLAGS}
       ${OPENGL_LIBRARIES}
       pthread
   )
