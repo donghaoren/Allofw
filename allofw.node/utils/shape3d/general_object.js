@@ -81,6 +81,11 @@ ShapeObject.prototype.attr = function(type, name, value) {
     return this;
 };
 
+ShapeObject.prototype.attrorder = function(names) {
+    this.attrs_order = names;
+    return this;
+};
+
 ShapeObject.prototype.variable = function(type, name, value) {
     if(this.vars[name]) this.vars[name].update(value);
     else this.vars[name] = new VariableValue(type, value);
@@ -116,6 +121,7 @@ function getProgramInfoLog(program) {
 }
 
 ShapeObject.prototype.compile = function(omni) {
+    var self = this;
     // Assign a name for each uniform.
     var uniform_defs = [];
     var input_defs = [];
@@ -140,7 +146,19 @@ ShapeObject.prototype.compile = function(omni) {
 
     var attribute_lines = [];
     attribute_lines.push("void computeAttributes() {");
-    for(var name in this.attrs) {
+    var attr_names = [];
+    for(var name in this.attrs) attr_names.push(name);
+    attr_names.sort(function(a, b) {
+        if(self.attrs_order) {
+            var ia = self.attrs_order.indexOf(a);
+            var ib = self.attrs_order.indexOf(b);
+            return ia - ib;
+        } else {
+            return a < b ? -1 : (a == b ? 0 : 1);
+        }
+    });
+    for(var i = 0; i < attr_names.length; i++) {
+        var name = attr_names[i];
         var attr = this.attrs[name];
         attribute_lines.push("    " + name + " = " + attr.repr + ";");
     }

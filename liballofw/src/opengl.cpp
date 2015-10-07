@@ -348,6 +348,10 @@ public:
         glfwSetScrollCallback(window, cb_scroll);
     }
 
+    virtual bool shouldClose() {
+        return glfwWindowShouldClose(window);
+    }
+
     virtual void close() {
         glfwSetWindowShouldClose(window, true);
     }

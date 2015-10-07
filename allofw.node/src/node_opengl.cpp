@@ -33,6 +33,7 @@ public:
         Nan::SetPrototypeMethod(tpl, "pollEvents", NODE_pollEvents);
         Nan::SetPrototypeMethod(tpl, "waitEvents", NODE_waitEvents);
         Nan::SetPrototypeMethod(tpl, "getFramebufferSize", NODE_getFramebufferSize);
+        Nan::SetPrototypeMethod(tpl, "shouldClose", NODE_shouldClose);
         Nan::SetPrototypeMethod(tpl, "close", NODE_close);
 
         constructor.Reset(tpl->GetFunction());
@@ -141,6 +142,7 @@ private:
     static NAN_METHOD(NODE_pollEvents);
     static NAN_METHOD(NODE_waitEvents);
     static NAN_METHOD(NODE_getFramebufferSize);
+    static NAN_METHOD(NODE_shouldClose);
     static NAN_METHOD(NODE_close);
 
     static Nan::Persistent<v8::Function> constructor;
@@ -289,6 +291,12 @@ NAN_METHOD(NODE_OpenGLWindow::NODE_getFramebufferSize) {
     r->Set(0, Nan::New<Integer>(result.x));
     r->Set(1, Nan::New<Integer>(result.y));
     info.GetReturnValue().Set(r);
+}
+NAN_METHOD(NODE_OpenGLWindow::NODE_shouldClose) {
+    Nan::HandleScope scope;
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
+    bool r = obj->window->shouldClose();
+    info.GetReturnValue().Set(Nan::New<v8::Boolean>(r));
 }
 NAN_METHOD(NODE_OpenGLWindow::NODE_close) {
     Nan::HandleScope scope;

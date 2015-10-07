@@ -1,13 +1,17 @@
 var math = require("../math/math.js");
+var MakeEventSource = require("../utils/events.js").MakeEventSource;
 
 var Vector3 = math.Vector3;
 var Quaternion = math.Quaternion;
 
 exports.WindowNavigation = function(window, omnistereo) {
+    var self = this;
+
     var pose = {
         position: new Vector3(0, 0, 0),
         rotation: new Quaternion(new Vector3(0, 0, 0), 1)
     };
+    this.pose = pose;
     var velocity = [ 0, 0, 0, 0, 0 ];
     var keys = {
         "W"    : [ 0,  0,  0, -1, 0, 0 ],
@@ -80,6 +84,9 @@ exports.WindowNavigation = function(window, omnistereo) {
         if(action == "PRESS" && key == "ESCAPE") {
             window.close();
         }
+        self.raise("keyboard", key, action, modifiers, scancode);
     });
+
+    MakeEventSource(this);
 
 };

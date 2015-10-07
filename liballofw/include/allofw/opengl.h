@@ -79,7 +79,9 @@ namespace ALLOFW_NS {
         virtual void enableKeyboardInput() = 0;
         virtual void enableMouseInput() = 0;
 
-        // Control.
+        // Should the window be closed?
+        virtual bool shouldClose() = 0;
+        // Flag for close, after this, shouldClose() return true.
         virtual void close() = 0;
 
         // Static methods to create a window.
