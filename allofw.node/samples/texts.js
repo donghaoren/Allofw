@@ -67,7 +67,10 @@
   timer = setInterval(function() {
     nav.update();
     render();
-    return w.pollEvents();
+    w.pollEvents();
+    if (w.shouldClose()) {
+      return clearInterval(timer);
+    }
   });
 
   w.onClose(function() {

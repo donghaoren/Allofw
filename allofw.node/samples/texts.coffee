@@ -62,5 +62,8 @@ timer = setInterval () ->
     render()
     w.pollEvents()
 
+    if w.shouldClose()
+        clearInterval(timer)
+
 w.onClose () ->
     clearInterval(timer)

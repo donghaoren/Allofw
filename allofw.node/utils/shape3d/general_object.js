@@ -172,17 +172,31 @@ ShapeObject.prototype.compile = function(omni) {
 
     var shader_v = null, shader_g = null, shader_f = null;
 
-    var vertex_code = "#version 330\n" + shader_prefix + omni.getShaderCode() + this._vertexShader().replace("__ATTRIBUTE_LINES__", attribute_lines.join("\n"));
+    var vertex_code =
+        "#version 330\n" +
+        shader_prefix +
+        omni.getShaderCode() +
+        this._vertexShader().replace("__ATTRIBUTE_LINES__", attribute_lines.join("\n"));
+
     shader_v = GL.createShader(GL.VERTEX_SHADER);
     GL.shaderSource(shader_v, [vertex_code]);
 
     if(this._geometryShader) {
-        var geometry_code = "#version 330\n" + omni.getShaderCode() + this._geometryShader();
+        var geometry_code =
+            "#version 330\n" +
+            omni.getShaderCode() +
+            this._geometryShader();
+
         shader_g = GL.createShader(GL.GEOMETRY_SHADER);
         GL.shaderSource(shader_g, [geometry_code]);
     }
 
-    var fragment_code = "#version 330\n" + omni.getShaderCode() + uniform_defs.join("\n") + this._fragmentShader();
+    var fragment_code =
+        "#version 330\n" +
+        omni.getShaderCode() +
+        uniform_defs.join("\n") +
+        this._fragmentShader();
+
     shader_f = GL.createShader(GL.FRAGMENT_SHADER);
     GL.shaderSource(shader_f, [fragment_code]);
 
