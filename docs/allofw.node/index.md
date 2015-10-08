@@ -54,28 +54,6 @@ Note: Fullscreen will use the current display resolution, regardless of the `wid
 - `shouldClose()`          : Should we close the window, return `true`/`false`.
 - `close()`                : Mark the window as closing (`shouldClose()` will return true after this).
 
-## class allofw.OmniStereo
-
-Create an OmniStereo object with/without config file:
-
-    var omni = new allofw.OmniStereo();
-    var omni = new allofw.OmniStereo("allofw.yaml");
-
-**Instance Methods**
-
-- `setPose(x, y, z, qx, qy, qz, qw)`: Set the pose with position `[x, y, z]` and quaternion `[qx, qy, qz, qw]`.
-- `setLens(eye_separation, sphere_radius)`: Set the OmniStereo lens with `eye_separation` and `sphere_radius`.
-- `setClipRange(near, far)`: Set the clip range to `[near, far]`.
-- `getCubemapTexture()`: Get the cubemap texture. Return `[leftid, rightid]`.
-- `getDepthCubemapTexture()`: Get the depth cubemap texture. Return `[leftid, rightid]`.
-- `capture()`: Capture the scene (will call the callback in `onCaptureViewport` multiple times).
-- `composite(vp_x, vp_y, vp_w, vp_h, info)`: Composite the scene into a viewport. info (optional): `{ panorama: [ leftid, rightid, type ("cubemap" / "equirectangular") }`.
-- `setUniforms(shader_id)`: Set the uniforms for a shader.
-- `getShaderCode()`: Get the sharder code prefix for OmniStereo render.
-- `compositeCustomizeShader(code)`: Replace the composite shader code with `code`.
-- `compositeRestoreShader()`: Restore the default composite shader code.
-- `onCaptureViewport(f)`: Set capture callback. `f = function()`.
-
 ## allofw.GL3
 
 OpenGL 3 Bindings. The following rules apply:
@@ -98,6 +76,73 @@ Objects are garbage-collected. Call `obj.delete()` for manual deletion. Call `ob
 Binding functions that accepts OpenGL objects supports both `obj` and `obj.id()`. However, the OmniStereo class only accepts `obj.id()`.
 
 **Pointers**: Javascript strings and Node.js Buffers can be used for string parameters and pointer parameters respectively.
+
+## class allofw.OmniStereo
+
+Create an OmniStereo object with/without config file:
+
+    var omni = new allofw.OmniStereo();
+    var omni = new allofw.OmniStereo("allofw.yaml");
+
+**Instance Methods**
+
+- `setPose(x, y, z, qx, qy, qz, qw)`: Set the pose with position `[x, y, z]` and quaternion `[qx, qy, qz, qw]`.
+- `setLens(eye_separation, sphere_radius)`: Set the OmniStereo lens with `eye_separation` and `sphere_radius`.
+- `setClipRange(near, far)`: Set the clip range to `[near, far]`.
+- `getCubemapTexture()`: Get the cubemap texture. Return `[leftid, rightid]`.
+- `getDepthCubemapTexture()`: Get the depth cubemap texture. Return `[leftid, rightid]`.
+- `capture()`: Capture the scene (will call the callback in `onCaptureViewport` multiple times).
+- `composite(vp_x, vp_y, vp_w, vp_h, info)`: Composite the scene into a viewport. info (optional): `{ panorama: [ leftid, rightid, type ("cubemap" / "equirectangular") }`.
+- `setUniforms(shader_id)`: Set the uniforms for a shader.
+- `getShaderCode()`: Get the sharder code prefix for OmniStereo render.
+- `compositeCustomizeShader(code)`: Replace the composite shader code with `code`.
+- `compositeRestoreShader()`: Restore the default composite shader code.
+- `onCaptureViewport(f)`: Set capture callback. `f = function()`.
+
+**Example**
+
+An example with OpenGLWindow and OmniStereo.
+
+    // Import the allofw library.
+    var allofw = require("allofw");
+    var GL = allofw.GL3;
+
+    // Create the window.
+    var w = new allofw.OpenGLWindow();
+    w.makeContextCurrent();
+
+    // Create the OmniStereo.
+    var omni = new allofw.OmniStereo("allofw.yaml");
+
+    // Set capture callback.
+    omni.onCaptureViewport(function() {
+        GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT)
+        GL.enable(GL.BLEND);
+        GL.blendFunc(GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
+        // Render something here.
+    });
+
+    // Render as fast as possible.
+    var timer = setInterval(function() {
+        // Capture the scene.
+        omni.capture();
+        // Composite the scene to the full window.
+        var sz = w.getFramebufferSize();
+        omni.composite(0, 0, sz[0], sz[1]);
+
+        // Swap buffers.
+        w.swapBuffers();
+
+        // Poll window events.
+        w.pollEvents();
+        if(w.shouldClose()) {
+            clearInterval(timer);
+        }
+    }, 0);
+
+    w.onClose(function() {
+        clearInterval(timer);
+    });
 
 ## allofw.graphics
 
