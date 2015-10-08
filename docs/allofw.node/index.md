@@ -13,20 +13,24 @@ Node.js bindings to liballofw.
 
 Create with liballofw config file `allofw.yaml`:
 
-    var window = new allofw.OpenGLWindow({
-        config: "allofw.yaml"
-    });
+```javascript
+var window = new allofw.OpenGLWindow({
+    config: "allofw.yaml"
+});
+```
 
 Create with parameters:
 
-    var window = new allofw.OpenGLWindow({
-        title: "Window Title",
-        width: [width],
-        height: [height],
-        active_stereo: [true/false],
-        hide_cursor: [true/false],
-        fullscreen: [true/false]
-    });
+```javascript
+var window = new allofw.OpenGLWindow({
+    title: "Window Title",
+    width: [width],
+    height: [height],
+    active_stereo: [true/false],
+    hide_cursor: [true/false],
+    fullscreen: [true/false]
+});
+```
 
 Note: Fullscreen will use the current display resolution, regardless of the `width` and `height`.
 
@@ -81,8 +85,10 @@ Binding functions that accepts OpenGL objects supports both `obj` and `obj.id()`
 
 Create an OmniStereo object with/without config file:
 
-    var omni = new allofw.OmniStereo();
-    var omni = new allofw.OmniStereo("allofw.yaml");
+```javascript
+var omni = new allofw.OmniStereo();
+var omni = new allofw.OmniStereo("allofw.yaml");
+```
 
 **Instance Methods**
 
@@ -152,16 +158,16 @@ Bindings to the Skia graphics library for 2D graphics rendering.
 
 ## allofw.log(level, string)
 
-    allofw.log(level, string)
-
 Add a line of log. `level` can be one of `allofw.kInfo`, `allofw.kWarning`, `allofw.kError` and `allofw.kFatal`.
 
 ## class allofw.SharedMemory
 
 Create the `SharedMemory` object with a key or existing shmid and semid:
 
-    var shm = new allofw.SharedMemory(key, size, is_create)
-    var shm = new allofw.SharedMemory(shmid, semid, size, is_create)
+```javascript
+var shm = new allofw.SharedMemory(key, size, is_create)
+var shm = new allofw.SharedMemory(shmid, semid, size, is_create)
+```
 
 **Instance Methods**
 
