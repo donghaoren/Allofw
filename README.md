@@ -2,6 +2,8 @@
 
 Allosphere Framework in C++11
 
+[Documentation](docs/index.md)
+
 ## Features:
 
 - Basic OpenGL 3.3 Context Creation and Window Management (based on GLFW).
