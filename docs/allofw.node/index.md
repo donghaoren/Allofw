@@ -5,7 +5,9 @@ Node.js bindings to liballofw.
 
 ## Importing
 
-    var allofw = require("allofw");
+```javascript
+var allofw = require("allofw");
+```
 
 ## class allofw.OpenGLWindow
 
