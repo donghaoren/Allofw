@@ -253,11 +253,13 @@ public:
             }
         } else {
             std::string generate = conf->getString("omnistereo.warpblend.generate", "equirectangular");
+            int width = conf->getUInt32("omnistereo.warpblend.generate_width", 1600);
+            int height = conf->getUInt32("omnistereo.warpblend.generate_height", 900);
             if(generate == "equirectangular") {
-                warpblend_ = WarpBlend::CreateEquirectangular();
+                warpblend_ = WarpBlend::CreateEquirectangular(width, height);
             } else if(generate == "perspective") {
                 float fov = conf->getFloat("omnistereo.warpblend.generate_fov", 90);
-                warpblend_ = WarpBlend::CreatePerspective(fov / 180.0 * PI);
+                warpblend_ = WarpBlend::CreatePerspective(width, height, fov / 180.0 * PI);
             }
         }
 

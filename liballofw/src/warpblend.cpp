@@ -62,15 +62,15 @@ public:
         return vp.warp_texture;
     }
 
-    void createEquirectangular() {
+    void createEquirectangular(int width, int height) {
         data.resize(1);
-        int W = 1000;
-        int H = 500;
+        int W = width;
+        int H = height;
         data[0].allocate(Size2i(W, H), Size2i(W, H));
         data[0].viewport.viewport = Rectangle2(0, 0, 1, 1);
         data[0].viewport.aspect_ratio = 2.0;
         data[0].viewport.enforce_aspect_ratio = true;
-        data[0].viewport.screen_resolution = Size2i(2000, 1000);
+        data[0].viewport.screen_resolution = Size2i(width, height);
         for(int y = 0; y < H; y++) {
             for(int x = 0; x < W; x++) {
                 int i = x + y * W;
@@ -84,15 +84,15 @@ public:
             }
         }
     }
-    void createPerspective(float fov) {
+    void createPerspective(int width, int height, float fov) {
         data.resize(1);
-        int W = 800;
-        int H = 800;
+        int W = width;
+        int H = height;
         data[0].allocate(Size2i(W, H), Size2i(W, H));
         data[0].viewport.viewport = Rectangle2(0, 0, 1, 1);
         data[0].viewport.aspect_ratio = 1.0;
         data[0].viewport.enforce_aspect_ratio = true;
-        data[0].viewport.screen_resolution = Size2i(1600, 1600);
+        data[0].viewport.screen_resolution = Size2i(width, height);
         float scale = 2.0f * tan(fov / 2.0f);
         for(int y = 0; y < H; y++) {
             for(int x = 0; x < W; x++) {
@@ -220,15 +220,15 @@ public:
     std::vector<ViewportData> data;
 };
 
-WarpBlend* WarpBlend::CreateEquirectangular() {
+WarpBlend* WarpBlend::CreateEquirectangular(int width, int height) {
     WarpBlendImpl* impl = new WarpBlendImpl();
-    impl->createEquirectangular();
+    impl->createEquirectangular(width, height);
     return impl;
 }
 
-WarpBlend* WarpBlend::CreatePerspective(float fov) {
+WarpBlend* WarpBlend::CreatePerspective(int width, int height, float fov) {
     WarpBlendImpl* impl = new WarpBlendImpl();
-    impl->createPerspective(fov);
+    impl->createPerspective(width, height, fov);
     return impl;
 }
 

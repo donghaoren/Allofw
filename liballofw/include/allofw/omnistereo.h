@@ -174,8 +174,8 @@ namespace ALLOFW_NS {
         virtual GLTextureID getBlendTexture(int viewport) = 0;
         virtual GLTextureID getWarpTexture(int viewport) = 0;
 
-        static WarpBlend* CreateEquirectangular();
-        static WarpBlend* CreatePerspective(float fov);
+        static WarpBlend* CreateEquirectangular(int width, int height);
+        static WarpBlend* CreatePerspective(int width, int height, float fov);
         static WarpBlend* LoadAllosphereCalibration(const char* calibration_path, const char* hostname = nullptr);
         static void Destroy(WarpBlend* warpblend);
 
