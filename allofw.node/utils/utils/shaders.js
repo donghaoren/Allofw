@@ -36,7 +36,7 @@
             GL.shaderSource(shader_v, [shaders.vertex]);
             GL.compileShader(shader_v);
             var log = getShaderInfoLog(shader_v);
-            if(log) {
+            if(log && log.trim() != "") {
                 throw new ShaderException("Vertex", log);
             }
         }
@@ -45,7 +45,7 @@
             GL.shaderSource(shader_f, [shaders.fragment]);
             GL.compileShader(shader_f);
             var log = getShaderInfoLog(shader_f);
-            if(log) {
+            if(log && log.trim() != "") {
                 throw new ShaderException("Fragment", log);
             }
         }
@@ -54,7 +54,7 @@
             GL.shaderSource(shader_g, [shaders.geometry]);
             GL.compileShader(shader_g);
             var log = getShaderInfoLog(shader_g);
-            if(log) {
+            if(log && log.trim() != "") {
                 throw new ShaderException("Geometry", log);
             }
         }
@@ -68,7 +68,7 @@
         GL.linkProgram(program);
         var log = getProgramInfoLog(program);
 
-        if(log) {
+        if(log && log.trim() != "") {
             throw new ShaderException("Link", log);
         }
 
