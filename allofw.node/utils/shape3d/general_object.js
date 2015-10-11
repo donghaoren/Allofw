@@ -290,5 +290,5 @@ ShapeObject.prototype.render = function(omni) {
     return this;
 };
 
-exports.ShapeObject = ShapeObject;
-exports.VariableValue = VariableValue;
+shape3d.ShapeObject = ShapeObject;
+shape3d.VariableValue = VariableValue;

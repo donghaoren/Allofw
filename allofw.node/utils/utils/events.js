@@ -2,7 +2,7 @@
 // Binding behaviour is similar to d3.
 // on("event:namespace", handler)
 // raise("event", arguments, this)
-var MakeEventSource = function (obj) {
+var makeEventSource = function (obj) {
     var handlers = {};
     obj.on = function (event, callback) {
         var e = event.split(".");
@@ -18,4 +18,4 @@ var MakeEventSource = function (obj) {
     };
 };
 
-exports.MakeEventSource = MakeEventSource;
+utils.makeEventSource = makeEventSource;

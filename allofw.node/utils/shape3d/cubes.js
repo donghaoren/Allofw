@@ -1,5 +1,3 @@
-var ShapeObject = require("./general_object.js").ShapeObject;
-
 var CubeObject = function() {
     ShapeObject.call(this);
 };
@@ -140,7 +138,7 @@ CubeObject.prototype._fragmentShader = function() { return `
 
 CubeObject.prototype.constructor = CubeObject;
 
-exports.cubes = function() {
+shape3d.cubes = function() {
     return new CubeObject();
 };
 

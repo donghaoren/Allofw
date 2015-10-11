@@ -1,5 +1,3 @@
-var ShapeObject = require("./general_object.js").ShapeObject;
-
 var SphereObject = function() {
     ShapeObject.call(this);
 };
@@ -118,7 +116,7 @@ SphereObject.prototype._fragmentShader = function() { return `
 
 SphereObject.prototype.constructor = SphereObject;
 
-exports.spheres = function() {
+shape3d.spheres = function() {
     return new SphereObject();
 };
 

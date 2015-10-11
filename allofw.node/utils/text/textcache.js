@@ -158,4 +158,4 @@ TextCache.prototype.clear = function() {
 };
 
 
-exports.TextCache = TextCache;
+text.TextCache = TextCache;

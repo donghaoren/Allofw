@@ -1,10 +1,9 @@
 var allofw = require("allofw");
+var allofwutils = exports;
 
-exports.math = require("./math/math.js");
-
-exports.WindowNavigation = require("./interface/navigation.js").WindowNavigation;
-exports.FPSCounter = require("./interface/fps_counter.js").FPSCounter;
-
-exports.shape3d = require("./shape3d/shape3d.js");
-
-exports.TextCache = require("./text/textcache.js").TextCache;
+import "utils/utils.js";
+import "math/math.js";
+import "interface/interface.js";
+import "text/text.js";
+import "shape3d/shape3d.js";
+import "networking/networking.js";

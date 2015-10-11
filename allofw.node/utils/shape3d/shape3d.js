@@ -1,6 +1,14 @@
 // How to use:
 
-exports.spheres = require("./spheres.js").spheres;
-exports.cubes = require("./cubes.js").cubes;
-exports.texts = require("./texts.js").texts;
-exports.images = require("./images.js").images;
+(function() {
+
+    var shape3d = { };
+    allofwutils.shape3d = shape3d;
+
+    import "general_object.js";
+    import "spheres.js";
+    import "cubes.js";
+    import "texts.js";
+    import "images.js";
+
+})();

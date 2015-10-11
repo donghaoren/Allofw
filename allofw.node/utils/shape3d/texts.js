@@ -1,7 +1,4 @@
-var ShapeObject = require("./general_object.js").ShapeObject;
-var VariableValue = require("./general_object.js").VariableValue;
-var TextCache = require("../text/textcache.js").TextCache;
-var GL = require("allofw").GL3;
+var TextCache = allofwutils.text.TextCache;
 
 var TextObject = function() {
     ShapeObject.call(this);
@@ -169,7 +166,7 @@ TextObject.prototype._fragmentShader = function() { return `
 
 TextObject.prototype.constructor = TextObject;
 
-exports.texts = function() {
+shape3d.texts = function() {
     return new TextObject();
 };
 

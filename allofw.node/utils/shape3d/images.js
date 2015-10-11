@@ -1,9 +1,5 @@
 // Display image patches.
 
-var ShapeObject = require("./general_object.js").ShapeObject;
-var VariableValue = require("./general_object.js").VariableValue;
-var GL = require("allofw").GL3;
-
 var ImageObject = function() {
     ShapeObject.call(this);
 };

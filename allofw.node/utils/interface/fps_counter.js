@@ -18,4 +18,4 @@ FPSCounter.prototype.update = function() {
     this.t_previous_frame = t;
 };
 
-exports.FPSCounter = FPSCounter;
+allofwutils.FPSCounter = FPSCounter;
