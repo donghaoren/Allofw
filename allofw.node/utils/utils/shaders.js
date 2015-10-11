@@ -13,6 +13,19 @@
         }
     };
 
+    var isShaderCompiled = function(shader) {
+        var buffer = new Buffer(4);
+        GL.getShaderiv(shader, GL.COMPILE_STATUS, buffer);
+        var success = buffer.readUInt32LE(0);
+        return success != 0;
+    };
+    var isProgramLinked = function(program) {
+        var buffer = new Buffer(4);
+        GL.getProgramiv(program, GL.LINK_STATUS, buffer);
+        var success = buffer.readUInt32LE(0);
+        return success != 0;
+    };
+
     var getProgramInfoLog = function(program) {
         var buffer = new Buffer(4);
         GL.getProgramiv(program, GL.INFO_LOG_LENGTH, buffer);
@@ -37,7 +50,10 @@
             GL.compileShader(shader_v);
             var log = getShaderInfoLog(shader_v);
             if(log && log.trim() != "") {
-                throw new ShaderException("Vertex", log);
+                console.log(log);
+            }
+            if(!isShaderCompiled(shader_v)) {
+                throw new ShaderException("Vertex");
             }
         }
         if(shaders.fragment) {
@@ -46,16 +62,21 @@
             GL.compileShader(shader_f);
             var log = getShaderInfoLog(shader_f);
             if(log && log.trim() != "") {
-                throw new ShaderException("Fragment", log);
+                console.log(log);
+            }
+            if(!isShaderCompiled(shader_f)) {
+                throw new ShaderException("Fragment");
             }
         }
         if(shaders.geometry) {
             shader_g = GL.createShader(GL.GEOMETRY_SHADER);
             GL.shaderSource(shader_g, [shaders.geometry]);
             GL.compileShader(shader_g);
-            var log = getShaderInfoLog(shader_g);
             if(log && log.trim() != "") {
-                throw new ShaderException("Geometry", log);
+                console.log(log);
+            }
+            if(!isShaderCompiled(shader_g)) {
+                throw new ShaderException("Geometry");
             }
         }
 
@@ -67,11 +88,12 @@
 
         GL.linkProgram(program);
         var log = getProgramInfoLog(program);
-
         if(log && log.trim() != "") {
-            throw new ShaderException("Link", log);
+            console.log(log);
         }
-
+        if(!isProgramLinked(program)) {
+            throw new ShaderException("Link");
+        }
         return program;
     };
 
