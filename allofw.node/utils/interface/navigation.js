@@ -148,23 +148,27 @@ allofwutils.NetworkNavigation = function(networking) {
         t0 = t;
     };
 
-    networking.on("nav.reset", function() {
-        pose_target = {
-            position: new math.Vector3(0, 0, 0),
-            rotation: new math.Quaternion(new math.Vector3(0, 0, 0), 1)
-        };
-        velocity_prev = [ 0, 0, 0, 0, 0 ];
-    });
-    networking.on("nav", function(l_x, l_y, r_x, r_y) {
-        keys["D"][0] = l_x > 0 ? 0 : l_x;
-        keys["A"][0] = l_x < 0 ? 0 : -l_x;
-        keys["X"][0] = l_y > 0 ? 0 : l_y;
-        keys["W"][0] = l_y < 0 ? 0 : -l_y;
+    networking.on("nav", function(l_x, l_y, l_z, r_x, r_y) {
+        if(l_x == "reset") {
+            pose_target = {
+                position: new math.Vector3(0, 0, 0),
+                rotation: new math.Quaternion(new math.Vector3(0, 0, 0), 1)
+            };
+            velocity_prev = [ 0, 0, 0, 0, 0 ];
+        } else {
+            pose_target = null;
+            keys["D"][0] = l_x > 0 ? 0 : l_x;
+            keys["A"][0] = l_x < 0 ? 0 : -l_x;
+            keys["Z"][0] = l_y > 0 ? 0 : l_y;
+            keys["Q"][0] = l_y < 0 ? 0 : -l_y;
+            keys["X"][0] = l_z > 0 ? 0 : l_z;
+            keys["W"][0] = l_z < 0 ? 0 : -l_z;
 
-        keys["DOWN"][0] = r_y > 0 ? 0 : r_y;
-        keys["UP"][0] = r_y < 0 ? 0 : -r_y;
-        keys["RIGHT"][0] = r_x > 0 ? 0 : r_x;
-        keys["LEFT"][0] = r_x < 0 ? 0 : -r_x;
+            keys["DOWN"][0] = r_y > 0 ? 0 : r_y;
+            keys["UP"][0] = r_y < 0 ? 0 : -r_y;
+            keys["RIGHT"][0] = r_x > 0 ? 0 : r_x;
+            keys["LEFT"][0] = r_x < 0 ? 0 : -r_x;
+        }
     });
 
     allofwutils.utils.makeEventSource(this);

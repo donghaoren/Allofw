@@ -14,11 +14,11 @@ ImageObject.prototype.xywh = function(f) {
     return this;
 };
 
-ImageObject.prototype.image = function(image) {
+ImageObject.prototype.image = function(image, width, height) {
     this.imagetexture = image;
     image.uploadTexture();
-    this.uniform("int", "__texture_w", this.imagetexture.width());
-    this.uniform("int", "__texture_h", this.imagetexture.height());
+    this.uniform("int", "__texture_w", width !== undefined ? width : this.imagetexture.width());
+    this.uniform("int", "__texture_h", height !== undefined ? height : this.imagetexture.height());
     return this;
 };
 
@@ -110,7 +110,7 @@ ImageObject.prototype._fragmentShader = function() { return [
 
 ImageObject.prototype.constructor = ImageObject;
 
-exports.images = function() {
+shape3d.images = function() {
     return new ImageObject();
 };
 

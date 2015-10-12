@@ -54,6 +54,7 @@ public:
         glfwDefaultWindowHints();
         // We use OpenGL 3.3 Forward Compat Context, Core Profile.
         // Note: On Mac OS X, deprecated features are no longer supported.
+        // The lowest OS X version with OpenGL 3.3+ is OS X 10.9 Mavericks.
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
