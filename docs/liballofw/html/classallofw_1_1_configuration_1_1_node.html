@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -81,65 +83,477 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>allofw</b></li><li class="navelem"><a class="el" href="classallofw_1_1_configuration.html">Configuration</a></li><li class="navelem"><a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceallofw.html">allofw</a></li><li class="navelem"><a class="el" href="classallofw_1_1_configuration.html">Configuration</a></li><li class="navelem"><a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="classallofw_1_1_configuration_1_1_node-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">allofw::Configuration::Node Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Config node.  
+ <a href="classallofw_1_1_configuration_1_1_node.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="config_8h_source.html">config.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad7fda318641eb6df8a0381c594e0af0f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad7fda318641eb6df8a0381c594e0af0f"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isArray</b> () const  =0</td></tr>
+<tr class="memitem:ad7fda318641eb6df8a0381c594e0af0f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#ad7fda318641eb6df8a0381c594e0af0f">isArray</a> () const  =0</td></tr>
 <tr class="separator:ad7fda318641eb6df8a0381c594e0af0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa7eb9474a4925d7da0f94c0e3b27a80"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaa7eb9474a4925d7da0f94c0e3b27a80"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isDictionary</b> () const  =0</td></tr>
+<tr class="memitem:aaa7eb9474a4925d7da0f94c0e3b27a80"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#aaa7eb9474a4925d7da0f94c0e3b27a80">isDictionary</a> () const  =0</td></tr>
+<tr class="memdesc:aaa7eb9474a4925d7da0f94c0e3b27a80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is this an array?  <a href="#aaa7eb9474a4925d7da0f94c0e3b27a80">More...</a><br /></td></tr>
 <tr class="separator:aaa7eb9474a4925d7da0f94c0e3b27a80"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80d35b086b59d6554d10ac80e8d9b694"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a80d35b086b59d6554d10ac80e8d9b694"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValue</b> () const  =0</td></tr>
+<tr class="memitem:a80d35b086b59d6554d10ac80e8d9b694"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a80d35b086b59d6554d10ac80e8d9b694">isValue</a> () const  =0</td></tr>
+<tr class="memdesc:a80d35b086b59d6554d10ac80e8d9b694"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is this a dictionary?  <a href="#a80d35b086b59d6554d10ac80e8d9b694">More...</a><br /></td></tr>
 <tr class="separator:a80d35b086b59d6554d10ac80e8d9b694"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a17458d70e630499bcb4918ab04235c5d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a17458d70e630499bcb4918ab04235c5d"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>getString</b> (char *output, size_t output_capacity, const char *fallback=&quot;&quot;) const  =0</td></tr>
+<tr class="memitem:a17458d70e630499bcb4918ab04235c5d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a17458d70e630499bcb4918ab04235c5d">getString</a> (char *output, size_t output_capacity, const char *fallback=&quot;&quot;) const  =0</td></tr>
+<tr class="memdesc:a17458d70e630499bcb4918ab04235c5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is this a value?  <a href="#a17458d70e630499bcb4918ab04235c5d">More...</a><br /></td></tr>
 <tr class="separator:a17458d70e630499bcb4918ab04235c5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a578aa6142311dbe70e86a1f7de4f6e34"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a578aa6142311dbe70e86a1f7de4f6e34"></a>
-virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><b>getStringLength</b> (const char *fallback=&quot;&quot;) const  =0</td></tr>
+<tr class="memitem:a578aa6142311dbe70e86a1f7de4f6e34"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a578aa6142311dbe70e86a1f7de4f6e34">getStringLength</a> (const char *fallback=&quot;&quot;) const  =0</td></tr>
+<tr class="memdesc:a578aa6142311dbe70e86a1f7de4f6e34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the length of the string.  <a href="#a578aa6142311dbe70e86a1f7de4f6e34">More...</a><br /></td></tr>
 <tr class="separator:a578aa6142311dbe70e86a1f7de4f6e34"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0698b2475a5fd58801bf7d00844f1a77"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0698b2475a5fd58801bf7d00844f1a77"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>getInt32</b> (int fallback=0) const  =0</td></tr>
+<tr class="memitem:a0698b2475a5fd58801bf7d00844f1a77"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a0698b2475a5fd58801bf7d00844f1a77">getInt32</a> (int fallback=0) const  =0</td></tr>
+<tr class="memdesc:a0698b2475a5fd58801bf7d00844f1a77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get int32 value.  <a href="#a0698b2475a5fd58801bf7d00844f1a77">More...</a><br /></td></tr>
 <tr class="separator:a0698b2475a5fd58801bf7d00844f1a77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e38dd189f8fbad5a46c0a5cbe3f23c4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6e38dd189f8fbad5a46c0a5cbe3f23c4"></a>
-virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>getUInt32</b> (unsigned int fallback=0) const  =0</td></tr>
+<tr class="memitem:a6e38dd189f8fbad5a46c0a5cbe3f23c4"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a6e38dd189f8fbad5a46c0a5cbe3f23c4">getUInt32</a> (unsigned int fallback=0) const  =0</td></tr>
+<tr class="memdesc:a6e38dd189f8fbad5a46c0a5cbe3f23c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get uint32 value.  <a href="#a6e38dd189f8fbad5a46c0a5cbe3f23c4">More...</a><br /></td></tr>
 <tr class="separator:a6e38dd189f8fbad5a46c0a5cbe3f23c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05225533280f927b40b79ffe63ec4c94"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a05225533280f927b40b79ffe63ec4c94"></a>
-virtual float&#160;</td><td class="memItemRight" valign="bottom"><b>getFloat</b> (float fallback=0.0f) const  =0</td></tr>
+<tr class="memitem:a05225533280f927b40b79ffe63ec4c94"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a05225533280f927b40b79ffe63ec4c94">getFloat</a> (float fallback=0.0f) const  =0</td></tr>
+<tr class="memdesc:a05225533280f927b40b79ffe63ec4c94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get float value.  <a href="#a05225533280f927b40b79ffe63ec4c94">More...</a><br /></td></tr>
 <tr class="separator:a05225533280f927b40b79ffe63ec4c94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4112c15bf2297ca7c30e03b09bb8f99b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4112c15bf2297ca7c30e03b09bb8f99b"></a>
-virtual double&#160;</td><td class="memItemRight" valign="bottom"><b>getDouble</b> (double fallback=0.0) const  =0</td></tr>
+<tr class="memitem:a4112c15bf2297ca7c30e03b09bb8f99b"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a4112c15bf2297ca7c30e03b09bb8f99b">getDouble</a> (double fallback=0.0) const  =0</td></tr>
+<tr class="memdesc:a4112c15bf2297ca7c30e03b09bb8f99b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get double value.  <a href="#a4112c15bf2297ca7c30e03b09bb8f99b">More...</a><br /></td></tr>
 <tr class="separator:a4112c15bf2297ca7c30e03b09bb8f99b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f33b75c0e10b03cff0d41ef435e37c2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1f33b75c0e10b03cff0d41ef435e37c2"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>getBoolean</b> (bool fallback=0.0) const  =0</td></tr>
+<tr class="memitem:a1f33b75c0e10b03cff0d41ef435e37c2"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a1f33b75c0e10b03cff0d41ef435e37c2">getBoolean</a> (bool fallback=0.0) const  =0</td></tr>
+<tr class="memdesc:a1f33b75c0e10b03cff0d41ef435e37c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get boolean value.  <a href="#a1f33b75c0e10b03cff0d41ef435e37c2">More...</a><br /></td></tr>
 <tr class="separator:a1f33b75c0e10b03cff0d41ef435e37c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a4ead529f2ba50d6b7d57bbf24e05fc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2a4ead529f2ba50d6b7d57bbf24e05fc"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><b>getString</b> (const char *fallback=&quot;&quot;)</td></tr>
+<tr class="memitem:a2a4ead529f2ba50d6b7d57bbf24e05fc"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a2a4ead529f2ba50d6b7d57bbf24e05fc">getString</a> (const char *fallback=&quot;&quot;)</td></tr>
+<tr class="memdesc:a2a4ead529f2ba50d6b7d57bbf24e05fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get STL string value.  <a href="#a2a4ead529f2ba50d6b7d57bbf24e05fc">More...</a><br /></td></tr>
 <tr class="separator:a2a4ead529f2ba50d6b7d57bbf24e05fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae71fc89e63bf7da88b5a5336bdc264c2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae71fc89e63bf7da88b5a5336bdc264c2"></a>
-virtual <a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (int index) const  =0</td></tr>
+<tr class="memitem:ae71fc89e63bf7da88b5a5336bdc264c2"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#ae71fc89e63bf7da88b5a5336bdc264c2">get</a> (int index) const  =0</td></tr>
+<tr class="memdesc:ae71fc89e63bf7da88b5a5336bdc264c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get array item by index.  <a href="#ae71fc89e63bf7da88b5a5336bdc264c2">More...</a><br /></td></tr>
 <tr class="separator:ae71fc89e63bf7da88b5a5336bdc264c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e7c4c7366d2fc57e1dfe8c1a0d6a52e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8e7c4c7366d2fc57e1dfe8c1a0d6a52e"></a>
-virtual <a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (const char *key) const  =0</td></tr>
+<tr class="memitem:a8e7c4c7366d2fc57e1dfe8c1a0d6a52e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a8e7c4c7366d2fc57e1dfe8c1a0d6a52e">get</a> (const char *key) const  =0</td></tr>
+<tr class="memdesc:a8e7c4c7366d2fc57e1dfe8c1a0d6a52e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get dictionary item by key.  <a href="#a8e7c4c7366d2fc57e1dfe8c1a0d6a52e">More...</a><br /></td></tr>
 <tr class="separator:a8e7c4c7366d2fc57e1dfe8c1a0d6a52e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab50edff410f245c25b4410977b342ec7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab50edff410f245c25b4410977b342ec7"></a>
-virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><b>size</b> () const  =0</td></tr>
+<tr class="memitem:ab50edff410f245c25b4410977b342ec7"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#ab50edff410f245c25b4410977b342ec7">size</a> () const  =0</td></tr>
+<tr class="memdesc:ab50edff410f245c25b4410977b342ec7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get size of the node (for array and dictionary).  <a href="#ab50edff410f245c25b4410977b342ec7">More...</a><br /></td></tr>
 <tr class="separator:ab50edff410f245c25b4410977b342ec7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a23e2e58986451f2376097234a8584805"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html#a23e2e58986451f2376097234a8584805">~Node</a> ()</td></tr>
+<tr class="separator:a23e2e58986451f2376097234a8584805"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Config node. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a23e2e58986451f2376097234a8584805"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual allofw::Configuration::Node::~Node </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="ae71fc89e63bf7da88b5a5336bdc264c2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a>* allofw::Configuration::Node::get </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get array item by index. </p>
+
+</div>
+</div>
+<a class="anchor" id="a8e7c4c7366d2fc57e1dfe8c1a0d6a52e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a>* allofw::Configuration::Node::get </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>key</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get dictionary item by key. </p>
+
+</div>
+</div>
+<a class="anchor" id="a1f33b75c0e10b03cff0d41ef435e37c2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool allofw::Configuration::Node::getBoolean </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0.0</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get boolean value. </p>
+
+</div>
+</div>
+<a class="anchor" id="a4112c15bf2297ca7c30e03b09bb8f99b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual double allofw::Configuration::Node::getDouble </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0.0</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get double value. </p>
+
+</div>
+</div>
+<a class="anchor" id="a05225533280f927b40b79ffe63ec4c94"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual float allofw::Configuration::Node::getFloat </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0.0f</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get float value. </p>
+
+</div>
+</div>
+<a class="anchor" id="a0698b2475a5fd58801bf7d00844f1a77"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int allofw::Configuration::Node::getInt32 </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get int32 value. </p>
+
+</div>
+</div>
+<a class="anchor" id="a17458d70e630499bcb4918ab04235c5d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::Configuration::Node::getString </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>output_capacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Is this a value? </p>
+<p>Get string. </p>
+
+</div>
+</div>
+<a class="anchor" id="a2a4ead529f2ba50d6b7d57bbf24e05fc"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string allofw::Configuration::Node::getString </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>&quot;&quot;</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get STL string value. </p>
+
+</div>
+</div>
+<a class="anchor" id="a578aa6142311dbe70e86a1f7de4f6e34"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual size_t allofw::Configuration::Node::getStringLength </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>&quot;&quot;</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the length of the string. </p>
+
+</div>
+</div>
+<a class="anchor" id="a6e38dd189f8fbad5a46c0a5cbe3f23c4"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual unsigned int allofw::Configuration::Node::getUInt32 </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get uint32 value. </p>
+
+</div>
+</div>
+<a class="anchor" id="ad7fda318641eb6df8a0381c594e0af0f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool allofw::Configuration::Node::isArray </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aaa7eb9474a4925d7da0f94c0e3b27a80"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool allofw::Configuration::Node::isDictionary </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Is this an array? </p>
+
+</div>
+</div>
+<a class="anchor" id="a80d35b086b59d6554d10ac80e8d9b694"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool allofw::Configuration::Node::isValue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Is this a dictionary? </p>
+
+</div>
+</div>
+<a class="anchor" id="ab50edff410f245c25b4410977b342ec7"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual size_t allofw::Configuration::Node::size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get size of the node (for array and dictionary). </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/<a class="el" href="config_8h_source.html">config.h</a></li>
+<li><a class="el" href="config_8h_source.html">config.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

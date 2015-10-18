@@ -1,5 +1,26 @@
 var searchData=
 [
-  ['warpblend',['WarpBlend',['../classallofw_1_1_warp_blend.html',1,'allofw']]],
-  ['warpdata',['WarpData',['../structallofw_1_1_warp_blend_1_1_warp_data.html',1,'allofw::WarpBlend']]]
+  ['r',['r',['../structallofw_1_1_color.html#a5b1f16955f14bbf7fd375b7c73a7a8c5',1,'allofw::Color::r()'],['../structallofw_1_1_omni_stereo_1_1_stereo_texture.html#a98ffa37c24da8e31396aad9bea72b421',1,'allofw::OmniStereo::StereoTexture::R()']]],
+  ['random',['random',['../structallofw_1_1_matrix3__.html#ad3f21ae49d808d30355f56b000b7f9ef',1,'allofw::Matrix3_::random()'],['../structallofw_1_1_matrix4__.html#aacc02a5821cb3bf6a28cbdc3bff97b5d',1,'allofw::Matrix4_::random()']]],
+  ['read',['read',['../classallofw_1_1_byte_stream.html#a3f57bab332a5dfec26cc4a77150d6811',1,'allofw::ByteStream']]],
+  ['rectangle2',['Rectangle2',['../namespaceallofw.html#ab7e04a816c052c601caf94e3897fe9a5',1,'allofw']]],
+  ['rectangle2_5f',['Rectangle2_',['../structallofw_1_1_rectangle2__.html#afd65a7449b6abe0463f70b564ed015c4',1,'allofw::Rectangle2_::Rectangle2_()=default'],['../structallofw_1_1_rectangle2__.html#abc1f9557f38e79b0aa5f83da04be4fec',1,'allofw::Rectangle2_::Rectangle2_(const Vector2_&lt; number_t &gt; &amp;position_, const Vector2_&lt; number_t &gt; &amp;size_)'],['../structallofw_1_1_rectangle2__.html#af3165022a844883622d023ef3081e85c',1,'allofw::Rectangle2_::Rectangle2_(number_t w, number_t h)'],['../structallofw_1_1_rectangle2__.html#a986db4886f05f175972050672a9b4964',1,'allofw::Rectangle2_::Rectangle2_(number_t x, number_t y, number_t w, number_t h)']]],
+  ['rectangle2_5f',['Rectangle2_',['../structallofw_1_1_rectangle2__.html',1,'allofw']]],
+  ['rectangle2d',['Rectangle2d',['../namespaceallofw.html#a3cdb1f1abd767f6c7842a4871286c0c0',1,'allofw']]],
+  ['rectangle2f',['Rectangle2f',['../namespaceallofw.html#a648669085a8486375bef87c05186e61c',1,'allofw']]],
+  ['rectangle2i',['Rectangle2i',['../namespaceallofw.html#a790b9e69e5061f4d864ee92708c1f46e',1,'allofw']]],
+  ['rectangle3',['Rectangle3',['../namespaceallofw.html#a2a2f0c0a99c961493607951a9c29a87a',1,'allofw']]],
+  ['rectangle3_5f',['Rectangle3_',['../structallofw_1_1_rectangle3__.html',1,'allofw']]],
+  ['rectangle3_5f',['Rectangle3_',['../structallofw_1_1_rectangle3__.html#adde35efad69e03fdcec6cda8b911a00e',1,'allofw::Rectangle3_::Rectangle3_()=default'],['../structallofw_1_1_rectangle3__.html#a5f924da8f1c036ffab76bc49a4558750',1,'allofw::Rectangle3_::Rectangle3_(const Vector3_&lt; number_t &gt; &amp;position_, const Vector3_&lt; number_t &gt; &amp;size_)'],['../structallofw_1_1_rectangle3__.html#a41038bff4593d2cabfd16dfa6e378a65',1,'allofw::Rectangle3_::Rectangle3_(number_t w, number_t h, number_t d)'],['../structallofw_1_1_rectangle3__.html#ad335f4afb2d94aa1dead8d6940ec1003',1,'allofw::Rectangle3_::Rectangle3_(number_t x, number_t y, number_t z, number_t w, number_t h, number_t d)']]],
+  ['rectangle3d',['Rectangle3d',['../namespaceallofw.html#a520aa24d09ea890a6de920006617442c',1,'allofw']]],
+  ['rectangle3f',['Rectangle3f',['../namespaceallofw.html#accb91708d1a1b0588ad047061d3637df',1,'allofw']]],
+  ['rectangle3i',['Rectangle3i',['../namespaceallofw.html#af997f877dc8c77b1ae62a426a3b83531',1,'allofw']]],
+  ['reset',['reset',['../classallofw_1_1_graphical_context2_d.html#ae4baa44799db37e0b60e40dd839115b4',1,'allofw::GraphicalContext2D']]],
+  ['restore',['restore',['../classallofw_1_1_graphical_context2_d.html#ab90fb68570eac2a640675d708d70695f',1,'allofw::GraphicalContext2D']]],
+  ['right',['RIGHT',['../namespaceallofw.html#a5a3f9efd3ccc55147e2eb835b8687bcea21507b40c80068eda19865706fdc2403',1,'allofw']]],
+  ['rotate',['rotate',['../classallofw_1_1_graphical_context2_d.html#a2554fb4d9ff93aeaa5c662c43899f039',1,'allofw::GraphicalContext2D::rotate()'],['../structallofw_1_1_quaternion__.html#a3362391463a10a27308f9905836f1949',1,'allofw::Quaternion_::rotate()']]],
+  ['rotate90deg',['rotate90deg',['../structallofw_1_1_vector2__.html#a51a21c458391d2794b7cc78702e2cabf',1,'allofw::Vector2_']]],
+  ['rotation',['rotation',['../structallofw_1_1_pose.html#a7f1efaad81737c1347497006b7f66eeb',1,'allofw::Pose::rotation()'],['../structallofw_1_1_quaternion__.html#ac9f8fbc175cb7a3522bb181152ad0149',1,'allofw::Quaternion_::Rotation()']]],
+  ['round',['ROUND',['../namespaceallofw.html#a8f13429213692af3ebba462715a446c5a2ea77cf582892014b30e6fa7e558350d',1,'allofw::ROUND()'],['../namespaceallofw.html#a848ebc8b77070a59626b0442adfb1c54a2ea77cf582892014b30e6fa7e558350d',1,'allofw::ROUND()']]],
+  ['run',['run',['../classallofw_1_1details_1_1_omni_app_runner_base.html#a2e69b0d7dac4b0215eb4d36780879d94',1,'allofw::details::OmniAppRunnerBase']]]
 ];

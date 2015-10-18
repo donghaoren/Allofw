@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -81,44 +83,234 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>allofw</b></li><li class="navelem"><a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceallofw.html">allofw</a></li><li class="navelem"><a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="classallofw_1_1_surface2_d-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">allofw::Surface2D Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="graphics_8h_source.html">graphics.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a9fc085df464ea390279a971cbb5ff92d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9fc085df464ea390279a971cbb5ff92d"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>width</b> () const  =0</td></tr>
+<tr class="memitem:a9fc085df464ea390279a971cbb5ff92d"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_surface2_d.html#a9fc085df464ea390279a971cbb5ff92d">width</a> () const  =0</td></tr>
 <tr class="separator:a9fc085df464ea390279a971cbb5ff92d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4234c15334b5ebd4b97b51727c737f7b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4234c15334b5ebd4b97b51727c737f7b"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>height</b> () const  =0</td></tr>
+<tr class="memitem:a4234c15334b5ebd4b97b51727c737f7b"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_surface2_d.html#a4234c15334b5ebd4b97b51727c737f7b">height</a> () const  =0</td></tr>
 <tr class="separator:a4234c15334b5ebd4b97b51727c737f7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af7b29b7d54827d91cdc1826083288b11"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af7b29b7d54827d91cdc1826083288b11"></a>
-virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>pixels</b> () const  =0</td></tr>
+<tr class="memitem:af7b29b7d54827d91cdc1826083288b11"><td class="memItemLeft" align="right" valign="top">virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_surface2_d.html#af7b29b7d54827d91cdc1826083288b11">pixels</a> () const  =0</td></tr>
 <tr class="separator:af7b29b7d54827d91cdc1826083288b11"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ec6549c3c9a5204f61783854e9e4cf2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4ec6549c3c9a5204f61783854e9e4cf2"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>bindTexture</b> (unsigned int unit)=0</td></tr>
+<tr class="memitem:a4ec6549c3c9a5204f61783854e9e4cf2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_surface2_d.html#a4ec6549c3c9a5204f61783854e9e4cf2">bindTexture</a> (unsigned int unit)=0</td></tr>
 <tr class="separator:a4ec6549c3c9a5204f61783854e9e4cf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae03d85d42a0ab3fdde010592753eaae9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae03d85d42a0ab3fdde010592753eaae9"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>uploadTexture</b> ()=0</td></tr>
+<tr class="memitem:ae03d85d42a0ab3fdde010592753eaae9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_surface2_d.html#ae03d85d42a0ab3fdde010592753eaae9">uploadTexture</a> ()=0</td></tr>
 <tr class="separator:ae03d85d42a0ab3fdde010592753eaae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67eb2f59bbe6db1e93ea253e7aa6a599"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a67eb2f59bbe6db1e93ea253e7aa6a599"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>unbindTexture</b> (unsigned int unit)=0</td></tr>
+<tr class="memitem:a67eb2f59bbe6db1e93ea253e7aa6a599"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_surface2_d.html#a67eb2f59bbe6db1e93ea253e7aa6a599">unbindTexture</a> (unsigned int unit)=0</td></tr>
 <tr class="separator:a67eb2f59bbe6db1e93ea253e7aa6a599"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a02d63183257e123154fba751fdb54625"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a02d63183257e123154fba751fdb54625"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>save</b> (<a class="el" href="classallofw_1_1_byte_stream.html">ByteStream</a> *stream)=0</td></tr>
+<tr class="memitem:a02d63183257e123154fba751fdb54625"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_surface2_d.html#a02d63183257e123154fba751fdb54625">save</a> (<a class="el" href="classallofw_1_1_byte_stream.html">ByteStream</a> *stream)=0</td></tr>
 <tr class="separator:a02d63183257e123154fba751fdb54625"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a32aa89a627994eb43dac5eea927fc415"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_surface2_d.html#a32aa89a627994eb43dac5eea927fc415">~Surface2D</a> ()</td></tr>
+<tr class="separator:a32aa89a627994eb43dac5eea927fc415"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a32aa89a627994eb43dac5eea927fc415"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual allofw::Surface2D::~Surface2D </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a4ec6549c3c9a5204f61783854e9e4cf2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::Surface2D::bindTexture </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>unit</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a4234c15334b5ebd4b97b51727c737f7b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int allofw::Surface2D::height </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af7b29b7d54827d91cdc1826083288b11"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const void* allofw::Surface2D::pixels </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a02d63183257e123154fba751fdb54625"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::Surface2D::save </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_byte_stream.html">ByteStream</a> *&#160;</td>
+          <td class="paramname"><em>stream</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a67eb2f59bbe6db1e93ea253e7aa6a599"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::Surface2D::unbindTexture </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>unit</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ae03d85d42a0ab3fdde010592753eaae9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::Surface2D::uploadTexture </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a9fc085df464ea390279a971cbb5ff92d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int allofw::Surface2D::width </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/<a class="el" href="graphics_8h_source.html">graphics.h</a></li>
+<li><a class="el" href="graphics_8h_source.html">graphics.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

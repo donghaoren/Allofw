@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -81,7 +83,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>allofw</b></li><li class="navelem"><a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a></li><li class="navelem"><a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html">ViewportInfo</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceallofw.html">allofw</a></li><li class="navelem"><a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a></li><li class="navelem"><a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html">ViewportInfo</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -92,24 +94,88 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">allofw::WarpBlend::ViewportInfo Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Viewport information.  
+ <a href="structallofw_1_1_warp_blend_1_1_viewport_info.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="omnistereo_8h_source.html">omnistereo.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a428369cb7264c33d5a9e29791dd2c952"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a428369cb7264c33d5a9e29791dd2c952"></a>
-<a class="el" href="structallofw_1_1_rectangle2__.html">Rectangle2</a>&#160;</td><td class="memItemRight" valign="bottom"><b>viewport</b></td></tr>
+<tr class="memitem:a428369cb7264c33d5a9e29791dd2c952"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceallofw.html#ab7e04a816c052c601caf94e3897fe9a5">Rectangle2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html#a428369cb7264c33d5a9e29791dd2c952">viewport</a></td></tr>
+<tr class="memdesc:a428369cb7264c33d5a9e29791dd2c952"><td class="mdescLeft">&#160;</td><td class="mdescRight">The viewport coordinates in screen pixels.  <a href="#a428369cb7264c33d5a9e29791dd2c952">More...</a><br /></td></tr>
 <tr class="separator:a428369cb7264c33d5a9e29791dd2c952"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd4585ea3b60c7a2316b1957708eb8a2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afd4585ea3b60c7a2316b1957708eb8a2"></a>
-<a class="el" href="structallofw_1_1_vector2__.html">Size2i</a>&#160;</td><td class="memItemRight" valign="bottom"><b>screen_resolution</b></td></tr>
+<tr class="memitem:afd4585ea3b60c7a2316b1957708eb8a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceallofw.html#af8b0010afda5b87915bd968a98acf368">Size2i</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html#afd4585ea3b60c7a2316b1957708eb8a2">screen_resolution</a></td></tr>
+<tr class="memdesc:afd4585ea3b60c7a2316b1957708eb8a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target screen resolution (<a class="el" href="classallofw_1_1_omni_stereo.html" title="Class for Omnistereo rendering. ">OmniStereo</a> will determine the size of internal framebuffers based on this value).  <a href="#afd4585ea3b60c7a2316b1957708eb8a2">More...</a><br /></td></tr>
 <tr class="separator:afd4585ea3b60c7a2316b1957708eb8a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68af245e9cb120c3439d098cc95ce99d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a68af245e9cb120c3439d098cc95ce99d"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>enforce_aspect_ratio</b></td></tr>
+<tr class="memitem:a68af245e9cb120c3439d098cc95ce99d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html#a68af245e9cb120c3439d098cc95ce99d">enforce_aspect_ratio</a></td></tr>
+<tr class="memdesc:a68af245e9cb120c3439d098cc95ce99d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should <a class="el" href="classallofw_1_1_omni_stereo.html" title="Class for Omnistereo rendering. ">OmniStereo</a> maintain the viewport aspect ratio.  <a href="#a68af245e9cb120c3439d098cc95ce99d">More...</a><br /></td></tr>
 <tr class="separator:a68af245e9cb120c3439d098cc95ce99d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b6a8240ff9d3258c9834cc660d01613"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5b6a8240ff9d3258c9834cc660d01613"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>aspect_ratio</b></td></tr>
+<tr class="memitem:a5b6a8240ff9d3258c9834cc660d01613"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html#a5b6a8240ff9d3258c9834cc660d01613">aspect_ratio</a></td></tr>
+<tr class="memdesc:a5b6a8240ff9d3258c9834cc660d01613"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target aspect ratio of the viewport.  <a href="#a5b6a8240ff9d3258c9834cc660d01613">More...</a><br /></td></tr>
 <tr class="separator:a5b6a8240ff9d3258c9834cc660d01613"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Viewport information. </p>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a class="anchor" id="a5b6a8240ff9d3258c9834cc660d01613"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float allofw::WarpBlend::ViewportInfo::aspect_ratio</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Target aspect ratio of the viewport. </p>
+
+</div>
+</div>
+<a class="anchor" id="a68af245e9cb120c3439d098cc95ce99d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool allofw::WarpBlend::ViewportInfo::enforce_aspect_ratio</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Should <a class="el" href="classallofw_1_1_omni_stereo.html" title="Class for Omnistereo rendering. ">OmniStereo</a> maintain the viewport aspect ratio. </p>
+
+</div>
+</div>
+<a class="anchor" id="afd4585ea3b60c7a2316b1957708eb8a2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceallofw.html#af8b0010afda5b87915bd968a98acf368">Size2i</a> allofw::WarpBlend::ViewportInfo::screen_resolution</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Target screen resolution (<a class="el" href="classallofw_1_1_omni_stereo.html" title="Class for Omnistereo rendering. ">OmniStereo</a> will determine the size of internal framebuffers based on this value). </p>
+
+</div>
+</div>
+<a class="anchor" id="a428369cb7264c33d5a9e29791dd2c952"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceallofw.html#ab7e04a816c052c601caf94e3897fe9a5">Rectangle2</a> allofw::WarpBlend::ViewportInfo::viewport</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The viewport coordinates in screen pixels. </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/<a class="el" href="omnistereo_8h_source.html">omnistereo.h</a></li>
+<li><a class="el" href="omnistereo_8h_source.html">omnistereo.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

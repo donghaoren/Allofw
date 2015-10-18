@@ -1,0 +1,13 @@
+var searchData=
+[
+  ['random',['random',['../structallofw_1_1_matrix3__.html#ad3f21ae49d808d30355f56b000b7f9ef',1,'allofw::Matrix3_::random()'],['../structallofw_1_1_matrix4__.html#aacc02a5821cb3bf6a28cbdc3bff97b5d',1,'allofw::Matrix4_::random()']]],
+  ['read',['read',['../classallofw_1_1_byte_stream.html#a3f57bab332a5dfec26cc4a77150d6811',1,'allofw::ByteStream']]],
+  ['rectangle2_5f',['Rectangle2_',['../structallofw_1_1_rectangle2__.html#afd65a7449b6abe0463f70b564ed015c4',1,'allofw::Rectangle2_::Rectangle2_()=default'],['../structallofw_1_1_rectangle2__.html#abc1f9557f38e79b0aa5f83da04be4fec',1,'allofw::Rectangle2_::Rectangle2_(const Vector2_&lt; number_t &gt; &amp;position_, const Vector2_&lt; number_t &gt; &amp;size_)'],['../structallofw_1_1_rectangle2__.html#af3165022a844883622d023ef3081e85c',1,'allofw::Rectangle2_::Rectangle2_(number_t w, number_t h)'],['../structallofw_1_1_rectangle2__.html#a986db4886f05f175972050672a9b4964',1,'allofw::Rectangle2_::Rectangle2_(number_t x, number_t y, number_t w, number_t h)']]],
+  ['rectangle3_5f',['Rectangle3_',['../structallofw_1_1_rectangle3__.html#adde35efad69e03fdcec6cda8b911a00e',1,'allofw::Rectangle3_::Rectangle3_()=default'],['../structallofw_1_1_rectangle3__.html#a5f924da8f1c036ffab76bc49a4558750',1,'allofw::Rectangle3_::Rectangle3_(const Vector3_&lt; number_t &gt; &amp;position_, const Vector3_&lt; number_t &gt; &amp;size_)'],['../structallofw_1_1_rectangle3__.html#a41038bff4593d2cabfd16dfa6e378a65',1,'allofw::Rectangle3_::Rectangle3_(number_t w, number_t h, number_t d)'],['../structallofw_1_1_rectangle3__.html#ad335f4afb2d94aa1dead8d6940ec1003',1,'allofw::Rectangle3_::Rectangle3_(number_t x, number_t y, number_t z, number_t w, number_t h, number_t d)']]],
+  ['reset',['reset',['../classallofw_1_1_graphical_context2_d.html#ae4baa44799db37e0b60e40dd839115b4',1,'allofw::GraphicalContext2D']]],
+  ['restore',['restore',['../classallofw_1_1_graphical_context2_d.html#ab90fb68570eac2a640675d708d70695f',1,'allofw::GraphicalContext2D']]],
+  ['rotate',['rotate',['../classallofw_1_1_graphical_context2_d.html#a2554fb4d9ff93aeaa5c662c43899f039',1,'allofw::GraphicalContext2D::rotate()'],['../structallofw_1_1_quaternion__.html#a3362391463a10a27308f9905836f1949',1,'allofw::Quaternion_::rotate()']]],
+  ['rotate90deg',['rotate90deg',['../structallofw_1_1_vector2__.html#a51a21c458391d2794b7cc78702e2cabf',1,'allofw::Vector2_']]],
+  ['rotation',['Rotation',['../structallofw_1_1_quaternion__.html#ac9f8fbc175cb7a3522bb181152ad0149',1,'allofw::Quaternion_']]],
+  ['run',['run',['../classallofw_1_1details_1_1_omni_app_runner_base.html#a2e69b0d7dac4b0215eb4d36780879d94',1,'allofw::details::OmniAppRunnerBase']]]
+];

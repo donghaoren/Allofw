@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -81,66 +83,443 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>allofw</b></li><li class="navelem"><a class="el" href="classallofw_1_1_graphical_backend.html">GraphicalBackend</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceallofw.html">allofw</a></li><li class="navelem"><a class="el" href="classallofw_1_1_graphical_backend.html">GraphicalBackend</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="classallofw_1_1_graphical_backend-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">allofw::GraphicalBackend Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="graphics_8h_source.html">graphics.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5c1ca3b5ef098df734c6a2810751e695"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5c1ca3b5ef098df734c6a2810751e695"></a>
-virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>createSurface2D</b> (int width, int height)=0</td></tr>
+<tr class="memitem:a5c1ca3b5ef098df734c6a2810751e695"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#a5c1ca3b5ef098df734c6a2810751e695">createSurface2D</a> (int width, int height)=0</td></tr>
 <tr class="separator:a5c1ca3b5ef098df734c6a2810751e695"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76f457cfe383ed1b898d00861084d2b4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a76f457cfe383ed1b898d00861084d2b4"></a>
-virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>createSurface2DWithPixels</b> (int width, int height, void *pixels)=0</td></tr>
+<tr class="memitem:a76f457cfe383ed1b898d00861084d2b4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#a76f457cfe383ed1b898d00861084d2b4">createSurface2DWithPixels</a> (int width, int height, void *pixels)=0</td></tr>
 <tr class="separator:a76f457cfe383ed1b898d00861084d2b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abdab7b72453310ee00a89e3ac86064bd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abdab7b72453310ee00a89e3ac86064bd"></a>
-virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>createPDFSurface2D</b> (int width, int height)=0</td></tr>
+<tr class="memitem:abdab7b72453310ee00a89e3ac86064bd"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#abdab7b72453310ee00a89e3ac86064bd">createPDFSurface2D</a> (int width, int height)=0</td></tr>
 <tr class="separator:abdab7b72453310ee00a89e3ac86064bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2da35c329f5872eb737f134ded774985"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2da35c329f5872eb737f134ded774985"></a>
-virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>createSurface2DFromImage</b> (<a class="el" href="classallofw_1_1_byte_stream.html">ByteStream</a> *stream)=0</td></tr>
+<tr class="memitem:a2da35c329f5872eb737f134ded774985"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#a2da35c329f5872eb737f134ded774985">createSurface2DFromImage</a> (<a class="el" href="classallofw_1_1_byte_stream.html">ByteStream</a> *stream)=0</td></tr>
 <tr class="separator:a2da35c329f5872eb737f134ded774985"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab94e6fb84035b38f5e352a638600e72b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab94e6fb84035b38f5e352a638600e72b"></a>
-virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>createSurface2DFromImage</b> (const void *data, size_t length)=0</td></tr>
+<tr class="memitem:ab94e6fb84035b38f5e352a638600e72b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#ab94e6fb84035b38f5e352a638600e72b">createSurface2DFromImage</a> (const void *data, size_t length)=0</td></tr>
 <tr class="separator:ab94e6fb84035b38f5e352a638600e72b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b4490aa71a5c13719933fded4d5ae52"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5b4490aa71a5c13719933fded4d5ae52"></a>
-virtual <a class="el" href="classallofw_1_1_video_surface2_d.html">VideoSurface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>createVideoSurface2DFromStream</b> (<a class="el" href="classallofw_1_1_byte_stream.html">ByteStream</a> *stream)=0</td></tr>
+<tr class="memitem:a5b4490aa71a5c13719933fded4d5ae52"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_video_surface2_d.html">VideoSurface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#a5b4490aa71a5c13719933fded4d5ae52">createVideoSurface2DFromStream</a> (<a class="el" href="classallofw_1_1_byte_stream.html">ByteStream</a> *stream)=0</td></tr>
 <tr class="separator:a5b4490aa71a5c13719933fded4d5ae52"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cf2afd70ae8fb1c759f4223bafbfba4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9cf2afd70ae8fb1c759f4223bafbfba4"></a>
-virtual <a class="el" href="classallofw_1_1_video_surface2_d.html">VideoSurface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>createVideoSurface2DFromFile</b> (const char *path)=0</td></tr>
+<tr class="memitem:a9cf2afd70ae8fb1c759f4223bafbfba4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_video_surface2_d.html">VideoSurface2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#a9cf2afd70ae8fb1c759f4223bafbfba4">createVideoSurface2DFromFile</a> (const char *path)=0</td></tr>
 <tr class="separator:a9cf2afd70ae8fb1c759f4223bafbfba4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab2c207f08a2ac1a7187a3504b4e35d64"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab2c207f08a2ac1a7187a3504b4e35d64"></a>
-virtual <a class="el" href="classallofw_1_1_graphical_context2_d.html">GraphicalContext2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>createGraphicalContext2D</b> (<a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *surface)=0</td></tr>
+<tr class="memitem:ab2c207f08a2ac1a7187a3504b4e35d64"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_graphical_context2_d.html">GraphicalContext2D</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#ab2c207f08a2ac1a7187a3504b4e35d64">createGraphicalContext2D</a> (<a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *surface)=0</td></tr>
 <tr class="separator:ab2c207f08a2ac1a7187a3504b4e35d64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6630e348d5e1dcaa776258f7092dfe7b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6630e348d5e1dcaa776258f7092dfe7b"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>destroySurface2D</b> (<a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *surface)=0</td></tr>
+<tr class="memitem:a6630e348d5e1dcaa776258f7092dfe7b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#a6630e348d5e1dcaa776258f7092dfe7b">destroySurface2D</a> (<a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *surface)=0</td></tr>
 <tr class="separator:a6630e348d5e1dcaa776258f7092dfe7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33ad505b2ea7f94a8660658023e5802c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a33ad505b2ea7f94a8660658023e5802c"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>destroyVideoSurface2D</b> (<a class="el" href="classallofw_1_1_video_surface2_d.html">VideoSurface2D</a> *video)=0</td></tr>
+<tr class="memitem:a33ad505b2ea7f94a8660658023e5802c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#a33ad505b2ea7f94a8660658023e5802c">destroyVideoSurface2D</a> (<a class="el" href="classallofw_1_1_video_surface2_d.html">VideoSurface2D</a> *video)=0</td></tr>
 <tr class="separator:a33ad505b2ea7f94a8660658023e5802c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a799220d211b39c3d2aa3213d3c59bce2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a799220d211b39c3d2aa3213d3c59bce2"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>destroyGraphicalContext2D</b> (<a class="el" href="classallofw_1_1_graphical_context2_d.html">GraphicalContext2D</a> *context)=0</td></tr>
+<tr class="memitem:a799220d211b39c3d2aa3213d3c59bce2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#a799220d211b39c3d2aa3213d3c59bce2">destroyGraphicalContext2D</a> (<a class="el" href="classallofw_1_1_graphical_context2_d.html">GraphicalContext2D</a> *context)=0</td></tr>
 <tr class="separator:a799220d211b39c3d2aa3213d3c59bce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aaad0c58eaf438df1bb23aa25a5da9efe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaad0c58eaf438df1bb23aa25a5da9efe"></a>
-static <a class="el" href="classallofw_1_1_graphical_backend.html">GraphicalBackend</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>CreateSkia</b> ()</td></tr>
+<tr class="memitem:aaad0c58eaf438df1bb23aa25a5da9efe"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classallofw_1_1_graphical_backend.html">GraphicalBackend</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#aaad0c58eaf438df1bb23aa25a5da9efe">CreateSkia</a> ()</td></tr>
 <tr class="separator:aaad0c58eaf438df1bb23aa25a5da9efe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedfc6c9491f9e39a535bf77d12a91bf2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aedfc6c9491f9e39a535bf77d12a91bf2"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>Destroy</b> (<a class="el" href="classallofw_1_1_graphical_backend.html">GraphicalBackend</a> *backend)</td></tr>
+<tr class="memitem:aedfc6c9491f9e39a535bf77d12a91bf2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#aedfc6c9491f9e39a535bf77d12a91bf2">Destroy</a> (<a class="el" href="classallofw_1_1_graphical_backend.html">GraphicalBackend</a> *backend)</td></tr>
 <tr class="separator:aedfc6c9491f9e39a535bf77d12a91bf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a1c43206445de96f94252fc38c7659611"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_graphical_backend.html#a1c43206445de96f94252fc38c7659611">~GraphicalBackend</a> ()</td></tr>
+<tr class="separator:a1c43206445de96f94252fc38c7659611"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a1c43206445de96f94252fc38c7659611"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual allofw::GraphicalBackend::~GraphicalBackend </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="ab2c207f08a2ac1a7187a3504b4e35d64"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_graphical_context2_d.html">GraphicalContext2D</a>* allofw::GraphicalBackend::createGraphicalContext2D </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td>
+          <td class="paramname"><em>surface</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="abdab7b72453310ee00a89e3ac86064bd"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a>* allofw::GraphicalBackend::createPDFSurface2D </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aaad0c58eaf438df1bb23aa25a5da9efe"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classallofw_1_1_graphical_backend.html">GraphicalBackend</a>* allofw::GraphicalBackend::CreateSkia </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a5c1ca3b5ef098df734c6a2810751e695"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a>* allofw::GraphicalBackend::createSurface2D </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a2da35c329f5872eb737f134ded774985"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a>* allofw::GraphicalBackend::createSurface2DFromImage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_byte_stream.html">ByteStream</a> *&#160;</td>
+          <td class="paramname"><em>stream</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ab94e6fb84035b38f5e352a638600e72b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a>* allofw::GraphicalBackend::createSurface2DFromImage </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a76f457cfe383ed1b898d00861084d2b4"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a>* allofw::GraphicalBackend::createSurface2DWithPixels </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>pixels</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a9cf2afd70ae8fb1c759f4223bafbfba4"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_video_surface2_d.html">VideoSurface2D</a>* allofw::GraphicalBackend::createVideoSurface2DFromFile </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a5b4490aa71a5c13719933fded4d5ae52"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_video_surface2_d.html">VideoSurface2D</a>* allofw::GraphicalBackend::createVideoSurface2DFromStream </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_byte_stream.html">ByteStream</a> *&#160;</td>
+          <td class="paramname"><em>stream</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aedfc6c9491f9e39a535bf77d12a91bf2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void allofw::GraphicalBackend::Destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_graphical_backend.html">GraphicalBackend</a> *&#160;</td>
+          <td class="paramname"><em>backend</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a799220d211b39c3d2aa3213d3c59bce2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::GraphicalBackend::destroyGraphicalContext2D </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_graphical_context2_d.html">GraphicalContext2D</a> *&#160;</td>
+          <td class="paramname"><em>context</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a6630e348d5e1dcaa776258f7092dfe7b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::GraphicalBackend::destroySurface2D </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_surface2_d.html">Surface2D</a> *&#160;</td>
+          <td class="paramname"><em>surface</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a33ad505b2ea7f94a8660658023e5802c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::GraphicalBackend::destroyVideoSurface2D </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_video_surface2_d.html">VideoSurface2D</a> *&#160;</td>
+          <td class="paramname"><em>video</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/<a class="el" href="graphics_8h_source.html">graphics.h</a></li>
+<li><a class="el" href="graphics_8h_source.html">graphics.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

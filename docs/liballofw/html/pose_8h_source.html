@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>liballofw: /Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/math/pose.h Source File</title>
+<title>liballofw: pose.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -61,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -79,7 +81,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_2a31ef91e2bde20c1c1c7234f5ba63b0.html">Allofw</a></li><li class="navelem"><a class="el" href="dir_142424a45fbc9c3712ea13b314242ccb.html">liballofw</a></li><li class="navelem"><a class="el" href="dir_596e4b4a4196a30be3526e60a1f348f1.html">include</a></li><li class="navelem"><a class="el" href="dir_5d7db45979eb3e029464a16644a4b212.html">allofw</a></li><li class="navelem"><a class="el" href="dir_08998d126ef03e73c6815c379dbf975c.html">math</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_8dbd96830d206991f8881ba1b8fefebb.html">AllofwModule</a></li><li class="navelem"><a class="el" href="dir_7dd0b47b189f60f188539ed76de22c75.html">liballofw</a></li><li class="navelem"><a class="el" href="dir_2910e3aaee372bdd36762042fad0309d.html">include</a></li><li class="navelem"><a class="el" href="dir_41ce791180e6f10f0176cda8dbb01784.html">allofw</a></li><li class="navelem"><a class="el" href="dir_ba556766b1b76cade1ddfa848fdcc8a4.html">math</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -87,28 +89,34 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">pose.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef IV_MATH_POSE_H</span></div>
+<a href="pose_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef IV_MATH_POSE_H</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define IV_MATH_POSE_H</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;vector.h&quot;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &quot;quaternion.h&quot;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="vector_8h.html">vector.h</a>&quot;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="quaternion_8h.html">quaternion.h</a>&quot;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;</div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceallofw.html">allofw</a> {</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
 <div class="line"><a name="l00009"></a><span class="lineno"><a class="line" href="structallofw_1_1_pose.html">    9</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structallofw_1_1_pose.html">Pose</a> {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;        <a class="code" href="structallofw_1_1_vector3__.html">Vector3</a> position;</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;        <a class="code" href="structallofw_1_1_quaternion__.html">Quaternion</a> rotation;</div>
+<div class="line"><a name="l00010"></a><span class="lineno"><a class="line" href="structallofw_1_1_pose.html#abe42ab09eff2eef902097eb8bf9cea40">   10</a></span>&#160;        <a class="code" href="structallofw_1_1_vector3__.html">Vector3</a> <a class="code" href="structallofw_1_1_pose.html#abe42ab09eff2eef902097eb8bf9cea40">position</a>;</div>
+<div class="line"><a name="l00011"></a><span class="lineno"><a class="line" href="structallofw_1_1_pose.html#a7f1efaad81737c1347497006b7f66eeb">   11</a></span>&#160;        <a class="code" href="structallofw_1_1_quaternion__.html">Quaternion</a> <a class="code" href="structallofw_1_1_pose.html#a7f1efaad81737c1347497006b7f66eeb">rotation</a>;</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;        <a class="code" href="structallofw_1_1_pose.html">Pose</a>() : position(0, 0, 0), rotation(Quaternion::One()) { }</div>
+<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="structallofw_1_1_pose.html#a834b6826989fadf3ef508b6b11bf5c47">   13</a></span>&#160;        <a class="code" href="structallofw_1_1_pose.html#a834b6826989fadf3ef508b6b11bf5c47">Pose</a>() : position(0, 0, 0), rotation(<a class="code" href="structallofw_1_1_quaternion__.html">Quaternion</a>::One()) { }</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;        <span class="keyword">static</span> <a class="code" href="structallofw_1_1_pose.html">Pose</a> lookAt(<a class="code" href="structallofw_1_1_vector3__.html">Vector3</a> eye, <a class="code" href="structallofw_1_1_vector3__.html">Vector3</a> at, <a class="code" href="structallofw_1_1_vector3__.html">Vector3</a> up);</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;        <span class="keyword">static</span> <a class="code" href="structallofw_1_1_pose.html">Pose</a> <a class="code" href="structallofw_1_1_pose.html#a8a0da3fa84a91c51613bb87264c473b1">lookAt</a>(<a class="code" href="structallofw_1_1_vector3__.html">Vector3</a> eye, <a class="code" href="structallofw_1_1_vector3__.html">Vector3</a> at, <a class="code" href="structallofw_1_1_vector3__.html">Vector3</a> up);</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    };</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;}</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="structallofw_1_1_pose_html_a8a0da3fa84a91c51613bb87264c473b1"><div class="ttname"><a href="structallofw_1_1_pose.html#a8a0da3fa84a91c51613bb87264c473b1">allofw::Pose::lookAt</a></div><div class="ttdeci">static Pose lookAt(Vector3 eye, Vector3 at, Vector3 up)</div></div>
+<div class="ttc" id="structallofw_1_1_pose_html_abe42ab09eff2eef902097eb8bf9cea40"><div class="ttname"><a href="structallofw_1_1_pose.html#abe42ab09eff2eef902097eb8bf9cea40">allofw::Pose::position</a></div><div class="ttdeci">Vector3 position</div><div class="ttdef"><b>Definition:</b> pose.h:10</div></div>
+<div class="ttc" id="structallofw_1_1_pose_html_a834b6826989fadf3ef508b6b11bf5c47"><div class="ttname"><a href="structallofw_1_1_pose.html#a834b6826989fadf3ef508b6b11bf5c47">allofw::Pose::Pose</a></div><div class="ttdeci">Pose()</div><div class="ttdef"><b>Definition:</b> pose.h:13</div></div>
 <div class="ttc" id="namespaceallofw_html"><div class="ttname"><a href="namespaceallofw.html">allofw</a></div><div class="ttdef"><b>Definition:</b> allofw.h:12</div></div>
+<div class="ttc" id="structallofw_1_1_pose_html_a7f1efaad81737c1347497006b7f66eeb"><div class="ttname"><a href="structallofw_1_1_pose.html#a7f1efaad81737c1347497006b7f66eeb">allofw::Pose::rotation</a></div><div class="ttdeci">Quaternion rotation</div><div class="ttdef"><b>Definition:</b> pose.h:11</div></div>
 <div class="ttc" id="structallofw_1_1_quaternion___html"><div class="ttname"><a href="structallofw_1_1_quaternion__.html">allofw::Quaternion_</a></div><div class="ttdef"><b>Definition:</b> quaternion.h:9</div></div>
+<div class="ttc" id="quaternion_8h_html"><div class="ttname"><a href="quaternion_8h.html">quaternion.h</a></div></div>
+<div class="ttc" id="vector_8h_html"><div class="ttname"><a href="vector_8h.html">vector.h</a></div></div>
 <div class="ttc" id="structallofw_1_1_vector3___html"><div class="ttname"><a href="structallofw_1_1_vector3__.html">allofw::Vector3_</a></div><div class="ttdef"><b>Definition:</b> vector.h:63</div></div>
 <div class="ttc" id="structallofw_1_1_pose_html"><div class="ttname"><a href="structallofw_1_1_pose.html">allofw::Pose</a></div><div class="ttdef"><b>Definition:</b> pose.h:9</div></div>
 </div><!-- fragment --></div><!-- contents -->

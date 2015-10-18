@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>liballofw: /Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/opengl_utils.h Source File</title>
+<title>liballofw: opengl_utils.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -61,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -79,7 +81,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_2a31ef91e2bde20c1c1c7234f5ba63b0.html">Allofw</a></li><li class="navelem"><a class="el" href="dir_142424a45fbc9c3712ea13b314242ccb.html">liballofw</a></li><li class="navelem"><a class="el" href="dir_596e4b4a4196a30be3526e60a1f348f1.html">include</a></li><li class="navelem"><a class="el" href="dir_5d7db45979eb3e029464a16644a4b212.html">allofw</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_8dbd96830d206991f8881ba1b8fefebb.html">AllofwModule</a></li><li class="navelem"><a class="el" href="dir_7dd0b47b189f60f188539ed76de22c75.html">liballofw</a></li><li class="navelem"><a class="el" href="dir_2910e3aaee372bdd36762042fad0309d.html">include</a></li><li class="navelem"><a class="el" href="dir_41ce791180e6f10f0176cda8dbb01784.html">allofw</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -87,24 +89,30 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">opengl_utils.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef ALLOFW_OPENGL_UTILS_H</span></div>
+<a href="opengl__utils_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef ALLOFW_OPENGL_UTILS_H</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define ALLOFW_OPENGL_UTILS_H</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;opengl.h&quot;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &quot;logger.h&quot;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="opengl_8h.html">opengl.h</a>&quot;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="logger_8h.html">logger.h</a>&quot;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;</div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceallofw.html">allofw</a> {</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;    <span class="keyword">namespace </span>glutils {</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;        <span class="comment">// Print glGetError()</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;        <span class="keywordtype">void</span> checkGLErrors(<span class="keyword">const</span> <span class="keywordtype">char</span>* info, Logger* logger = Logger::Default());</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;        <span class="comment">// Compile shader program, return 0 if failed.</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;        GLuint compileShaderProgram(<span class="keyword">const</span> <span class="keywordtype">char</span>* source_vertex, <span class="keyword">const</span> <span class="keywordtype">char</span>* source_fragment, Logger* logger = Logger::Default());</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;        GLuint compileShaderProgram(<span class="keyword">const</span> <span class="keywordtype">char</span>* source_vertex, <span class="keyword">const</span> <span class="keywordtype">char</span>* source_geometry, <span class="keyword">const</span> <span class="keywordtype">char</span>* source_fragment, Logger* logger = Logger::Default());</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    }</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;}</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno"><a class="line" href="namespaceallofw_1_1glutils.html">    8</a></span>&#160;    <span class="keyword">namespace </span>glutils {</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="namespaceallofw_1_1glutils.html#a9bb1cc644b138afaeb2808f80c33e238">checkGLErrors</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* info, <a class="code" href="classallofw_1_1_logger.html">Logger</a>* logger = <a class="code" href="classallofw_1_1_logger.html#aa6e58b177c9cb66cb153f1a0394b3fe7">Logger::Default</a>());</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;        GLuint <a class="code" href="namespaceallofw_1_1glutils.html#a5fff1ac45991a0e79dcffc7997cef9c2">compileShaderProgram</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* source_vertex, <span class="keyword">const</span> <span class="keywordtype">char</span>* source_fragment, <a class="code" href="classallofw_1_1_logger.html">Logger</a>* logger = <a class="code" href="classallofw_1_1_logger.html#aa6e58b177c9cb66cb153f1a0394b3fe7">Logger::Default</a>());</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        GLuint <a class="code" href="namespaceallofw_1_1glutils.html#a5fff1ac45991a0e79dcffc7997cef9c2">compileShaderProgram</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* source_vertex, <span class="keyword">const</span> <span class="keywordtype">char</span>* source_geometry, <span class="keyword">const</span> <span class="keywordtype">char</span>* source_fragment, <a class="code" href="classallofw_1_1_logger.html">Logger</a>* logger = <a class="code" href="classallofw_1_1_logger.html#aa6e58b177c9cb66cb153f1a0394b3fe7">Logger::Default</a>());</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    }</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;}</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="opengl_8h_html"><div class="ttname"><a href="opengl_8h.html">opengl.h</a></div></div>
 <div class="ttc" id="namespaceallofw_html"><div class="ttname"><a href="namespaceallofw.html">allofw</a></div><div class="ttdef"><b>Definition:</b> allofw.h:12</div></div>
+<div class="ttc" id="classallofw_1_1_logger_html"><div class="ttname"><a href="classallofw_1_1_logger.html">allofw::Logger</a></div><div class="ttdef"><b>Definition:</b> logger.h:25</div></div>
+<div class="ttc" id="logger_8h_html"><div class="ttname"><a href="logger_8h.html">logger.h</a></div></div>
+<div class="ttc" id="classallofw_1_1_logger_html_aa6e58b177c9cb66cb153f1a0394b3fe7"><div class="ttname"><a href="classallofw_1_1_logger.html#aa6e58b177c9cb66cb153f1a0394b3fe7">allofw::Logger::Default</a></div><div class="ttdeci">static Logger * Default()</div><div class="ttdef"><b>Definition:</b> logger.h:49</div></div>
+<div class="ttc" id="namespaceallofw_1_1glutils_html_a5fff1ac45991a0e79dcffc7997cef9c2"><div class="ttname"><a href="namespaceallofw_1_1glutils.html#a5fff1ac45991a0e79dcffc7997cef9c2">allofw::glutils::compileShaderProgram</a></div><div class="ttdeci">GLuint compileShaderProgram(const char *source_vertex, const char *source_fragment, Logger *logger=Logger::Default())</div></div>
+<div class="ttc" id="namespaceallofw_1_1glutils_html_a9bb1cc644b138afaeb2808f80c33e238"><div class="ttname"><a href="namespaceallofw_1_1glutils.html#a9bb1cc644b138afaeb2808f80c33e238">allofw::glutils::checkGLErrors</a></div><div class="ttdeci">void checkGLErrors(const char *info, Logger *logger=Logger::Default())</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

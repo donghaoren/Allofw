@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -81,7 +83,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>allofw</b></li><li class="navelem"><a class="el" href="classallofw_1_1_configuration.html">Configuration</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceallofw.html">allofw</a></li><li class="navelem"><a class="el" href="classallofw_1_1_configuration.html">Configuration</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -94,65 +96,601 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">allofw::Configuration Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>YAML-based configuration reader.  
+ <a href="classallofw_1_1_configuration.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="config_8h_source.html">config.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Config node.  <a href="classallofw_1_1_configuration_1_1_node.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:abb284466dc1195dde4280ba94d4a8e39"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abb284466dc1195dde4280ba94d4a8e39"></a>
-virtual <a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getNode</b> (const char *key)=0</td></tr>
+<tr class="memitem:abb284466dc1195dde4280ba94d4a8e39"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#abb284466dc1195dde4280ba94d4a8e39">getNode</a> (const char *key)=0</td></tr>
+<tr class="memdesc:abb284466dc1195dde4280ba94d4a8e39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a node with a key (pair with destroyNode).  <a href="#abb284466dc1195dde4280ba94d4a8e39">More...</a><br /></td></tr>
 <tr class="separator:abb284466dc1195dde4280ba94d4a8e39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac45e7ec6aec62e6dca7b78581bc9ad54"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac45e7ec6aec62e6dca7b78581bc9ad54"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>destroyNode</b> (<a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a> *node)=0</td></tr>
+<tr class="memitem:ac45e7ec6aec62e6dca7b78581bc9ad54"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#ac45e7ec6aec62e6dca7b78581bc9ad54">destroyNode</a> (<a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a> *node)=0</td></tr>
+<tr class="memdesc:ac45e7ec6aec62e6dca7b78581bc9ad54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the node.  <a href="#ac45e7ec6aec62e6dca7b78581bc9ad54">More...</a><br /></td></tr>
 <tr class="separator:ac45e7ec6aec62e6dca7b78581bc9ad54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:affab21ea2a714a40aed03b7df7d2c017"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="affab21ea2a714a40aed03b7df7d2c017"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>getString</b> (const char *key, char *output, size_t output_capacity, const char *fallback=&quot;&quot;)=0</td></tr>
-<tr class="separator:affab21ea2a714a40aed03b7df7d2c017"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76789a6806ba9e06d391bf5b58c6ff3e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a76789a6806ba9e06d391bf5b58c6ff3e"></a>
-virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><b>getStringLength</b> (const char *key, const char *fallback=&quot;&quot;)=0</td></tr>
-<tr class="separator:a76789a6806ba9e06d391bf5b58c6ff3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e49cf4e14474854b0cc360cb3825c72"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8e49cf4e14474854b0cc360cb3825c72"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>getInt32</b> (const char *key, int fallback=0)=0</td></tr>
-<tr class="separator:a8e49cf4e14474854b0cc360cb3825c72"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a61d095a5debe66d91439bd16890a3f7a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a61d095a5debe66d91439bd16890a3f7a"></a>
-virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>getUInt32</b> (const char *key, unsigned int fallback=0)=0</td></tr>
-<tr class="separator:a61d095a5debe66d91439bd16890a3f7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c7e820d2f64c4510fc62109f8a85aaf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9c7e820d2f64c4510fc62109f8a85aaf"></a>
-virtual float&#160;</td><td class="memItemRight" valign="bottom"><b>getFloat</b> (const char *key, float fallback=0.0f)=0</td></tr>
-<tr class="separator:a9c7e820d2f64c4510fc62109f8a85aaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad21bb203bd62723145c685d15059b15a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad21bb203bd62723145c685d15059b15a"></a>
-virtual double&#160;</td><td class="memItemRight" valign="bottom"><b>getDouble</b> (const char *key, double fallback=0.0)=0</td></tr>
-<tr class="separator:ad21bb203bd62723145c685d15059b15a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9620718d5bcf631febcb72cc8680f74b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9620718d5bcf631febcb72cc8680f74b"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>getBoolean</b> (const char *key, bool fallback=0.0)=0</td></tr>
-<tr class="separator:a9620718d5bcf631febcb72cc8680f74b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade32362c6c255f8d24e9dbec7c9edfa4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ade32362c6c255f8d24e9dbec7c9edfa4"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseFile</b> (const char *path)=0</td></tr>
+<tr class="memitem:ac76fcc213dbde65c6e3ed83f1748b81f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#ac76fcc213dbde65c6e3ed83f1748b81f">getString</a> (const char *path, char *output, size_t output_capacity, const char *fallback=&quot;&quot;)=0</td></tr>
+<tr class="memdesc:ac76fcc213dbde65c6e3ed83f1748b81f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the string at a given path.  <a href="#ac76fcc213dbde65c6e3ed83f1748b81f">More...</a><br /></td></tr>
+<tr class="separator:ac76fcc213dbde65c6e3ed83f1748b81f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4864988f50d39abd9c350afedd57dd04"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#a4864988f50d39abd9c350afedd57dd04">getStringLength</a> (const char *path, const char *fallback=&quot;&quot;)=0</td></tr>
+<tr class="memdesc:a4864988f50d39abd9c350afedd57dd04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the length of the string at a give path.  <a href="#a4864988f50d39abd9c350afedd57dd04">More...</a><br /></td></tr>
+<tr class="separator:a4864988f50d39abd9c350afedd57dd04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac515ef61aef3912f80d34d742898f2a"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#aac515ef61aef3912f80d34d742898f2a">getInt32</a> (const char *path, int fallback=0)=0</td></tr>
+<tr class="memdesc:aac515ef61aef3912f80d34d742898f2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get int32 at a given path.  <a href="#aac515ef61aef3912f80d34d742898f2a">More...</a><br /></td></tr>
+<tr class="separator:aac515ef61aef3912f80d34d742898f2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f20f76a09935a06d958328f39d33b3c"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#a5f20f76a09935a06d958328f39d33b3c">getUInt32</a> (const char *path, unsigned int fallback=0)=0</td></tr>
+<tr class="memdesc:a5f20f76a09935a06d958328f39d33b3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get uint32 at a given path.  <a href="#a5f20f76a09935a06d958328f39d33b3c">More...</a><br /></td></tr>
+<tr class="separator:a5f20f76a09935a06d958328f39d33b3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4c1c0b886f2f85bae166f3a3741fade"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#ae4c1c0b886f2f85bae166f3a3741fade">getFloat</a> (const char *path, float fallback=0.0f)=0</td></tr>
+<tr class="memdesc:ae4c1c0b886f2f85bae166f3a3741fade"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get float at a given path.  <a href="#ae4c1c0b886f2f85bae166f3a3741fade">More...</a><br /></td></tr>
+<tr class="separator:ae4c1c0b886f2f85bae166f3a3741fade"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4a4cbf130c77f594c4740203baf6703"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#ae4a4cbf130c77f594c4740203baf6703">getDouble</a> (const char *path, double fallback=0.0)=0</td></tr>
+<tr class="memdesc:ae4a4cbf130c77f594c4740203baf6703"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get double at a given path.  <a href="#ae4a4cbf130c77f594c4740203baf6703">More...</a><br /></td></tr>
+<tr class="separator:ae4a4cbf130c77f594c4740203baf6703"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8b47bbb0bb0486ea817d1c908a67dfd"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#ad8b47bbb0bb0486ea817d1c908a67dfd">getBoolean</a> (const char *path, bool fallback=0.0)=0</td></tr>
+<tr class="memdesc:ad8b47bbb0bb0486ea817d1c908a67dfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get boolean at a given path.  <a href="#ad8b47bbb0bb0486ea817d1c908a67dfd">More...</a><br /></td></tr>
+<tr class="separator:ad8b47bbb0bb0486ea817d1c908a67dfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade32362c6c255f8d24e9dbec7c9edfa4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#ade32362c6c255f8d24e9dbec7c9edfa4">parseFile</a> (const char *path)=0</td></tr>
+<tr class="memdesc:ade32362c6c255f8d24e9dbec7c9edfa4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a YAML file.  <a href="#ade32362c6c255f8d24e9dbec7c9edfa4">More...</a><br /></td></tr>
 <tr class="separator:ade32362c6c255f8d24e9dbec7c9edfa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82a246fe613b10eb3e550551ccf1a466"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a82a246fe613b10eb3e550551ccf1a466"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>parseFile</b> (const char *path, const char *key)=0</td></tr>
+<tr class="memitem:a82a246fe613b10eb3e550551ccf1a466"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#a82a246fe613b10eb3e550551ccf1a466">parseFile</a> (const char *path, const char *key)=0</td></tr>
+<tr class="memdesc:a82a246fe613b10eb3e550551ccf1a466"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a YAML file to a give key.  <a href="#a82a246fe613b10eb3e550551ccf1a466">More...</a><br /></td></tr>
 <tr class="separator:a82a246fe613b10eb3e550551ccf1a466"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b2b183122c1f1a578a0136bc63c158d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8b2b183122c1f1a578a0136bc63c158d"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><b>getString</b> (const char *key, const char *fallback=&quot;&quot;)</td></tr>
-<tr class="separator:a8b2b183122c1f1a578a0136bc63c158d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab73a1c0514cdc8b0d72a0c01ebc04441"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#ab73a1c0514cdc8b0d72a0c01ebc04441">getString</a> (const char *path, const char *fallback=&quot;&quot;)</td></tr>
+<tr class="memdesc:ab73a1c0514cdc8b0d72a0c01ebc04441"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get STL string at a given path.  <a href="#ab73a1c0514cdc8b0d72a0c01ebc04441">More...</a><br /></td></tr>
+<tr class="separator:ab73a1c0514cdc8b0d72a0c01ebc04441"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab302de2c59f8de3c686bd61685b75a6e"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#ab302de2c59f8de3c686bd61685b75a6e">~Configuration</a> ()</td></tr>
+<tr class="separator:ab302de2c59f8de3c686bd61685b75a6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a9f29e97239125da4b132b06585244dc6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9f29e97239125da4b132b06585244dc6"></a>
-static <a class="el" href="classallofw_1_1_configuration.html">Configuration</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>Create</b> ()</td></tr>
+<tr class="memitem:a9f29e97239125da4b132b06585244dc6"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classallofw_1_1_configuration.html">Configuration</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#a9f29e97239125da4b132b06585244dc6">Create</a> ()</td></tr>
+<tr class="memdesc:a9f29e97239125da4b132b06585244dc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create <a class="el" href="classallofw_1_1_configuration.html" title="YAML-based configuration reader. ">Configuration</a> object.  <a href="#a9f29e97239125da4b132b06585244dc6">More...</a><br /></td></tr>
 <tr class="separator:a9f29e97239125da4b132b06585244dc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55f671f9fc4b1794f37c7d3445dad9a6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a55f671f9fc4b1794f37c7d3445dad9a6"></a>
-static <a class="el" href="classallofw_1_1_configuration.html">Configuration</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>ParseMainArgs</b> (int argc, char *argv[])</td></tr>
+<tr class="memitem:a55f671f9fc4b1794f37c7d3445dad9a6"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classallofw_1_1_configuration.html">Configuration</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#a55f671f9fc4b1794f37c7d3445dad9a6">ParseMainArgs</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:a55f671f9fc4b1794f37c7d3445dad9a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create <a class="el" href="classallofw_1_1_configuration.html" title="YAML-based configuration reader. ">Configuration</a> object by C++ main() arguments.  <a href="#a55f671f9fc4b1794f37c7d3445dad9a6">More...</a><br /></td></tr>
 <tr class="separator:a55f671f9fc4b1794f37c7d3445dad9a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedd01c436a115f8a0b03d4100b83aa0b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aedd01c436a115f8a0b03d4100b83aa0b"></a>
-static <a class="el" href="classallofw_1_1_configuration.html">Configuration</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>CreateFromFile</b> (const char *args=nullptr)</td></tr>
+<tr class="memitem:aedd01c436a115f8a0b03d4100b83aa0b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classallofw_1_1_configuration.html">Configuration</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_configuration.html#aedd01c436a115f8a0b03d4100b83aa0b">CreateFromFile</a> (const char *args=nullptr)</td></tr>
+<tr class="memdesc:aedd01c436a115f8a0b03d4100b83aa0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create <a class="el" href="classallofw_1_1_configuration.html" title="YAML-based configuration reader. ">Configuration</a> object from file.  <a href="#aedd01c436a115f8a0b03d4100b83aa0b">More...</a><br /></td></tr>
 <tr class="separator:aedd01c436a115f8a0b03d4100b83aa0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>YAML-based configuration reader. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="ab302de2c59f8de3c686bd61685b75a6e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual allofw::Configuration::~Configuration </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a9f29e97239125da4b132b06585244dc6"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classallofw_1_1_configuration.html">Configuration</a>* allofw::Configuration::Create </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create <a class="el" href="classallofw_1_1_configuration.html" title="YAML-based configuration reader. ">Configuration</a> object. </p>
+
+</div>
+</div>
+<a class="anchor" id="aedd01c436a115f8a0b03d4100b83aa0b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classallofw_1_1_configuration.html">Configuration</a>* allofw::Configuration::CreateFromFile </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>args</em> = <code>nullptr</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create <a class="el" href="classallofw_1_1_configuration.html" title="YAML-based configuration reader. ">Configuration</a> object from file. </p>
+
+</div>
+</div>
+<a class="anchor" id="ac45e7ec6aec62e6dca7b78581bc9ad54"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::Configuration::destroyNode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a> *&#160;</td>
+          <td class="paramname"><em>node</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Destroy the node. </p>
+
+</div>
+</div>
+<a class="anchor" id="ad8b47bbb0bb0486ea817d1c908a67dfd"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool allofw::Configuration::getBoolean </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0.0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get boolean at a given path. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae4a4cbf130c77f594c4740203baf6703"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual double allofw::Configuration::getDouble </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0.0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get double at a given path. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae4c1c0b886f2f85bae166f3a3741fade"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual float allofw::Configuration::getFloat </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0.0f</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get float at a given path. </p>
+
+</div>
+</div>
+<a class="anchor" id="aac515ef61aef3912f80d34d742898f2a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int allofw::Configuration::getInt32 </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get int32 at a given path. </p>
+
+</div>
+</div>
+<a class="anchor" id="abb284466dc1195dde4280ba94d4a8e39"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_configuration_1_1_node.html">Node</a>* allofw::Configuration::getNode </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>key</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a node with a key (pair with destroyNode). </p>
+
+</div>
+</div>
+<a class="anchor" id="ac76fcc213dbde65c6e3ed83f1748b81f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::Configuration::getString </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>output_capacity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the string at a given path. </p>
+
+</div>
+</div>
+<a class="anchor" id="ab73a1c0514cdc8b0d72a0c01ebc04441"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string allofw::Configuration::getString </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get STL string at a given path. </p>
+
+</div>
+</div>
+<a class="anchor" id="a4864988f50d39abd9c350afedd57dd04"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual size_t allofw::Configuration::getStringLength </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the length of the string at a give path. </p>
+
+</div>
+</div>
+<a class="anchor" id="a5f20f76a09935a06d958328f39d33b3c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual unsigned int allofw::Configuration::getUInt32 </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get uint32 at a given path. </p>
+
+</div>
+</div>
+<a class="anchor" id="ade32362c6c255f8d24e9dbec7c9edfa4"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::Configuration::parseFile </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parse a YAML file. </p>
+
+</div>
+</div>
+<a class="anchor" id="a82a246fe613b10eb3e550551ccf1a466"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::Configuration::parseFile </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parse a YAML file to a give key. </p>
+
+</div>
+</div>
+<a class="anchor" id="a55f671f9fc4b1794f37c7d3445dad9a6"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classallofw_1_1_configuration.html">Configuration</a>* allofw::Configuration::ParseMainArgs </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>argc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>argv</em>[]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create <a class="el" href="classallofw_1_1_configuration.html" title="YAML-based configuration reader. ">Configuration</a> object by C++ main() arguments. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/<a class="el" href="config_8h_source.html">config.h</a></li>
+<li><a class="el" href="config_8h_source.html">config.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -81,7 +83,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>allofw</b></li><li class="navelem"><a class="el" href="classallofw_1_1_logger_factory.html">LoggerFactory</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceallofw.html">allofw</a></li><li class="navelem"><a class="el" href="classallofw_1_1_logger_factory.html">LoggerFactory</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -93,27 +95,146 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">allofw::LoggerFactory Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="logger_8h_source.html">logger.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a7926a1dcc900207bb6ea46ff0752947a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7926a1dcc900207bb6ea46ff0752947a"></a>
-virtual <a class="el" href="classallofw_1_1_logger.html">Logger</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getThreadLogger</b> ()=0</td></tr>
+<tr class="memitem:a7926a1dcc900207bb6ea46ff0752947a"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classallofw_1_1_logger.html">Logger</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_logger_factory.html#a7926a1dcc900207bb6ea46ff0752947a">getThreadLogger</a> ()=0</td></tr>
 <tr class="separator:a7926a1dcc900207bb6ea46ff0752947a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a033801c240b6b274d5ada8d29c34e37e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a033801c240b6b274d5ada8d29c34e37e"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setThreadLogger</b> (<a class="el" href="classallofw_1_1_logger.html">Logger</a> *logger)=0</td></tr>
+<tr class="memitem:a033801c240b6b274d5ada8d29c34e37e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_logger_factory.html#a033801c240b6b274d5ada8d29c34e37e">setThreadLogger</a> (<a class="el" href="classallofw_1_1_logger.html">Logger</a> *logger)=0</td></tr>
 <tr class="separator:a033801c240b6b274d5ada8d29c34e37e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6380f220d3bccfa34b47a714836ea0cd"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_logger_factory.html#a6380f220d3bccfa34b47a714836ea0cd">~LoggerFactory</a> ()</td></tr>
+<tr class="separator:a6380f220d3bccfa34b47a714836ea0cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:abf0b295fd98db563535eb12df2e0c238"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abf0b295fd98db563535eb12df2e0c238"></a>
-static <a class="el" href="classallofw_1_1_logger_factory.html">LoggerFactory</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>Default</b> ()</td></tr>
+<tr class="memitem:abf0b295fd98db563535eb12df2e0c238"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classallofw_1_1_logger_factory.html">LoggerFactory</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_logger_factory.html#abf0b295fd98db563535eb12df2e0c238">Default</a> ()</td></tr>
 <tr class="separator:abf0b295fd98db563535eb12df2e0c238"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1057debc83c5e5f09829daec01968934"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1057debc83c5e5f09829daec01968934"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>SetDefault</b> (<a class="el" href="classallofw_1_1_logger_factory.html">LoggerFactory</a> *factory)</td></tr>
+<tr class="memitem:a1057debc83c5e5f09829daec01968934"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_logger_factory.html#a1057debc83c5e5f09829daec01968934">SetDefault</a> (<a class="el" href="classallofw_1_1_logger_factory.html">LoggerFactory</a> *factory)</td></tr>
 <tr class="separator:a1057debc83c5e5f09829daec01968934"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a6380f220d3bccfa34b47a714836ea0cd"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual allofw::LoggerFactory::~LoggerFactory </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="abf0b295fd98db563535eb12df2e0c238"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classallofw_1_1_logger_factory.html">LoggerFactory</a>* allofw::LoggerFactory::Default </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a7926a1dcc900207bb6ea46ff0752947a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classallofw_1_1_logger.html">Logger</a>* allofw::LoggerFactory::getThreadLogger </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a1057debc83c5e5f09829daec01968934"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void allofw::LoggerFactory::SetDefault </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_logger_factory.html">LoggerFactory</a> *&#160;</td>
+          <td class="paramname"><em>factory</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a033801c240b6b274d5ada8d29c34e37e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::LoggerFactory::setThreadLogger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_logger.html">Logger</a> *&#160;</td>
+          <td class="paramname"><em>logger</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/<a class="el" href="logger_8h_source.html">logger.h</a></li>
+<li><a class="el" href="logger_8h_source.html">logger.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

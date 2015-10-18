@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>liballofw: /Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/math/basic.h Source File</title>
+<title>liballofw: basic.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -61,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -79,7 +81,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_2a31ef91e2bde20c1c1c7234f5ba63b0.html">Allofw</a></li><li class="navelem"><a class="el" href="dir_142424a45fbc9c3712ea13b314242ccb.html">liballofw</a></li><li class="navelem"><a class="el" href="dir_596e4b4a4196a30be3526e60a1f348f1.html">include</a></li><li class="navelem"><a class="el" href="dir_5d7db45979eb3e029464a16644a4b212.html">allofw</a></li><li class="navelem"><a class="el" href="dir_08998d126ef03e73c6815c379dbf975c.html">math</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_8dbd96830d206991f8881ba1b8fefebb.html">AllofwModule</a></li><li class="navelem"><a class="el" href="dir_7dd0b47b189f60f188539ed76de22c75.html">liballofw</a></li><li class="navelem"><a class="el" href="dir_2910e3aaee372bdd36762042fad0309d.html">include</a></li><li class="navelem"><a class="el" href="dir_41ce791180e6f10f0176cda8dbb01784.html">allofw</a></li><li class="navelem"><a class="el" href="dir_ba556766b1b76cade1ddfa848fdcc8a4.html">math</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -87,7 +89,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">basic.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef IV_MATH_BASIC_H</span></div>
+<a href="basic_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef IV_MATH_BASIC_H</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define IV_MATH_BASIC_H</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;../common.h&quot;</span></div>
@@ -96,29 +98,38 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceallofw.html">allofw</a> {</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">double</span> PI = 3.1415926535897932384626433832795028841971693993751;</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">double</span> E = 2.7182818284590452353602874713526624977572470937000;</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">double</span> NaN = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">double</span> Infinity = std::numeric_limits&lt;double&gt;::infinity();</div>
+<div class="line"><a name="l00010"></a><span class="lineno"><a class="line" href="namespaceallofw.html#a4d26fd8f0cc550720adacb3def9027aa">   10</a></span>&#160;    <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="namespaceallofw.html#a4d26fd8f0cc550720adacb3def9027aa">PI</a> = 3.1415926535897932384626433832795028841971693993751;</div>
+<div class="line"><a name="l00011"></a><span class="lineno"><a class="line" href="namespaceallofw.html#a606ebebac26dfab1f042d2596a48e778">   11</a></span>&#160;    <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="namespaceallofw.html#a606ebebac26dfab1f042d2596a48e778">E</a> = 2.7182818284590452353602874713526624977572470937000;</div>
+<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="namespaceallofw.html#a060839c0a4f201a1f3dbd0fbe4596757">   12</a></span>&#160;    <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="namespaceallofw.html#a060839c0a4f201a1f3dbd0fbe4596757">NaN</a> = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
+<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="namespaceallofw.html#a32c97c3b48496deb9a24096916868e1a">   13</a></span>&#160;    <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="namespaceallofw.html#a32c97c3b48496deb9a24096916868e1a">Infinity</a> = std::numeric_limits&lt;double&gt;::infinity();</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <span class="keyword">using</span> std::isnan;</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <span class="keyword">using</span> <a class="code" href="namespaceallofw.html#a96ce7b460565f3095dc99e53aa533072">std::isnan</a>;</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> number_t&gt;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="keyword">inline</span> number_t min(number_t a, number_t b) { <span class="keywordflow">return</span> a &lt; b ? a : b; }</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> number_t&gt;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="keyword">inline</span> number_t max(number_t a, number_t b) { <span class="keywordflow">return</span> a &gt; b ? a : b; }</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> number_t&gt;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keyword">inline</span> number_t abs(number_t a) { <span class="keywordflow">return</span> a &gt; 0 ? a : -a; }</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> number_t&gt;</div>
+<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="namespaceallofw.html#a01d4ccebd03a78e894fa6a5b583ee8d9">   19</a></span>&#160;    <span class="keyword">inline</span> number_t <a class="code" href="namespaceallofw.html#a01d4ccebd03a78e894fa6a5b583ee8d9">min</a>(number_t a, number_t b) { <span class="keywordflow">return</span> a &lt; b ? a : b; }</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> number_t&gt;</div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="namespaceallofw.html#a0918c56dc67154b3fadbdd3411569ede">   23</a></span>&#160;    <span class="keyword">inline</span> number_t <a class="code" href="namespaceallofw.html#a0918c56dc67154b3fadbdd3411569ede">max</a>(number_t a, number_t b) { <span class="keywordflow">return</span> a &gt; b ? a : b; }</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> number_t&gt;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keyword">inline</span> number_t sign(number_t a) { <span class="keywordflow">return</span> a &gt; 0 ? 1 : (a &lt; 0 ? -1 : 0); }</div>
+<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="namespaceallofw.html#a5585b171f553473194f5145425ed2fa9">   27</a></span>&#160;    <span class="keyword">inline</span> number_t <a class="code" href="namespaceallofw.html#a5585b171f553473194f5145425ed2fa9">abs</a>(number_t a) { <span class="keywordflow">return</span> a &gt; 0 ? a : -a; }</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;}</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> number_t&gt;</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="namespaceallofw.html#ad3714ee6b18f452c505d3a51715a58a9">   31</a></span>&#160;    <span class="keyword">inline</span> number_t <a class="code" href="namespaceallofw.html#ad3714ee6b18f452c505d3a51715a58a9">sign</a>(number_t a) { <span class="keywordflow">return</span> a &gt; 0 ? 1 : (a &lt; 0 ? -1 : 0); }</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;}</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="namespaceallofw_html_a0918c56dc67154b3fadbdd3411569ede"><div class="ttname"><a href="namespaceallofw.html#a0918c56dc67154b3fadbdd3411569ede">allofw::max</a></div><div class="ttdeci">number_t max(number_t a, number_t b)</div><div class="ttdoc">Compute maximum. </div><div class="ttdef"><b>Definition:</b> basic.h:23</div></div>
+<div class="ttc" id="namespaceallofw_html_a606ebebac26dfab1f042d2596a48e778"><div class="ttname"><a href="namespaceallofw.html#a606ebebac26dfab1f042d2596a48e778">allofw::E</a></div><div class="ttdeci">const double E</div><div class="ttdef"><b>Definition:</b> basic.h:11</div></div>
 <div class="ttc" id="namespaceallofw_html"><div class="ttname"><a href="namespaceallofw.html">allofw</a></div><div class="ttdef"><b>Definition:</b> allofw.h:12</div></div>
+<div class="ttc" id="namespaceallofw_html_a32c97c3b48496deb9a24096916868e1a"><div class="ttname"><a href="namespaceallofw.html#a32c97c3b48496deb9a24096916868e1a">allofw::Infinity</a></div><div class="ttdeci">const double Infinity</div><div class="ttdef"><b>Definition:</b> basic.h:13</div></div>
+<div class="ttc" id="namespaceallofw_html_ad3714ee6b18f452c505d3a51715a58a9"><div class="ttname"><a href="namespaceallofw.html#ad3714ee6b18f452c505d3a51715a58a9">allofw::sign</a></div><div class="ttdeci">number_t sign(number_t a)</div><div class="ttdoc">Compute sign of a number. </div><div class="ttdef"><b>Definition:</b> basic.h:31</div></div>
+<div class="ttc" id="namespaceallofw_html_a96ce7b460565f3095dc99e53aa533072"><div class="ttname"><a href="namespaceallofw.html#a96ce7b460565f3095dc99e53aa533072">allofw::isnan</a></div><div class="ttdeci">bool isnan(const Vector2_&lt; T &gt; &amp;v)</div><div class="ttdef"><b>Definition:</b> vector.h:181</div></div>
+<div class="ttc" id="namespaceallofw_html_a5585b171f553473194f5145425ed2fa9"><div class="ttname"><a href="namespaceallofw.html#a5585b171f553473194f5145425ed2fa9">allofw::abs</a></div><div class="ttdeci">number_t abs(number_t a)</div><div class="ttdoc">Compute absolute value. </div><div class="ttdef"><b>Definition:</b> basic.h:27</div></div>
+<div class="ttc" id="namespaceallofw_html_a060839c0a4f201a1f3dbd0fbe4596757"><div class="ttname"><a href="namespaceallofw.html#a060839c0a4f201a1f3dbd0fbe4596757">allofw::NaN</a></div><div class="ttdeci">const double NaN</div><div class="ttdef"><b>Definition:</b> basic.h:12</div></div>
+<div class="ttc" id="namespaceallofw_html_a4d26fd8f0cc550720adacb3def9027aa"><div class="ttname"><a href="namespaceallofw.html#a4d26fd8f0cc550720adacb3def9027aa">allofw::PI</a></div><div class="ttdeci">const double PI</div><div class="ttdef"><b>Definition:</b> basic.h:10</div></div>
+<div class="ttc" id="namespaceallofw_html_a01d4ccebd03a78e894fa6a5b583ee8d9"><div class="ttname"><a href="namespaceallofw.html#a01d4ccebd03a78e894fa6a5b583ee8d9">allofw::min</a></div><div class="ttdeci">number_t min(number_t a, number_t b)</div><div class="ttdoc">Compute minimum. </div><div class="ttdef"><b>Definition:</b> basic.h:19</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

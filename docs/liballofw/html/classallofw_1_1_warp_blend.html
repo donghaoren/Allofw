@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -81,7 +83,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>allofw</b></li><li class="navelem"><a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceallofw.html">allofw</a></li><li class="navelem"><a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -89,59 +91,426 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="classallofw_1_1_warp_blend-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">allofw::WarpBlend Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Warp and blend information for a display configuration.  
+ <a href="classallofw_1_1_warp_blend.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="omnistereo_8h_source.html">omnistereo.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structallofw_1_1_warp_blend_1_1_blend_data.html">BlendData</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blend map data.  <a href="structallofw_1_1_warp_blend_1_1_blend_data.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html">ViewportInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Viewport information.  <a href="structallofw_1_1_warp_blend_1_1_viewport_info.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structallofw_1_1_warp_blend_1_1_warp_data.html">WarpData</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Warp map data.  <a href="structallofw_1_1_warp_blend_1_1_warp_data.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a26ef5131b7f8f3a41d4cbf0739873842"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a26ef5131b7f8f3a41d4cbf0739873842"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>getViewportCount</b> ()=0</td></tr>
+<tr class="memitem:a26ef5131b7f8f3a41d4cbf0739873842"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#a26ef5131b7f8f3a41d4cbf0739873842">getViewportCount</a> ()=0</td></tr>
+<tr class="memdesc:a26ef5131b7f8f3a41d4cbf0739873842"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get how many viewports to draw.  <a href="#a26ef5131b7f8f3a41d4cbf0739873842">More...</a><br /></td></tr>
 <tr class="separator:a26ef5131b7f8f3a41d4cbf0739873842"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a5af336ca8578d3f5e2a2623df28950"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4a5af336ca8578d3f5e2a2623df28950"></a>
-virtual <a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html">ViewportInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getViewport</b> (int viewport)=0</td></tr>
-<tr class="separator:a4a5af336ca8578d3f5e2a2623df28950"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c656cdfdfacb588295c3331fac20bc9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7c656cdfdfacb588295c3331fac20bc9"></a>
-virtual <a class="el" href="structallofw_1_1_warp_blend_1_1_blend_data.html">BlendData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getBlendData</b> (int viewport)=0</td></tr>
-<tr class="separator:a7c656cdfdfacb588295c3331fac20bc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa29bee2acaa0aea1cee7b9c360e66e5a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa29bee2acaa0aea1cee7b9c360e66e5a"></a>
-virtual <a class="el" href="structallofw_1_1_warp_blend_1_1_warp_data.html">WarpData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getWarpData</b> (int viewport)=0</td></tr>
-<tr class="separator:aa29bee2acaa0aea1cee7b9c360e66e5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa85f880fbfada8ec3a73f788b2fcee56"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa85f880fbfada8ec3a73f788b2fcee56"></a>
-virtual GLTextureID&#160;</td><td class="memItemRight" valign="bottom"><b>getBlendTexture</b> (int viewport)=0</td></tr>
-<tr class="separator:aa85f880fbfada8ec3a73f788b2fcee56"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cb8a93fa61b7bbfd5aa55f0c46f4d52"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3cb8a93fa61b7bbfd5aa55f0c46f4d52"></a>
-virtual GLTextureID&#160;</td><td class="memItemRight" valign="bottom"><b>getWarpTexture</b> (int viewport)=0</td></tr>
-<tr class="separator:a3cb8a93fa61b7bbfd5aa55f0c46f4d52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6c6535c698af6943be714684a442d9e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html">ViewportInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#ad6c6535c698af6943be714684a442d9e">getViewport</a> (int viewport_index)=0</td></tr>
+<tr class="separator:ad6c6535c698af6943be714684a442d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8344c8a58cf0c24b20c8b5830cea03c7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structallofw_1_1_warp_blend_1_1_blend_data.html">BlendData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#a8344c8a58cf0c24b20c8b5830cea03c7">getBlendData</a> (int viewport_index)=0</td></tr>
+<tr class="separator:a8344c8a58cf0c24b20c8b5830cea03c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78709f1bc4da38299186008158e826d8"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structallofw_1_1_warp_blend_1_1_warp_data.html">WarpData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#a78709f1bc4da38299186008158e826d8">getWarpData</a> (int viewport_index)=0</td></tr>
+<tr class="separator:a78709f1bc4da38299186008158e826d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab46a525f36de3c021ee571f719a3daa7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceallofw.html#adfeddbc58a5d2188c43cfe9526c48c4a">GLTextureID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#ab46a525f36de3c021ee571f719a3daa7">getBlendTexture</a> (int viewport_index)=0</td></tr>
+<tr class="separator:ab46a525f36de3c021ee571f719a3daa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89c6c93024dcae8a51eb829b0b17595d"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceallofw.html#adfeddbc58a5d2188c43cfe9526c48c4a">GLTextureID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#a89c6c93024dcae8a51eb829b0b17595d">getWarpTexture</a> (int viewport_index)=0</td></tr>
+<tr class="separator:a89c6c93024dcae8a51eb829b0b17595d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aa6e29b7baf0f9efd0a8aa097bbcfcee3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa6e29b7baf0f9efd0a8aa097bbcfcee3"></a>
-static <a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>CreateEquirectangular</b> (int width, int height)</td></tr>
+<tr class="memitem:aa6e29b7baf0f9efd0a8aa097bbcfcee3"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#aa6e29b7baf0f9efd0a8aa097bbcfcee3">CreateEquirectangular</a> (int width, int height)</td></tr>
 <tr class="separator:aa6e29b7baf0f9efd0a8aa097bbcfcee3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4d8a9da408c7055a680a0ab72c25fab"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa4d8a9da408c7055a680a0ab72c25fab"></a>
-static <a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>CreatePerspective</b> (int width, int height, float fov)</td></tr>
+<tr class="memitem:aa4d8a9da408c7055a680a0ab72c25fab"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#aa4d8a9da408c7055a680a0ab72c25fab">CreatePerspective</a> (int width, int height, float fov)</td></tr>
 <tr class="separator:aa4d8a9da408c7055a680a0ab72c25fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d6662ad0de167afc04d392fe5e168a1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8d6662ad0de167afc04d392fe5e168a1"></a>
-static <a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>LoadAllosphereCalibration</b> (const char *calibration_path, const char *hostname=nullptr)</td></tr>
+<tr class="memitem:a8d6662ad0de167afc04d392fe5e168a1"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#a8d6662ad0de167afc04d392fe5e168a1">LoadAllosphereCalibration</a> (const char *calibration_path, const char *hostname=nullptr)</td></tr>
 <tr class="separator:a8d6662ad0de167afc04d392fe5e168a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a884bab6b996c086137c6462a82ee6608"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a884bab6b996c086137c6462a82ee6608"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>Destroy</b> (<a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a> *warpblend)</td></tr>
+<tr class="memitem:a884bab6b996c086137c6462a82ee6608"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#a884bab6b996c086137c6462a82ee6608">Destroy</a> (<a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a> *warpblend)</td></tr>
 <tr class="separator:a884bab6b996c086137c6462a82ee6608"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:adaeb9766c1e4f59be379ee1429363815"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_warp_blend.html#adaeb9766c1e4f59be379ee1429363815">~WarpBlend</a> ()</td></tr>
+<tr class="separator:adaeb9766c1e4f59be379ee1429363815"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Warp and blend information for a display configuration. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="adaeb9766c1e4f59be379ee1429363815"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual allofw::WarpBlend::~WarpBlend </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="aa6e29b7baf0f9efd0a8aa097bbcfcee3"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a>* allofw::WarpBlend::CreateEquirectangular </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Create warpblend data with Equirectangular projection. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">width</td><td>The width of the warpblend info. </td></tr>
+    <tr><td class="paramname">height</td><td>The height of the warpblend info. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aa4d8a9da408c7055a680a0ab72c25fab"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a>* allofw::WarpBlend::CreatePerspective </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>fov</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Create warpblend data for Perspective projection. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">width</td><td>The width of the warpblend info. </td></tr>
+    <tr><td class="paramname">height</td><td>The height of the warpblend info. </td></tr>
+    <tr><td class="paramname">fov</td><td>The horizontal field of view. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a884bab6b996c086137c6462a82ee6608"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void allofw::WarpBlend::Destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a> *&#160;</td>
+          <td class="paramname"><em>warpblend</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Destroy the warpblend object. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">warpblend</td><td>The object to be destroyed. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a8344c8a58cf0c24b20c8b5830cea03c7"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="structallofw_1_1_warp_blend_1_1_blend_data.html">BlendData</a> allofw::WarpBlend::getBlendData </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>viewport_index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get warp data for the viewport. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">viewport_index</td><td>The index of the viewport, 0 to <a class="el" href="classallofw_1_1_warp_blend.html#a26ef5131b7f8f3a41d4cbf0739873842" title="Get how many viewports to draw. ">getViewportCount()</a> - 1. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ab46a525f36de3c021ee571f719a3daa7"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespaceallofw.html#adfeddbc58a5d2188c43cfe9526c48c4a">GLTextureID</a> allofw::WarpBlend::getBlendTexture </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>viewport_index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get warp texture for the viewport. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">viewport_index</td><td>The index of the viewport, 0 to <a class="el" href="classallofw_1_1_warp_blend.html#a26ef5131b7f8f3a41d4cbf0739873842" title="Get how many viewports to draw. ">getViewportCount()</a> - 1. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ad6c6535c698af6943be714684a442d9e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="structallofw_1_1_warp_blend_1_1_viewport_info.html">ViewportInfo</a> allofw::WarpBlend::getViewport </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>viewport_index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get viewport information. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">viewport_index</td><td>The index of the viewport, 0 to <a class="el" href="classallofw_1_1_warp_blend.html#a26ef5131b7f8f3a41d4cbf0739873842" title="Get how many viewports to draw. ">getViewportCount()</a> - 1. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a26ef5131b7f8f3a41d4cbf0739873842"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int allofw::WarpBlend::getViewportCount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get how many viewports to draw. </p>
+
+</div>
+</div>
+<a class="anchor" id="a78709f1bc4da38299186008158e826d8"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="structallofw_1_1_warp_blend_1_1_warp_data.html">WarpData</a> allofw::WarpBlend::getWarpData </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>viewport_index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get blend data for the viewport. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">viewport_index</td><td>The index of the viewport, 0 to <a class="el" href="classallofw_1_1_warp_blend.html#a26ef5131b7f8f3a41d4cbf0739873842" title="Get how many viewports to draw. ">getViewportCount()</a> - 1. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a89c6c93024dcae8a51eb829b0b17595d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespaceallofw.html#adfeddbc58a5d2188c43cfe9526c48c4a">GLTextureID</a> allofw::WarpBlend::getWarpTexture </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>viewport_index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get blend texture for the viewport. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">viewport_index</td><td>The index of the viewport, 0 to <a class="el" href="classallofw_1_1_warp_blend.html#a26ef5131b7f8f3a41d4cbf0739873842" title="Get how many viewports to draw. ">getViewportCount()</a> - 1. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a8d6662ad0de167afc04d392fe5e168a1"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classallofw_1_1_warp_blend.html">WarpBlend</a>* allofw::WarpBlend::LoadAllosphereCalibration </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>calibration_path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>hostname</em> = <code>nullptr</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Load warpblend data from AlloSphere calibration directory. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">calibration_path</td><td>The path to the calibration directory. </td></tr>
+    <tr><td class="paramname">hostname</td><td>The hostname, if omitted, use gethostname(). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/<a class="el" href="omnistereo_8h_source.html">omnistereo.h</a></li>
+<li><a class="el" href="omnistereo_8h_source.html">omnistereo.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

@@ -38,6 +38,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -81,156 +83,1107 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>allofw</b></li><li class="navelem"><a class="el" href="classallofw_1_1_omni_stereo.html">OmniStereo</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceallofw.html">allofw</a></li><li class="navelem"><a class="el" href="classallofw_1_1_omni_stereo.html">OmniStereo</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
-<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="classallofw_1_1_omni_stereo-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">allofw::OmniStereo Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Class for Omnistereo rendering.  
+ <a href="classallofw_1_1_omni_stereo.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="omnistereo_8h_source.html">omnistereo.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structallofw_1_1_omni_stereo_1_1_composite_info.html">CompositeInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Composite info structure.  <a href="structallofw_1_1_omni_stereo_1_1_composite_info.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo_1_1_delegate.html">Delegate</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classallofw_1_1_omni_stereo.html" title="Class for Omnistereo rendering. ">OmniStereo</a> delegate class.  <a href="classallofw_1_1_omni_stereo_1_1_delegate.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html">StereoTexture</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Panorama is cubemap.  <a href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:ac880fcd4f058b55edf8256b31b36260f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac880fcd4f058b55edf8256b31b36260f"></a>
-typedef int&#160;</td><td class="memItemRight" valign="bottom"><b>StereoMode</b></td></tr>
-<tr class="separator:ac880fcd4f058b55edf8256b31b36260f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18a19dba7cb399484b060c43e005176e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a18a19dba7cb399484b060c43e005176e"></a>
-typedef int&#160;</td><td class="memItemRight" valign="bottom"><b>PanoramaMode</b></td></tr>
-<tr class="separator:a18a19dba7cb399484b060c43e005176e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adabb39de56daa34c5b82fdf5559cb538"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adabb39de56daa34c5b82fdf5559cb538"></a>
-typedef int&#160;</td><td class="memItemRight" valign="bottom"><b>Eye</b></td></tr>
-<tr class="separator:adabb39de56daa34c5b82fdf5559cb538"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26161bf55a7089f367532974ad7c19d9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a26161bf55a7089f367532974ad7c19d9"></a>
-typedef int&#160;</td><td class="memItemRight" valign="bottom"><b>CompositeMask</b></td></tr>
-<tr class="separator:a26161bf55a7089f367532974ad7c19d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab42bea701bf31b90c99699926f25db86"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab42bea701bf31b90c99699926f25db86"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setResolution</b> (int size=1024)=0</td></tr>
+<tr class="memitem:ab42bea701bf31b90c99699926f25db86"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#ab42bea701bf31b90c99699926f25db86">setResolution</a> (int size=1024)=0</td></tr>
 <tr class="separator:ab42bea701bf31b90c99699926f25db86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa42bdc17fba908fc42816aef1989b753"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa42bdc17fba908fc42816aef1989b753"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setStereoMode</b> (StereoMode stereo_mode)=0</td></tr>
+<tr class="memitem:aa42bdc17fba908fc42816aef1989b753"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#aa42bdc17fba908fc42816aef1989b753">setStereoMode</a> (<a class="el" href="classallofw_1_1_omni_stereo.html#ac880fcd4f058b55edf8256b31b36260f">StereoMode</a> stereo_mode)=0</td></tr>
 <tr class="separator:aa42bdc17fba908fc42816aef1989b753"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a39261ac218cf15c4a3700fe94245a9a1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a39261ac218cf15c4a3700fe94245a9a1"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setPose</b> (const <a class="el" href="structallofw_1_1_pose.html">Pose</a> &amp;pose)=0</td></tr>
+<tr class="memitem:a39261ac218cf15c4a3700fe94245a9a1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a39261ac218cf15c4a3700fe94245a9a1">setPose</a> (const <a class="el" href="structallofw_1_1_pose.html">Pose</a> &amp;pose)=0</td></tr>
 <tr class="separator:a39261ac218cf15c4a3700fe94245a9a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad058224ef94f16b2ce1b2bca6c888963"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad058224ef94f16b2ce1b2bca6c888963"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setLens</b> (float eye_separation=0.0f, float sphere_radius=1.0f)=0</td></tr>
+<tr class="memitem:ad058224ef94f16b2ce1b2bca6c888963"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#ad058224ef94f16b2ce1b2bca6c888963">setLens</a> (float eye_separation=0.0f, float sphere_radius=1.0f)=0</td></tr>
 <tr class="separator:ad058224ef94f16b2ce1b2bca6c888963"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a755e53feaf2865f907eaff485a638998"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a755e53feaf2865f907eaff485a638998"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setClipRange</b> (float near, float far)=0</td></tr>
+<tr class="memitem:a755e53feaf2865f907eaff485a638998"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a755e53feaf2865f907eaff485a638998">setClipRange</a> (float near, float far)=0</td></tr>
 <tr class="separator:a755e53feaf2865f907eaff485a638998"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad227876c570e90d0472270f7f5377dbf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad227876c570e90d0472270f7f5377dbf"></a>
-virtual <a class="el" href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html">StereoTexture</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getCubemapTexture</b> ()=0</td></tr>
+<tr class="memitem:ad227876c570e90d0472270f7f5377dbf"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html">StereoTexture</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#ad227876c570e90d0472270f7f5377dbf">getCubemapTexture</a> ()=0</td></tr>
 <tr class="separator:ad227876c570e90d0472270f7f5377dbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc144c7035536e615a49ec515e6a3573"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adc144c7035536e615a49ec515e6a3573"></a>
-virtual <a class="el" href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html">StereoTexture</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getDepthCubemapTexture</b> ()=0</td></tr>
+<tr class="memitem:adc144c7035536e615a49ec515e6a3573"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html">StereoTexture</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#adc144c7035536e615a49ec515e6a3573">getDepthCubemapTexture</a> ()=0</td></tr>
 <tr class="separator:adc144c7035536e615a49ec515e6a3573"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e410ff9f43df7e5baea4a9ff2f3cbb8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5e410ff9f43df7e5baea4a9ff2f3cbb8"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>capture</b> ()=0</td></tr>
+<tr class="memitem:a5e410ff9f43df7e5baea4a9ff2f3cbb8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a5e410ff9f43df7e5baea4a9ff2f3cbb8">capture</a> ()=0</td></tr>
+<tr class="memdesc:a5e410ff9f43df7e5baea4a9ff2f3cbb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capture the scene.  <a href="#a5e410ff9f43df7e5baea4a9ff2f3cbb8">More...</a><br /></td></tr>
 <tr class="separator:a5e410ff9f43df7e5baea4a9ff2f3cbb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e9b5577d983adb4ee84ab0515e22307"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8e9b5577d983adb4ee84ab0515e22307"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>composite</b> (const <a class="el" href="structallofw_1_1_rectangle2__.html">Rectangle2i</a> &amp;viewport, const <a class="el" href="structallofw_1_1_omni_stereo_1_1_composite_info.html">CompositeInfo</a> &amp;info=<a class="el" href="structallofw_1_1_omni_stereo_1_1_composite_info.html">CompositeInfo</a>())=0</td></tr>
+<tr class="memitem:a8e9b5577d983adb4ee84ab0515e22307"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a8e9b5577d983adb4ee84ab0515e22307">composite</a> (const <a class="el" href="namespaceallofw.html#a790b9e69e5061f4d864ee92708c1f46e">Rectangle2i</a> &amp;viewport, const <a class="el" href="structallofw_1_1_omni_stereo_1_1_composite_info.html">CompositeInfo</a> &amp;info=<a class="el" href="structallofw_1_1_omni_stereo_1_1_composite_info.html">CompositeInfo</a>())=0</td></tr>
 <tr class="separator:a8e9b5577d983adb4ee84ab0515e22307"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6491ad0f84e4877cce8fdd2af34f3265"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6491ad0f84e4877cce8fdd2af34f3265"></a>
-virtual GLuint&#160;</td><td class="memItemRight" valign="bottom"><b>compositeCustomizeShader</b> (const char *code)=0</td></tr>
+<tr class="memitem:a6491ad0f84e4877cce8fdd2af34f3265"><td class="memItemLeft" align="right" valign="top">virtual GLuint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a6491ad0f84e4877cce8fdd2af34f3265">compositeCustomizeShader</a> (const char *code)=0</td></tr>
 <tr class="separator:a6491ad0f84e4877cce8fdd2af34f3265"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac90c26558fa6a1308cae503d633624e8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac90c26558fa6a1308cae503d633624e8"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>compositeRestoreShader</b> ()=0</td></tr>
+<tr class="memitem:ac90c26558fa6a1308cae503d633624e8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#ac90c26558fa6a1308cae503d633624e8">compositeRestoreShader</a> ()=0</td></tr>
+<tr class="memdesc:ac90c26558fa6a1308cae503d633624e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restore the composite shader to default.  <a href="#ac90c26558fa6a1308cae503d633624e8">More...</a><br /></td></tr>
 <tr class="separator:ac90c26558fa6a1308cae503d633624e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa46d3d1ba416ad9a76adca00a3996c12"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa46d3d1ba416ad9a76adca00a3996c12"></a>
-virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><b>getShaderCode</b> ()=0</td></tr>
+<tr class="memitem:aa46d3d1ba416ad9a76adca00a3996c12"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#aa46d3d1ba416ad9a76adca00a3996c12">getShaderCode</a> ()=0</td></tr>
 <tr class="separator:aa46d3d1ba416ad9a76adca00a3996c12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2445a1a290e435ca966700c98e4250db"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2445a1a290e435ca966700c98e4250db"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setUniforms</b> (GLuint program, const <a class="el" href="structallofw_1_1_omni_stereo_1_1_delegate_1_1_capture_info.html">Delegate::CaptureInfo</a> &amp;info)=0</td></tr>
+<tr class="memitem:a2445a1a290e435ca966700c98e4250db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a2445a1a290e435ca966700c98e4250db">setUniforms</a> (GLuint program, const <a class="el" href="structallofw_1_1_omni_stereo_1_1_delegate_1_1_capture_info.html">Delegate::CaptureInfo</a> &amp;info)=0</td></tr>
 <tr class="separator:a2445a1a290e435ca966700c98e4250db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50ceb0b44823f03d42c0ca1ba2e0340c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a50ceb0b44823f03d42c0ca1ba2e0340c"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setDelegate</b> (<a class="el" href="classallofw_1_1_omni_stereo_1_1_delegate.html">Delegate</a> *delegate)=0</td></tr>
+<tr class="memitem:a50ceb0b44823f03d42c0ca1ba2e0340c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a50ceb0b44823f03d42c0ca1ba2e0340c">setDelegate</a> (<a class="el" href="classallofw_1_1_omni_stereo_1_1_delegate.html">Delegate</a> *delegate)=0</td></tr>
 <tr class="separator:a50ceb0b44823f03d42c0ca1ba2e0340c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a30eeddf1d1bfccc503ba87eb6fcd817c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a30eeddf1d1bfccc503ba87eb6fcd817c"></a>
-static <a class="el" href="classallofw_1_1_omni_stereo.html">OmniStereo</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>Create</b> (<a class="el" href="classallofw_1_1_configuration.html">Configuration</a> *conf)</td></tr>
+<tr class="memitem:a30eeddf1d1bfccc503ba87eb6fcd817c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classallofw_1_1_omni_stereo.html">OmniStereo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a30eeddf1d1bfccc503ba87eb6fcd817c">Create</a> (<a class="el" href="classallofw_1_1_configuration.html">Configuration</a> *conf)</td></tr>
 <tr class="separator:a30eeddf1d1bfccc503ba87eb6fcd817c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeff16d59a13ffcf0c7fb6da93e314373"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aeff16d59a13ffcf0c7fb6da93e314373"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>Destroy</b> (<a class="el" href="classallofw_1_1_omni_stereo.html">OmniStereo</a> *omnistereo)</td></tr>
+<tr class="memitem:aeff16d59a13ffcf0c7fb6da93e314373"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#aeff16d59a13ffcf0c7fb6da93e314373">Destroy</a> (<a class="el" href="classallofw_1_1_omni_stereo.html">OmniStereo</a> *omnistereo)</td></tr>
 <tr class="separator:aeff16d59a13ffcf0c7fb6da93e314373"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
-Static Public Attributes</h2></td></tr>
-<tr class="memitem:a8b2fda7a6ff1775f82f17802969b53b0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8b2fda7a6ff1775f82f17802969b53b0"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kStereoMode_Mono</b> = 0</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a7945fff24cc429b248e299157cc11770"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a7945fff24cc429b248e299157cc11770">~OmniStereo</a> ()</td></tr>
+<tr class="separator:a7945fff24cc429b248e299157cc11770"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac880fcd4f058b55edf8256b31b36260f"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#ac880fcd4f058b55edf8256b31b36260f">StereoMode</a></td></tr>
+<tr class="memdesc:ac880fcd4f058b55edf8256b31b36260f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stereo mode.  <a href="#ac880fcd4f058b55edf8256b31b36260f">More...</a><br /></td></tr>
+<tr class="separator:ac880fcd4f058b55edf8256b31b36260f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b2fda7a6ff1775f82f17802969b53b0"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a8b2fda7a6ff1775f82f17802969b53b0">kStereoMode_Mono</a> = 0</td></tr>
 <tr class="separator:a8b2fda7a6ff1775f82f17802969b53b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0a55ed40aae19f2c8e62983146d8fff"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac0a55ed40aae19f2c8e62983146d8fff"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kStereoMode_Left</b> = 100</td></tr>
+<tr class="memitem:ac0a55ed40aae19f2c8e62983146d8fff"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#ac0a55ed40aae19f2c8e62983146d8fff">kStereoMode_Left</a> = 100</td></tr>
+<tr class="memdesc:ac0a55ed40aae19f2c8e62983146d8fff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mono.  <a href="#ac0a55ed40aae19f2c8e62983146d8fff">More...</a><br /></td></tr>
 <tr class="separator:ac0a55ed40aae19f2c8e62983146d8fff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a766afe4ac53f870a85059277762bde5d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a766afe4ac53f870a85059277762bde5d"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kStereoMode_Right</b> = 101</td></tr>
+<tr class="memitem:a766afe4ac53f870a85059277762bde5d"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a766afe4ac53f870a85059277762bde5d">kStereoMode_Right</a> = 101</td></tr>
+<tr class="memdesc:a766afe4ac53f870a85059277762bde5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Only show left eye.  <a href="#a766afe4ac53f870a85059277762bde5d">More...</a><br /></td></tr>
 <tr class="separator:a766afe4ac53f870a85059277762bde5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa8ff77caf1783d0477f3138d75648133"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa8ff77caf1783d0477f3138d75648133"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kStereoMode_Active</b> = 200</td></tr>
+<tr class="memitem:aa8ff77caf1783d0477f3138d75648133"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#aa8ff77caf1783d0477f3138d75648133">kStereoMode_Active</a> = 200</td></tr>
+<tr class="memdesc:aa8ff77caf1783d0477f3138d75648133"><td class="mdescLeft">&#160;</td><td class="mdescRight">Only show right eye.  <a href="#aa8ff77caf1783d0477f3138d75648133">More...</a><br /></td></tr>
 <tr class="separator:aa8ff77caf1783d0477f3138d75648133"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a906f6e8b8263da27f03bdae0c010e7dc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a906f6e8b8263da27f03bdae0c010e7dc"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kStereoMode_Dual_LR</b> = 300</td></tr>
+<tr class="memitem:a906f6e8b8263da27f03bdae0c010e7dc"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a906f6e8b8263da27f03bdae0c010e7dc">kStereoMode_Dual_LR</a> = 300</td></tr>
+<tr class="memdesc:a906f6e8b8263da27f03bdae0c010e7dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Active stereo.  <a href="#a906f6e8b8263da27f03bdae0c010e7dc">More...</a><br /></td></tr>
 <tr class="separator:a906f6e8b8263da27f03bdae0c010e7dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4085a87752810a397ebf377706363097"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4085a87752810a397ebf377706363097"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kStereoMode_Dual_RL</b> = 301</td></tr>
+<tr class="memitem:a4085a87752810a397ebf377706363097"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a4085a87752810a397ebf377706363097">kStereoMode_Dual_RL</a> = 301</td></tr>
+<tr class="memdesc:a4085a87752810a397ebf377706363097"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dual, left-right.  <a href="#a4085a87752810a397ebf377706363097">More...</a><br /></td></tr>
 <tr class="separator:a4085a87752810a397ebf377706363097"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae56eaff3c877da8bf9430f56cb8bf0cd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae56eaff3c877da8bf9430f56cb8bf0cd"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kStereoMode_Anaglyph_Red_Cyan</b> = 400</td></tr>
+<tr class="memitem:ae56eaff3c877da8bf9430f56cb8bf0cd"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#ae56eaff3c877da8bf9430f56cb8bf0cd">kStereoMode_Anaglyph_Red_Cyan</a> = 400</td></tr>
+<tr class="memdesc:ae56eaff3c877da8bf9430f56cb8bf0cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dual, right-left.  <a href="#ae56eaff3c877da8bf9430f56cb8bf0cd">More...</a><br /></td></tr>
 <tr class="separator:ae56eaff3c877da8bf9430f56cb8bf0cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad38d96c0062dda8172beced7e1943987"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad38d96c0062dda8172beced7e1943987"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kPanoramaModeEquirectangular</b> = 0</td></tr>
+<tr class="memitem:a18a19dba7cb399484b060c43e005176e"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a18a19dba7cb399484b060c43e005176e">PanoramaMode</a></td></tr>
+<tr class="memdesc:a18a19dba7cb399484b060c43e005176e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Anaglyph, red/cyan.  <a href="#a18a19dba7cb399484b060c43e005176e">More...</a><br /></td></tr>
+<tr class="separator:a18a19dba7cb399484b060c43e005176e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad38d96c0062dda8172beced7e1943987"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#ad38d96c0062dda8172beced7e1943987">kPanoramaModeEquirectangular</a> = 0</td></tr>
 <tr class="separator:ad38d96c0062dda8172beced7e1943987"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b84e57f284a9503c087a84f3f6cff6a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0b84e57f284a9503c087a84f3f6cff6a"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kEye</b> = 0</td></tr>
+<tr class="memitem:adabb39de56daa34c5b82fdf5559cb538"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#adabb39de56daa34c5b82fdf5559cb538">Eye</a></td></tr>
+<tr class="memdesc:adabb39de56daa34c5b82fdf5559cb538"><td class="mdescLeft">&#160;</td><td class="mdescRight">Equirectangular panorama mode.  <a href="#adabb39de56daa34c5b82fdf5559cb538">More...</a><br /></td></tr>
+<tr class="separator:adabb39de56daa34c5b82fdf5559cb538"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b84e57f284a9503c087a84f3f6cff6a"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a0b84e57f284a9503c087a84f3f6cff6a">kEye</a> = 0</td></tr>
 <tr class="separator:a0b84e57f284a9503c087a84f3f6cff6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9443d9629f8cddcc7ae11540caed815f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9443d9629f8cddcc7ae11540caed815f"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kEye_Left</b> = 0</td></tr>
+<tr class="memitem:a9443d9629f8cddcc7ae11540caed815f"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a9443d9629f8cddcc7ae11540caed815f">kEye_Left</a> = 0</td></tr>
+<tr class="memdesc:a9443d9629f8cddcc7ae11540caed815f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Single eye.  <a href="#a9443d9629f8cddcc7ae11540caed815f">More...</a><br /></td></tr>
 <tr class="separator:a9443d9629f8cddcc7ae11540caed815f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0156f18ffa56c4abf30fbc8fab57e796"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0156f18ffa56c4abf30fbc8fab57e796"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kEye_Right</b> = 1</td></tr>
+<tr class="memitem:a0156f18ffa56c4abf30fbc8fab57e796"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a0156f18ffa56c4abf30fbc8fab57e796">kEye_Right</a> = 1</td></tr>
+<tr class="memdesc:a0156f18ffa56c4abf30fbc8fab57e796"><td class="mdescLeft">&#160;</td><td class="mdescRight">Left eye.  <a href="#a0156f18ffa56c4abf30fbc8fab57e796">More...</a><br /></td></tr>
 <tr class="separator:a0156f18ffa56c4abf30fbc8fab57e796"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3617b4290794e16385de7858113b9b99"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3617b4290794e16385de7858113b9b99"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kCompositeMask_Scene</b> = 1 &lt;&lt; 0</td></tr>
+<tr class="memitem:a26161bf55a7089f367532974ad7c19d9"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a26161bf55a7089f367532974ad7c19d9">CompositeMask</a></td></tr>
+<tr class="memdesc:a26161bf55a7089f367532974ad7c19d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Right eye.  <a href="#a26161bf55a7089f367532974ad7c19d9">More...</a><br /></td></tr>
+<tr class="separator:a26161bf55a7089f367532974ad7c19d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3617b4290794e16385de7858113b9b99"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a3617b4290794e16385de7858113b9b99">kCompositeMask_Scene</a> = 1 &lt;&lt; 0</td></tr>
 <tr class="separator:a3617b4290794e16385de7858113b9b99"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bbdec27b5d03342ed1b83c005e69831"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9bbdec27b5d03342ed1b83c005e69831"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kCompositeMask_Back</b> = 1 &lt;&lt; 1</td></tr>
+<tr class="memitem:a9bbdec27b5d03342ed1b83c005e69831"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a9bbdec27b5d03342ed1b83c005e69831">kCompositeMask_Back</a> = 1 &lt;&lt; 1</td></tr>
+<tr class="memdesc:a9bbdec27b5d03342ed1b83c005e69831"><td class="mdescLeft">&#160;</td><td class="mdescRight">Show the scene.  <a href="#a9bbdec27b5d03342ed1b83c005e69831">More...</a><br /></td></tr>
 <tr class="separator:a9bbdec27b5d03342ed1b83c005e69831"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18641997a7dbab754c0af5b2c0e7fe12"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a18641997a7dbab754c0af5b2c0e7fe12"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kCompositeMask_Front</b> = 1 &lt;&lt; 2</td></tr>
+<tr class="memitem:a18641997a7dbab754c0af5b2c0e7fe12"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a18641997a7dbab754c0af5b2c0e7fe12">kCompositeMask_Front</a> = 1 &lt;&lt; 2</td></tr>
+<tr class="memdesc:a18641997a7dbab754c0af5b2c0e7fe12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Show the back buffer.  <a href="#a18641997a7dbab754c0af5b2c0e7fe12">More...</a><br /></td></tr>
 <tr class="separator:a18641997a7dbab754c0af5b2c0e7fe12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba0e1868775e86bfdcbd2cda383c7013"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aba0e1868775e86bfdcbd2cda383c7013"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kCompositeMask_Panorama</b> = 1 &lt;&lt; 3</td></tr>
+<tr class="memitem:aba0e1868775e86bfdcbd2cda383c7013"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#aba0e1868775e86bfdcbd2cda383c7013">kCompositeMask_Panorama</a> = 1 &lt;&lt; 3</td></tr>
+<tr class="memdesc:aba0e1868775e86bfdcbd2cda383c7013"><td class="mdescLeft">&#160;</td><td class="mdescRight">Show the front buffer.  <a href="#aba0e1868775e86bfdcbd2cda383c7013">More...</a><br /></td></tr>
 <tr class="separator:aba0e1868775e86bfdcbd2cda383c7013"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59dcf6274b9a3605d0fd39c2b9f1d13a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a59dcf6274b9a3605d0fd39c2b9f1d13a"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kCompositeMask_Panorama_Equirectangular</b> = 1 &lt;&lt; 4</td></tr>
+<tr class="memitem:a59dcf6274b9a3605d0fd39c2b9f1d13a"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#a59dcf6274b9a3605d0fd39c2b9f1d13a">kCompositeMask_Panorama_Equirectangular</a> = 1 &lt;&lt; 4</td></tr>
+<tr class="memdesc:a59dcf6274b9a3605d0fd39c2b9f1d13a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Show the panorama.  <a href="#a59dcf6274b9a3605d0fd39c2b9f1d13a">More...</a><br /></td></tr>
 <tr class="separator:a59dcf6274b9a3605d0fd39c2b9f1d13a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa2741e9224c7d78a753ddca62acea78a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa2741e9224c7d78a753ddca62acea78a"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><b>kCompositeMask_Panorama_Cubemap</b> = 1 &lt;&lt; 5</td></tr>
+<tr class="memitem:aa2741e9224c7d78a753ddca62acea78a"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classallofw_1_1_omni_stereo.html#aa2741e9224c7d78a753ddca62acea78a">kCompositeMask_Panorama_Cubemap</a> = 1 &lt;&lt; 5</td></tr>
+<tr class="memdesc:aa2741e9224c7d78a753ddca62acea78a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Panorama is equirectangular.  <a href="#aa2741e9224c7d78a753ddca62acea78a">More...</a><br /></td></tr>
 <tr class="separator:aa2741e9224c7d78a753ddca62acea78a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Class for Omnistereo rendering. </p>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a class="anchor" id="a26161bf55a7089f367532974ad7c19d9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef int <a class="el" href="classallofw_1_1_omni_stereo.html#a26161bf55a7089f367532974ad7c19d9">allofw::OmniStereo::CompositeMask</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Right eye. </p>
+<p>Composite mask. </p>
+
+</div>
+</div>
+<a class="anchor" id="adabb39de56daa34c5b82fdf5559cb538"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef int <a class="el" href="classallofw_1_1_omni_stereo.html#adabb39de56daa34c5b82fdf5559cb538">allofw::OmniStereo::Eye</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Equirectangular panorama mode. </p>
+<p>Eye index. </p>
+
+</div>
+</div>
+<a class="anchor" id="a18a19dba7cb399484b060c43e005176e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef int <a class="el" href="classallofw_1_1_omni_stereo.html#a18a19dba7cb399484b060c43e005176e">allofw::OmniStereo::PanoramaMode</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Anaglyph, red/cyan. </p>
+<p>Panorama mode. </p>
+
+</div>
+</div>
+<a class="anchor" id="ac880fcd4f058b55edf8256b31b36260f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef int <a class="el" href="classallofw_1_1_omni_stereo.html#ac880fcd4f058b55edf8256b31b36260f">allofw::OmniStereo::StereoMode</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Stereo mode. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a7945fff24cc429b248e299157cc11770"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual allofw::OmniStereo::~OmniStereo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a5e410ff9f43df7e5baea4a9ff2f3cbb8"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::capture </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Capture the scene. </p>
+
+</div>
+</div>
+<a class="anchor" id="a8e9b5577d983adb4ee84ab0515e22307"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::composite </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespaceallofw.html#a790b9e69e5061f4d864ee92708c1f46e">Rectangle2i</a> &amp;&#160;</td>
+          <td class="paramname"><em>viewport</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structallofw_1_1_omni_stereo_1_1_composite_info.html">CompositeInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>info</em> = <code><a class="el" href="structallofw_1_1_omni_stereo_1_1_composite_info.html">CompositeInfo</a>()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Composite the scene: Draw internal buffers to current viewport. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">viewport</td><td>The viewport in pixels. </td></tr>
+    <tr><td class="paramname">info</td><td>The <a class="el" href="structallofw_1_1_omni_stereo_1_1_composite_info.html" title="Composite info structure. ">CompositeInfo</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a6491ad0f84e4877cce8fdd2af34f3265"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual GLuint allofw::OmniStereo::compositeCustomizeShader </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Create a customized composite shader. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">code</td><td>Custom shader code. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The program ID of the compiled composite shader. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ac90c26558fa6a1308cae503d633624e8"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::compositeRestoreShader </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Restore the composite shader to default. </p>
+
+</div>
+</div>
+<a class="anchor" id="a30eeddf1d1bfccc503ba87eb6fcd817c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classallofw_1_1_omni_stereo.html">OmniStereo</a>* allofw::OmniStereo::Create </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_configuration.html">Configuration</a> *&#160;</td>
+          <td class="paramname"><em>conf</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Create new <a class="el" href="classallofw_1_1_omni_stereo.html" title="Class for Omnistereo rendering. ">OmniStereo</a> with configuration information. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">conf</td><td>The <a class="el" href="classallofw_1_1_configuration.html" title="YAML-based configuration reader. ">Configuration</a> object. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aeff16d59a13ffcf0c7fb6da93e314373"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void allofw::OmniStereo::Destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_omni_stereo.html">OmniStereo</a> *&#160;</td>
+          <td class="paramname"><em>omnistereo</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Destroy <a class="el" href="classallofw_1_1_omni_stereo.html" title="Class for Omnistereo rendering. ">OmniStereo</a> object. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">omnistereo</td><td>The object to destroy. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ad227876c570e90d0472270f7f5377dbf"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html">StereoTexture</a> allofw::OmniStereo::getCubemapTexture </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the cubemap (only allowed in cubemap mode). </p><dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html" title="Panorama is cubemap. ">StereoTexture</a> struct with left/right eye texture IDs. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="adc144c7035536e615a49ec515e6a3573"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html">StereoTexture</a> allofw::OmniStereo::getDepthCubemapTexture </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the depth cubemap (only allowed in cubemap mode). </p><dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="structallofw_1_1_omni_stereo_1_1_stereo_texture.html" title="Panorama is cubemap. ">StereoTexture</a> struct with left/right eye texture IDs. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="aa46d3d1ba416ad9a76adca00a3996c12"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const char* allofw::OmniStereo::getShaderCode </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get <a class="el" href="classallofw_1_1_omni_stereo.html" title="Class for Omnistereo rendering. ">OmniStereo</a> shader prefix code.</p>
+<p>Necessary functions and uniforms for use in shader programs.</p><ul>
+<li>vec3 omni_transform(vec3 v) : Transform coordinates to camera space.</li>
+<li>vec3 omni_transform_normal(vec3 v) : Transform normal to camera space.</li>
+<li>vec4 omni_displace(vec4 v) : Perform Omnistereo displacement on vertex.</li>
+<li>vec4 omni_project(vec4 v) : Perform projection to render target.</li>
+<li>vec4 omni_render(vec4 v) : Short for 'omni_project(omni_displace(v))'</li>
+</ul>
+<p>Uniforms:</p><ul>
+<li>omni_eye, omni_radius: Half eye separation, sphere radius.</li>
+<li>omni_viewport_rotation, omni_viewport_projection: Viewport pose and projection information, handled internally.</li>
+</ul>
+<p>Call <a class="el" href="classallofw_1_1_omni_stereo.html#a2445a1a290e435ca966700c98e4250db">setUniforms()</a> to set these uniforms to your shader. </p><dl class="section return"><dt>Returns</dt><dd>The shader code to be included. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a755e53feaf2865f907eaff485a638998"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::setClipRange </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>near</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>far</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set clip range. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">near</td><td>The near clipping distance in OpenGL units. </td></tr>
+    <tr><td class="paramname">far</td><td>The far clipping distance in OpenGL units. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a50ceb0b44823f03d42c0ca1ba2e0340c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::setDelegate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_omni_stereo_1_1_delegate.html">Delegate</a> *&#160;</td>
+          <td class="paramname"><em>delegate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set the delegate. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">delegate</td><td>Set the delegate object. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ad058224ef94f16b2ce1b2bca6c888963"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::setLens </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>eye_separation</em> = <code>0.0f</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>sphere_radius</em> = <code>1.0f</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set lens. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">eye_separation</td><td>Distance between the two eyes in OpenGL units. </td></tr>
+    <tr><td class="paramname">sphere_radius</td><td>The radius of the spherical display in OpenGL units </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a39261ac218cf15c4a3700fe94245a9a1"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::setPose </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structallofw_1_1_pose.html">Pose</a> &amp;&#160;</td>
+          <td class="paramname"><em>pose</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set pose. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pose</td><td>The pose. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ab42bea701bf31b90c99699926f25db86"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::setResolution </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>size</em> = <code>1024</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set cubemap resolution, allocate the cubemap. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">size</td><td>Width/height of the cubemap faces. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aa42bdc17fba908fc42816aef1989b753"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::setStereoMode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classallofw_1_1_omni_stereo.html#ac880fcd4f058b55edf8256b31b36260f">StereoMode</a>&#160;</td>
+          <td class="paramname"><em>stereo_mode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Enable stereo or not. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stereo_mode</td><td>The stereo mode. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a2445a1a290e435ca966700c98e4250db"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void allofw::OmniStereo::setUniforms </td>
+          <td>(</td>
+          <td class="paramtype">GLuint&#160;</td>
+          <td class="paramname"><em>program</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structallofw_1_1_omni_stereo_1_1_delegate_1_1_capture_info.html">Delegate::CaptureInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>info</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set uniforms to a shader program using <a class="el" href="classallofw_1_1_omni_stereo.html#aa46d3d1ba416ad9a76adca00a3996c12">getShaderCode()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">program</td><td>The OpenGL id of the program. </td></tr>
+    <tr><td class="paramname">info</td><td>The CaptureInfo given by onCaptureViewport. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a class="anchor" id="a9bbdec27b5d03342ed1b83c005e69831"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kCompositeMask_Back = 1 &lt;&lt; 1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Show the scene. </p>
+
+</div>
+</div>
+<a class="anchor" id="a18641997a7dbab754c0af5b2c0e7fe12"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kCompositeMask_Front = 1 &lt;&lt; 2</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Show the back buffer. </p>
+
+</div>
+</div>
+<a class="anchor" id="aba0e1868775e86bfdcbd2cda383c7013"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kCompositeMask_Panorama = 1 &lt;&lt; 3</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Show the front buffer. </p>
+
+</div>
+</div>
+<a class="anchor" id="aa2741e9224c7d78a753ddca62acea78a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kCompositeMask_Panorama_Cubemap = 1 &lt;&lt; 5</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Panorama is equirectangular. </p>
+
+</div>
+</div>
+<a class="anchor" id="a59dcf6274b9a3605d0fd39c2b9f1d13a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kCompositeMask_Panorama_Equirectangular = 1 &lt;&lt; 4</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Show the panorama. </p>
+
+</div>
+</div>
+<a class="anchor" id="a3617b4290794e16385de7858113b9b99"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kCompositeMask_Scene = 1 &lt;&lt; 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0b84e57f284a9503c087a84f3f6cff6a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kEye = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a9443d9629f8cddcc7ae11540caed815f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kEye_Left = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Single eye. </p>
+
+</div>
+</div>
+<a class="anchor" id="a0156f18ffa56c4abf30fbc8fab57e796"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kEye_Right = 1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Left eye. </p>
+
+</div>
+</div>
+<a class="anchor" id="ad38d96c0062dda8172beced7e1943987"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kPanoramaModeEquirectangular = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa8ff77caf1783d0477f3138d75648133"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kStereoMode_Active = 200</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Only show right eye. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae56eaff3c877da8bf9430f56cb8bf0cd"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kStereoMode_Anaglyph_Red_Cyan = 400</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dual, right-left. </p>
+
+</div>
+</div>
+<a class="anchor" id="a906f6e8b8263da27f03bdae0c010e7dc"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kStereoMode_Dual_LR = 300</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Active stereo. </p>
+
+</div>
+</div>
+<a class="anchor" id="a4085a87752810a397ebf377706363097"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kStereoMode_Dual_RL = 301</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dual, left-right. </p>
+
+</div>
+</div>
+<a class="anchor" id="ac0a55ed40aae19f2c8e62983146d8fff"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kStereoMode_Left = 100</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mono. </p>
+
+</div>
+</div>
+<a class="anchor" id="a8b2fda7a6ff1775f82f17802969b53b0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kStereoMode_Mono = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a766afe4ac53f870a85059277762bde5d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int allofw::OmniStereo::kStereoMode_Right = 101</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Only show left eye. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/Users/donghao/Documents/Projects/Allosphere/Allofw/liballofw/include/allofw/<a class="el" href="omnistereo_8h_source.html">omnistereo.h</a></li>
+<li><a class="el" href="omnistereo_8h_source.html">omnistereo.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
