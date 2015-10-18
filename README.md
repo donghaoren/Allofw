@@ -1,6 +1,6 @@
-# AllofwModule
+# Allofw - AlloFramework
 
-Allosphere Framework in C++11
+A framework for rendering 3D content for multi-projector display systems.
 
 [Documentation](http://donghaoren.github.io/Allofw)
 
