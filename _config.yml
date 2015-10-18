@@ -1,4 +1,5 @@
-url: http://donghaoren.github.io/Allofw
+url: "http://donghaoren.github.io/Allofw"
+baseurl: ""
 highlighter: pygments
 markdown: kramdown
 kramdown:
