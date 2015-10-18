@@ -4,17 +4,17 @@
 #include "vector.h"
 #include "quaternion.h"
 
-ALLOFW_NS_BEGIN
+namespace allofw {
 
-struct Pose {
-    Vector3 position;
-    Quaternion rotation;
+    struct Pose {
+        Vector3 position;
+        Quaternion rotation;
 
-    Pose() : position(0, 0, 0), rotation(Quaternion::One()) { }
+        Pose() : position(0, 0, 0), rotation(Quaternion::One()) { }
 
-    static Pose lookAt(Vector3 eye, Vector3 at, Vector3 up);
-};
+        static Pose lookAt(Vector3 eye, Vector3 at, Vector3 up);
+    };
 
-ALLOFW_NS_END
+}
 
 #endif

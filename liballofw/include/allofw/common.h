@@ -3,47 +3,47 @@
 
 #include <memory>
 
+// Don't use these in the header files, otherwise doxygen cannot show the right namespace.
 #define ALLOFW_NS allofw
-
-#define ALLOFW_NS_BEGIN namespace ALLOFW_NS {
+#define ALLOFW_NS_BEGIN namespace allofw {
 #define ALLOFW_NS_END }
 
-ALLOFW_NS_BEGIN
+namespace allofw {
 
-class exception {
-public:
-    exception(const char* what_ = nullptr);
-    exception(const exception& e);
-    exception& operator = (const exception& e);
-    virtual const char* what() const;
-    virtual ~exception();
-private:
-    char* description;
-};
+    class exception {
+    public:
+        exception(const char* what_ = nullptr);
+        exception(const exception& e);
+        exception& operator = (const exception& e);
+        virtual const char* what() const;
+        virtual ~exception();
+    private:
+        char* description;
+    };
 
-class not_implemented_yet : public exception {
-public:
-    not_implemented_yet(const char* what_ = nullptr) : exception(what_) { }
-};
+    class not_implemented_yet : public exception {
+    public:
+        not_implemented_yet(const char* what_ = nullptr) : exception(what_) { }
+    };
 
-class not_supported : public exception {
-public:
-    not_supported(const char* what_ = nullptr) : exception(what_) { }
-};
+    class not_supported : public exception {
+    public:
+        not_supported(const char* what_ = nullptr) : exception(what_) { }
+    };
 
-class invalid_argument : public exception {
-public:
-    invalid_argument(const char* what_ = nullptr) : exception(what_) { }
-};
+    class invalid_argument : public exception {
+    public:
+        invalid_argument(const char* what_ = nullptr) : exception(what_) { }
+    };
 
-class non_copyable {
-public:
-    non_copyable() = default;
-private:
-    non_copyable(const non_copyable&);
-    non_copyable& operator = (const non_copyable&);
-};
+    class non_copyable {
+    public:
+        non_copyable() = default;
+    private:
+        non_copyable(const non_copyable&);
+        non_copyable& operator = (const non_copyable&);
+    };
 
-ALLOFW_NS_END
+}
 
 #endif

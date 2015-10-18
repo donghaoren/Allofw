@@ -9,11 +9,11 @@
 
 #include "graphics.h"
 
-ALLOFW_NS_BEGIN
+namespace allofw {
 
-void allofwInit();
-void allofwExit();
+    void allofwInit();
+    void allofwExit();
 
-ALLOFW_NS_END
+}
 
 #endif

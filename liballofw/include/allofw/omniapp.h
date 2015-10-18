@@ -10,7 +10,7 @@
 
 #include <vector>
 
-namespace ALLOFW_NS {
+namespace allofw {
 
     namespace details {
 

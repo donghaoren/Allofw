@@ -3,11 +3,11 @@
 
 #include "common.h"
 
-ALLOFW_NS_BEGIN
+namespace allofw {
 
-// Get time in seconds.
-double get_time_seconds();
+    // Get time in seconds.
+    double get_time_seconds();
 
-ALLOFW_NS_END
+}
 
 #endif

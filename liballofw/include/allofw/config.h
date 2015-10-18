@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 
-namespace ALLOFW_NS {
+namespace allofw {
 
     class Configuration {
     public:

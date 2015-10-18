@@ -5,7 +5,7 @@
 #include "stream.h"
 #include "math/math.h"
 
-namespace ALLOFW_NS {
+namespace allofw {
 
     // Graphics API based on Skia's API.
 

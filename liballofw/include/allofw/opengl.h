@@ -16,7 +16,7 @@
 
 // OpenGL Window and Context Creation.
 
-namespace ALLOFW_NS {
+namespace allofw {
 
     class OpenGLWindow {
     public:

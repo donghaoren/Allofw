@@ -7,7 +7,7 @@
 #include "math/math.h"
 #include "opengl.h"
 
-namespace ALLOFW_NS {
+namespace allofw {
 
     typedef GLuint GLTextureID;
 

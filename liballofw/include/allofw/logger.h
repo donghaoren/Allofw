@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-namespace ALLOFW_NS {
+namespace allofw {
 
     class Logger;
 
