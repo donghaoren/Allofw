@@ -11,7 +11,10 @@
 
 namespace allofw {
 
+    //! Initialize the allofw library.
     void allofwInit();
+
+    //! De-initialize the allofw library.
     void allofwExit();
 
 }

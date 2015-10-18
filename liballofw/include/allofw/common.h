@@ -10,6 +10,7 @@
 
 namespace allofw {
 
+    //! Allofw exception class.
     class exception {
     public:
         exception(const char* what_ = nullptr);
@@ -21,21 +22,25 @@ namespace allofw {
         char* description;
     };
 
+    //! Not implemented exception.
     class not_implemented_yet : public exception {
     public:
         not_implemented_yet(const char* what_ = nullptr) : exception(what_) { }
     };
 
+    //! Not supported exception.
     class not_supported : public exception {
     public:
         not_supported(const char* what_ = nullptr) : exception(what_) { }
     };
 
+    //! Invalid argument exception.
     class invalid_argument : public exception {
     public:
         invalid_argument(const char* what_ = nullptr) : exception(what_) { }
     };
 
+    //! Inherit this to make a class non-copyable.
     class non_copyable {
     public:
         non_copyable() = default;
