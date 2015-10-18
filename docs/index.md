@@ -1,6 +1,6 @@
 ---
 title: Allofw Documentation
-layout: post
+layout: default
 ---
 
 Allofw

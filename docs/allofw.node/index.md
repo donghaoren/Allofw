@@ -1,6 +1,6 @@
 ---
 title: allofw.node - Allofw Documentation
-layout: post
+layout: default
 ---
 
 allofw.node

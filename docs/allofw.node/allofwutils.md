@@ -1,6 +1,6 @@
 ---
 title: allofwutils - Allofw Documentation
-layout: post
+layout: default
 ---
 
 allofwutils
