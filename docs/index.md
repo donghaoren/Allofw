@@ -15,15 +15,15 @@ Allofw consists of the following components.
 
 - liballofw: C++ Library for OpenGL window creation, OmniStereo rendering and 2D Graphics.
 
-	* [Documentation](liballofw/index.md)
+	* [Documentation](liballofw/html/index.html)
 
 - allofw.node: Node.js bindings for liballofw.
 
-	* [Documentation](allofw.node/index.md)
+	* [Documentation](allofw.node/index.html)
 
 - allosphere.node: AlloSphere specific components for Node.js.
 
-	* [Documentation](allosphere.node/index.md)
+	* [Documentation](allosphere.node/index.html)
 
 
 Dependencies

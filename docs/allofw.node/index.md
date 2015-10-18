@@ -1,3 +1,8 @@
+---
+title: allofw.node - Allofw Documentation
+layout: post
+---
+
 allofw.node
 ====
 

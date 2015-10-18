@@ -1,3 +1,8 @@
+---
+title: allofwutils - Allofw Documentation
+layout: post
+---
+
 allofwutils
 ====
 
