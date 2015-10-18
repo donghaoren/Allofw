@@ -1,5 +1,6 @@
 ---
 title: Allofw Documentation
+layout: post
 ---
 
 Allofw
