@@ -141,6 +141,23 @@ allofwutils.NetworkNavigation = function(networking) {
         );
     };
 
+    var home_position = new math.Vector3(0, 0, 0);
+    var home_rotation = new math.Quaternion(new math.Vector3(0, 0, 0), 1);
+
+    this.setPosition = function(position) {
+        pose.position = position;
+    };
+    this.setRotation = function(rotation) {
+        pose.rotation = rotation;
+    };
+
+    this.setHomePosition = function(position) {
+        home_position = position;
+    };
+    this.setHomeRotation = function(rotation) {
+        home_rotation = rotation;
+    };
+
     var t0 = new Date().getTime() / 1000;
     this.update = function() {
         var t = new Date().getTime() / 1000;
@@ -151,8 +168,8 @@ allofwutils.NetworkNavigation = function(networking) {
     networking.on("nav", function(l_x, l_y, l_z, r_x, r_y) {
         if(l_x == "reset") {
             pose_target = {
-                position: new math.Vector3(0, 0, 0),
-                rotation: new math.Quaternion(new math.Vector3(0, 0, 0), 1)
+                position: home_position,
+                rotation: home_rotation
             };
             velocity_prev = [ 0, 0, 0, 0, 0 ];
         } else {

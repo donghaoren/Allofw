@@ -42,8 +42,16 @@ function HTTPServer(config) {
         console.log("HTTPServer: Listening on port " + config.http.port);
     });
 
+    this.sockets = new Set();
+
     io.on('connection', function(socket) {
-        // socket.on('disconnect', function() { });
+        console.log("New connection: " + socket.id);
+        self.sockets.add(socket);
+
+        socket.on('disconnect', function() {
+            console.log("Connection closed: " + socket.id);
+            self.sockets.delete(socket);
+        });
 
         socket.on('m', function(msg) {
             try {
@@ -55,7 +63,21 @@ function HTTPServer(config) {
             }
         });
     });
+
+    this.current_message_queue = [];
+    setInterval(function() {
+        if(self.current_message_queue.length > 0) {
+            for(var item of self.sockets) {
+                item.emit("ms", self.current_message_queue);
+            }
+        }
+        self.current_message_queue = [];
+    }, 200);
 }
+
+HTTPServer.prototype.broadcast = function(path) {
+    this.current_message_queue.push([ path, Array.prototype.slice.call(arguments, 1) ]);
+};
 
 HTTPServer.prototype.on = function(event, handler) {
     this.handlers[event] = handler;
