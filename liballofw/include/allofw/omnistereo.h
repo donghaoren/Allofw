@@ -50,6 +50,7 @@ namespace allofw {
         static const int kCompositeMask_Panorama                  = 1 << 3;     //! Show the panorama.
         static const int kCompositeMask_Panorama_Equirectangular  = 1 << 4;     //! Panorama is equirectangular.
         static const int kCompositeMask_Panorama_Cubemap          = 1 << 5;     //! Panorama is cubemap.
+        static const int kCompositeMask_Panorama_Cubemap_YUV420P  = 1 << 6;     //! Panorama is cubemap.
         //@}
 
         // Stereo texture.
@@ -141,7 +142,10 @@ namespace allofw {
         struct CompositeInfo {
             CompositeMask mask;
             StereoTexture back, front;
-            StereoTexture panorama;
+            union {
+                StereoTexture panorama;
+                StereoTexture panorama_planes[3];
+            };
             CompositeInfo() : mask(kCompositeMask_Scene) { }
         };
 

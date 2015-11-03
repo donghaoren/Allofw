@@ -130,12 +130,28 @@ NAN_METHOD(NODE_OmniStereo::NODE_composite) {
         if(Nan::Has(obj, Nan::New<String>("panorama").ToLocalChecked()).FromMaybe(false)) {
             if(Nan::Get(obj, Nan::New<String>("panorama").ToLocalChecked()).ToLocalChecked()->IsArray()) {
                 Handle<Object> val = Nan::Get(obj, Nan::New<String>("panorama").ToLocalChecked()).ToLocalChecked()->ToObject();
-                composite_info.panorama.L = val->Get(0)->Uint32Value();
-                composite_info.panorama.R = val->Get(1)->Uint32Value();
+                if(val->Get(0)->IsObject()) {
+                    int len = val->Get(0)->ToObject()->Get(Nan::New<String>("length").ToLocalChecked())->IntegerValue();
+                    for(int i = 0; i < len && i < 3; i++) {
+                        composite_info.panorama_planes[i].L = val->Get(0)->ToObject()->Get(i)->Uint32Value();
+                    }
+                } else {
+                    composite_info.panorama.L = val->Get(0)->Uint32Value();
+                }
+                if(val->Get(1)->IsObject()) {
+                    int len = val->Get(1)->ToObject()->Get(Nan::New<String>("length").ToLocalChecked())->IntegerValue();
+                    for(int i = 0; i < len && i < 3; i++) {
+                        composite_info.panorama_planes[i].R = val->Get(1)->ToObject()->Get(i)->Uint32Value();
+                    }
+                } else {
+                    composite_info.panorama.R = val->Get(1)->Uint32Value();
+                }
                 Nan::Utf8String str(val->Get(2));
                 std::string s = *str;
                 if(s == "cubemap") {
                     composite_info.mask |= OmniStereo::kCompositeMask_Panorama | OmniStereo::kCompositeMask_Panorama_Cubemap;
+                } else if(s == "cubemap-yuv420p") {
+                    composite_info.mask |= OmniStereo::kCompositeMask_Panorama | OmniStereo::kCompositeMask_Panorama_Cubemap_YUV420P;
                 } else {
                     composite_info.mask |= OmniStereo::kCompositeMask_Panorama | OmniStereo::kCompositeMask_Panorama_Equirectangular;
                 }
