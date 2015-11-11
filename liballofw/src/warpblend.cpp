@@ -115,6 +115,28 @@ public:
         }
         YAML::Node conf = YAML::LoadFile(std::string(calibration_path) + "/" + hostname + ".json");
         data.resize(conf["projections"].size());
+
+        Matrix3d calibration_to_user_matrix = Matrix3d::eye();
+        Vector3d calibration_to_user_offset(0, 0, 0);
+
+        try {
+            YAML::Node phasespace_registration = YAML::LoadFile(std::string(calibration_path) + "/phasespace_registration.json");
+            Logger::Default()->printf(Logger::kInfo, "Reading phasespace registration data.");
+            calibration_to_user_matrix.a11 = phasespace_registration["calibration_to_user"]["matrix"][0][0].as<double>();
+            calibration_to_user_matrix.a12 = phasespace_registration["calibration_to_user"]["matrix"][0][1].as<double>();
+            calibration_to_user_matrix.a13 = phasespace_registration["calibration_to_user"]["matrix"][0][2].as<double>();
+            calibration_to_user_matrix.a21 = phasespace_registration["calibration_to_user"]["matrix"][1][0].as<double>();
+            calibration_to_user_matrix.a22 = phasespace_registration["calibration_to_user"]["matrix"][1][1].as<double>();
+            calibration_to_user_matrix.a23 = phasespace_registration["calibration_to_user"]["matrix"][1][2].as<double>();
+            calibration_to_user_matrix.a31 = phasespace_registration["calibration_to_user"]["matrix"][2][0].as<double>();
+            calibration_to_user_matrix.a32 = phasespace_registration["calibration_to_user"]["matrix"][2][1].as<double>();
+            calibration_to_user_matrix.a33 = phasespace_registration["calibration_to_user"]["matrix"][2][2].as<double>();
+            calibration_to_user_offset.x = phasespace_registration["calibration_to_user"]["offset"][0].as<double>();
+            calibration_to_user_offset.y = phasespace_registration["calibration_to_user"]["offset"][1].as<double>();
+            calibration_to_user_offset.z = phasespace_registration["calibration_to_user"]["offset"][2].as<double>();
+        } catch(...) {
+        }
+
         for(size_t p = 0; p < data.size(); p++) {
             ViewportData& vp = data[p];
             YAML::Node proj = conf["projections"][p];
@@ -169,6 +191,9 @@ public:
                     row1[x] = row2[x];
                     row2[x] = tmp;
                 }
+            }
+            for(int j = 0; j < vp.warp.size.w * vp.warp.size.h; j++) {
+                vp.warp.data[j] = calibration_to_user_matrix * vp.warp.data[j] + calibration_to_user_offset;
             }
             delete [] buf;
             fclose(fwarp);
