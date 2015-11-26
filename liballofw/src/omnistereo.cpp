@@ -1042,10 +1042,10 @@ private:
                     }
                 } break;
                 case kStereoMode_Dual_LR: {
-                    if(eye == kEye_Left) {
-                        glDrawBuffer(GL_BACK_LEFT);
+                    if(eye == kEye_Right) {
+                        draw_viewport = Rectangle2i(viewport.x, viewport.y, viewport.w / 2, viewport.h);
                     } else {
-                        glDrawBuffer(GL_BACK_RIGHT);
+                        draw_viewport = Rectangle2i(viewport.x + viewport.w / 2, viewport.y, viewport.w / 2, viewport.h);
                     }
                 } break;
                 case kStereoMode_Dual_RL: {
@@ -1085,9 +1085,13 @@ private:
                 }
                 viewport_code(mask, eye, vp, warp_texture, blend_texture, position_scalers);
             }
+            if(stereo_mode_ == kStereoMode_Active) {
+                glDrawBuffer(GL_BACK);
+            }
+            if(stereo_mode_ == kStereoMode_Anaglyph_Red_Cyan) {
+                glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            }
         }
-        glDrawBuffer(GL_BACK);
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         finalize_code();
         glutils::checkGLErrors("OmniStereo::composite");
     }
