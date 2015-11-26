@@ -225,6 +225,16 @@ namespace {
             return duration_;
         }
 
+        // Let the class write to this pixel buffer.
+        virtual void setPixelBuffer(void* buffer) {
+            assigned_buffer_ = (uint8_t*)buffer;
+            if(assigned_buffer_) {
+                avpicture_fill((AVPicture*)frame_rgb_, assigned_buffer_, PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
+            } else {
+                avpicture_fill((AVPicture*)frame_rgb_, buffer_, PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
+            }
+        }
+
         virtual const void* pixels() const {
             return buffer_;
         }
@@ -242,6 +252,7 @@ namespace {
         int                   frameFinished;
         int                   num_bytes_;
         uint8_t              *buffer_;
+        uint8_t              *assigned_buffer_;
         int64_t               time_base_;
         double                fps_;
         double                duration_;

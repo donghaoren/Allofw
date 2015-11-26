@@ -151,6 +151,7 @@ void NODE_VideoSurface2D::Init(Handle<Object> exports) {
     Nan::SetPrototypeMethod(tpl, "pixels", NODE_pixels);
     Nan::SetPrototypeMethod(tpl, "nextFrame", NODE_nextFrame);
     Nan::SetPrototypeMethod(tpl, "seek", NODE_seek);
+    Nan::SetPrototypeMethod(tpl, "setPixelBuffer", NODE_setPixelBuffer);
 
     constructor.Reset(tpl->GetFunction());
 
@@ -221,6 +222,18 @@ NAN_METHOD(NODE_VideoSurface2D::NODE_nextFrame) {
 NAN_METHOD(NODE_VideoSurface2D::NODE_seek) {
     NODE_VideoSurface2D* obj = ObjectWrap::Unwrap<NODE_VideoSurface2D>(info.This());
     obj->video->seek(info[0]->NumberValue());
+}
+
+NAN_METHOD(NODE_VideoSurface2D::NODE_setPixelBuffer) {
+    NODE_VideoSurface2D* obj = ObjectWrap::Unwrap<NODE_VideoSurface2D>(info.This());
+    if(info[0]->IsArrayBufferView()) {
+        v8::ArrayBufferView* view = v8::ArrayBufferView::Cast(*info[0]);
+        unsigned char* ptr = (unsigned char*)view->Buffer()->GetContents().Data();
+        ptr += view->ByteOffset();
+        obj->video->setPixelBuffer(ptr);
+    } else if(node::Buffer::HasInstance(info[0])) {
+        obj->video->setPixelBuffer(node::Buffer::Data(info[0]));
+    }
 }
 
 void NODE_GraphicalContext2D::Init(Handle<Object> exports) {

@@ -208,6 +208,9 @@ namespace allofw {
         virtual double fps() = 0;
         virtual double duration() = 0;
 
+        // Write to the givin pixel buffer.
+        virtual void setPixelBuffer(void* buffer) = 0;
+
         virtual const void* pixels() const = 0;
 
     protected:

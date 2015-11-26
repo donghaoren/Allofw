@@ -55,6 +55,7 @@ private:
     static NAN_METHOD(NODE_nextFrame);
     static NAN_METHOD(NODE_seek);
     static NAN_METHOD(NODE_pixels);
+    static NAN_METHOD(NODE_setPixelBuffer);
 
     static Nan::Persistent<v8::Function> constructor;
 };
