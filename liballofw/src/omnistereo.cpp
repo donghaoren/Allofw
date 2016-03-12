@@ -590,9 +590,9 @@ private:
             for (int f = 0; f < 6; f++) {
                 glTexImage2D(
                     GL_TEXTURE_CUBE_MAP_POSITIVE_X + f,
-                    0, GL_RGBA8,
+                    0, GL_RGBA32F,
                     resolution_, resolution_,
-                    0, GL_BGRA, GL_UNSIGNED_BYTE,
+                    0, GL_RGBA, GL_FLOAT,
                     NULL
                 );
             }
