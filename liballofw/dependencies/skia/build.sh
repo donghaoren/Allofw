@@ -2,6 +2,6 @@
 
 export PATH="${PWD}/depot_tools:${PATH}"
 cd skia
-git checkout chrome/m38_2125
-./tools/git-sync-deps
-make BUILDTYPE=Release
+git checkout chrome/m50
+./bin/sync-and-gyp
+ninja -C out/Release
