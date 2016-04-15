@@ -1,6 +1,5 @@
 # Skia as graphics backend.
 # Together with its dependencies.
-# This should be a custom build from source, put into /opt/build/skia
 SET ( Skia_SOURCE_DIR ${CMAKE_SOURCE_DIR}/dependencies/skia/skia )
 
 SET ( Skia_INCLUDE_DIRS
@@ -13,7 +12,7 @@ SET ( Skia_INCLUDE_DIRS
 
 SET ( Skia_LIBRARY_DIRS "${Skia_SOURCE_DIR}/out/Release" )
 
-# With skia commit: 7f8c54cefefb855bb0d85d09ce5282ba7e9e352a
+# With skia branch: chrome/m50
 SET ( Skia_LIBRARIES
   "${Skia_LIBRARY_DIRS}/libskia_pdf.a"
   "${Skia_LIBRARY_DIRS}/libskia_core.a"
@@ -22,29 +21,37 @@ SET ( Skia_LIBRARIES
   "${Skia_LIBRARY_DIRS}/libskia_utils.a"
   "${Skia_LIBRARY_DIRS}/libskia_opts.a"
   "${Skia_LIBRARY_DIRS}/libskia_opts_ssse3.a"
-  "${Skia_LIBRARY_DIRS}/libskia_opts_sse4.a"
+  "${Skia_LIBRARY_DIRS}/libskia_opts_sse41.a"
+  "${Skia_LIBRARY_DIRS}/libskia_opts_sse42.a"
+  "${Skia_LIBRARY_DIRS}/libskia_opts_avx.a"
+  "${Skia_LIBRARY_DIRS}/libskia_opts_avx2.a"
   "${Skia_LIBRARY_DIRS}/libskia_ports.a"
   "${Skia_LIBRARY_DIRS}/libskia_sfnt.a"
   "${Skia_LIBRARY_DIRS}/libskia_skgpu.a"
+  "${Skia_LIBRARY_DIRS}/libskia_codec.a"
 )
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     FIND_LIBRARY(ApplicationServices_LIBRARY ApplicationServices )
-    FIND_LIBRARY(AGL_LIBRARY AGL )
-    FIND_PACKAGE ( ZLIB )
     LIST ( APPEND Skia_LIBRARIES
+        "${Skia_LIBRARY_DIRS}/libicuuc.a"
+        "${Skia_LIBRARY_DIRS}/libsfntly.a"
         "${Skia_LIBRARY_DIRS}/libetc1.a"
+        "${Skia_LIBRARY_DIRS}/libzlib.a"
+        "${Skia_LIBRARY_DIRS}/libgiflib.a"
+        "${Skia_LIBRARY_DIRS}/libdng_sdk.a"
+        "${Skia_LIBRARY_DIRS}/libpiex.a"
+        "${Skia_LIBRARY_DIRS}/libraw_codec.a"
         "${Skia_LIBRARY_DIRS}/libSkKTX.a"
-        "${Skia_LIBRARY_DIRS}/libskflate.a"
-        "${Skia_LIBRARY_DIRS}/libjpeg.a"
+        "${Skia_LIBRARY_DIRS}/libpng_static.a"
+        "${Skia_LIBRARY_DIRS}/libjpeg-turbo.a"
         "${Skia_LIBRARY_DIRS}/libwebp_enc.a"
         "${Skia_LIBRARY_DIRS}/libwebp_dec.a"
         "${Skia_LIBRARY_DIRS}/libwebp_utils.a"
         "${Skia_LIBRARY_DIRS}/libwebp_dsp.a"
+        "${Skia_LIBRARY_DIRS}/libwebp_dsp_enc.a"
         "${Skia_LIBRARY_DIRS}/libwebp_demux.a"
-        ${ZLIB_LIBRARIES}
         ${ApplicationServices_LIBRARY}
-        ${AGL_LIBRARY}
     )
   ENDIF ( )
 

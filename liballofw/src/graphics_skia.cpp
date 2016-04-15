@@ -14,6 +14,7 @@
 #include <SkColorPriv.h>
 #include <SkGraphics.h>
 #include <SkSurface.h>
+#include <SkPath.h>
 #include <SkMallocPixelRef.h>
 #include <SkForceLinking.h>
 #include <SkColorFilter.h>
@@ -297,7 +298,7 @@ namespace {
         }
 
         Surface2D_Bitmap(int width, int height) {
-            bool r = bitmap.allocPixels(SkImageInfo::Make(width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType));
+            bool r = bitmap.tryAllocPixels(SkImageInfo::Make(width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType));
             if(!r) {
                 throw invalid_argument("cannot create 2D bitmap.");
             }
@@ -445,7 +446,7 @@ namespace {
         virtual void save(ByteStream* stream) {
             SkImage* img = surface->newImageSnapshot();
             if(!img) return;
-            SkData* data = img->encode(SkImageEncoder::kPNG_Type);
+            SkData* data = img->encode(SkImageEncoder::kPNG_Type, 0);
             if(!data) {
                 img->unref();
                 return;
@@ -580,8 +581,7 @@ namespace {
             SkPaint& paint = dynamic_cast<Paint_Impl*>(paint_)->paint;
             if(typeid(*surface_) == typeid(Surface2D_Bitmap)) {
                 Surface2D_Bitmap* surface = dynamic_cast<Surface2D_Bitmap*>(surface_);
-                SkRect sksrc = convert_rect(src);
-                canvas.drawBitmapRectToRect(surface->bitmap, &sksrc, convert_rect(dest), &paint);
+                canvas.drawBitmapRect(surface->bitmap, convert_rect(src), convert_rect(dest), &paint);
             } else {
                 throw invalid_argument("drawSurface() can only take bitmaps.");
             }

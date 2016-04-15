@@ -1,5 +1,6 @@
 all:
 	make -C build
+	make -C utils
 
 rebuild:
 	rm -rf build
