@@ -147,7 +147,7 @@ namespace {
             frame_ = av_frame_alloc();
             frame_rgb_ = av_frame_alloc();
 
-            int num_bytes_ = avpicture_get_size(PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
+            int num_bytes_ = avpicture_get_size(AV_PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
             buffer_ = (uint8_t *)av_malloc(num_bytes_ * sizeof(uint8_t));
 
             sws_ctx = sws_getContext(
@@ -156,7 +156,7 @@ namespace {
                 codec_context_->pix_fmt,
                 codec_context_->width,
                 codec_context_->height,
-                PIX_FMT_RGBA, SWS_FAST_BILINEAR,
+                AV_PIX_FMT_RGBA, SWS_FAST_BILINEAR,
                 NULL, NULL, NULL
             );
 
@@ -166,7 +166,7 @@ namespace {
 
             // Assign appropriate parts of buffer to image planes in pFrameRGB
             // Note that pFrameRGB is an AVFrame, but AVFrame is a superset of AVPicture
-            avpicture_fill((AVPicture*)frame_rgb_, buffer_, PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
+            avpicture_fill((AVPicture*)frame_rgb_, buffer_, AV_PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
         }
 
         void _cleanup() {
@@ -229,9 +229,9 @@ namespace {
         virtual void setPixelBuffer(void* buffer) {
             assigned_buffer_ = (uint8_t*)buffer;
             if(assigned_buffer_) {
-                avpicture_fill((AVPicture*)frame_rgb_, assigned_buffer_, PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
+                avpicture_fill((AVPicture*)frame_rgb_, assigned_buffer_, AV_PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
             } else {
-                avpicture_fill((AVPicture*)frame_rgb_, buffer_, PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
+                avpicture_fill((AVPicture*)frame_rgb_, buffer_, AV_PIX_FMT_RGBA, codec_context_->width, codec_context_->height);
             }
         }
 
