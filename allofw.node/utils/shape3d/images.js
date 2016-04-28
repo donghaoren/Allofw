@@ -7,7 +7,7 @@ var ImageObject = function() {
 ImageObject.prototype = Object.create(ShapeObject.prototype);
 
 ImageObject.prototype.xywh = function(f) {
-    this.variable("vec4", "__texture_xywh", function(d) {
+    this.variable("vec4", "_texture_xywh", function(d) {
         var rect = f(d);
         return [ rect.x, rect.y, rect.width, rect.height ];
     });
@@ -17,8 +17,8 @@ ImageObject.prototype.xywh = function(f) {
 ImageObject.prototype.image = function(image, width, height) {
     this.imagetexture = image;
     image.uploadTexture();
-    this.uniform("int", "__texture_w", width !== undefined ? width : this.imagetexture.width());
-    this.uniform("int", "__texture_h", height !== undefined ? height : this.imagetexture.height());
+    this.uniform("int", "_texture_w", width !== undefined ? width : this.imagetexture.width());
+    this.uniform("int", "_texture_h", height !== undefined ? height : this.imagetexture.height());
     return this;
 };
 
@@ -56,7 +56,7 @@ ImageObject.prototype._vertexShader = function() { return [
     "    centers = omni_transform(center);",
     "    normals = omni_transform_normal(normalize(normal));",
     "    ups = omni_transform_normal(normalize(up));",
-    "    t_xywhs = __texture_xywh;",
+    "    t_xywhs = _texture_xywh;",
     "    scales = scale;",
     "}"
 ].join("\n"); };
@@ -103,7 +103,7 @@ ImageObject.prototype._fragmentShader = function() { return [
     "uniform sampler2D texImage;",
     "in vec2 texCoord;",
     "void main() {",
-        "fragment_color = texture(texImage, texCoord / vec2(__texture_w, __texture_h));",
+        "fragment_color = texture(texImage, texCoord / vec2(_texture_w, _texture_h));",
         "if(fragment_color.a == 0) discard;",
     "}"
 ].join("\n"); };

@@ -7,16 +7,16 @@ var TextObject = function() {
     this.style_value = new VariableValue("object", { fill: [ 255, 255, 255, 1 ] });
 
     this.textcache = new TextCache(2048, 2048);
-    this.uniform("int", "__texture_w", this.textcache.width);
-    this.uniform("int", "__texture_h", this.textcache.height);
+    this.uniform("int", "_texture_w", this.textcache.width);
+    this.uniform("int", "_texture_h", this.textcache.height);
 
     var self = this;
 
-    this.variable("vec4", "__texture_xywh", function(d) {
+    this.variable("vec4", "_texture_xywh", function(d) {
         var rect = self.data2text.get(d);
         return [ rect.x, rect.y, rect.w, rect.h ];
     });
-    this.variable("vec2", "__texture_offset", function(d) {
+    this.variable("vec2", "_texture_offset", function(d) {
         var rect = self.data2text.get(d);
         return [ rect.x_offset, rect.baseline_offset ];
     });
@@ -111,8 +111,8 @@ TextObject.prototype._vertexShader = function() { return `
         centers = omni_transform(center);
         normals = omni_transform_normal(normalize(normal));
         ups = omni_transform_normal(normalize(up));
-        t_xywhs = __texture_xywh;
-        // t_offsets = __texture_offset;
+        t_xywhs = _texture_xywh;
+        // t_offsets = _texture_offset;
         scales = scale;
     }
 `; };
@@ -159,7 +159,7 @@ TextObject.prototype._fragmentShader = function() { return `
     uniform sampler2D texCache;
     in vec2 texCoord;
     void main() {
-        fragment_color = texture(texCache, texCoord / vec2(__texture_w, __texture_h));
+        fragment_color = texture(texCache, texCoord / vec2(_texture_w, _texture_h));
         if(fragment_color.a == 0) discard;
    }
 `; };

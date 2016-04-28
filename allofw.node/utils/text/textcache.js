@@ -13,6 +13,7 @@ var TextCache = function(width, height) {
     this.height = height;
     this.surface = new graphics.Surface2D(width, height, graphics.SURFACETYPE_RASTER);
     this.context = new graphics.GraphicalContext2D(this.surface);
+    this.context.clear(0, 0, 0, 0);
     this.paint = this.context.paint();
     this.paint.setLineJoin(graphics.LINEJOIN_ROUND);
 };
