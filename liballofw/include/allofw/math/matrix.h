@@ -15,13 +15,13 @@ namespace allofw {
         extern template void matrix_inversion<double, 4>(const double*, double*);
         extern template void matrix_inversion<float, 4>(const float*, float*);
 
-        template<typename number_t, int size>
-        void matrix_svd(const number_t* data, number_t* s, number_t* U, number_t* V);
+        // template<typename number_t, int size>
+        // void matrix_svd(const number_t* data, number_t* s, number_t* U, number_t* V);
 
-        extern template void matrix_svd<double, 3>(const double*, double*, double*, double*);
-        extern template void matrix_svd<float, 3>(const float*, float*, float*, float*);
-        extern template void matrix_svd<double, 4>(const double*, double*, double*, double*);
-        extern template void matrix_svd<float, 4>(const float*, float*, float*, float*);
+        // extern template void matrix_svd<double, 3>(const double*, double*, double*, double*);
+        // extern template void matrix_svd<float, 3>(const float*, float*, float*, float*);
+        // extern template void matrix_svd<double, 4>(const double*, double*, double*, double*);
+        // extern template void matrix_svd<float, 4>(const float*, float*, float*, float*);
     }
 
     template <typename T>
@@ -146,17 +146,17 @@ namespace allofw {
         }
         inline Matrix3_ i() const { return inversion(); }
 
-        vector_t svd() const {
-            vector_t r;
-            internal::matrix_svd<number_t, 3>(data(), r.data(), nullptr, nullptr);
-            return r;
-        }
+        // vector_t svd() const {
+        //     vector_t r;
+        //     internal::matrix_svd<number_t, 3>(data(), r.data(), nullptr, nullptr);
+        //     return r;
+        // }
 
-        vector_t svd(Matrix3_& U, Matrix3_& V) const {
-            vector_t r;
-            internal::matrix_svd<number_t, 3>(data(), r.data(), U.data(), V.data());
-            return r;
-        }
+        // vector_t svd(Matrix3_& U, Matrix3_& V) const {
+        //     vector_t r;
+        //     internal::matrix_svd<number_t, 3>(data(), r.data(), U.data(), V.data());
+        //     return r;
+        // }
 
         Matrix3_ transpose() const {
             Matrix3_ r;
@@ -342,17 +342,17 @@ namespace allofw {
         }
         inline Matrix4_ i() const { return inversion(); }
 
-        vector_t svd() const {
-            vector_t r;
-            internal::matrix_svd<number_t, 4>(data(), r.data(), nullptr, nullptr);
-            return r;
-        }
+        // vector_t svd() const {
+        //     vector_t r;
+        //     internal::matrix_svd<number_t, 4>(data(), r.data(), nullptr, nullptr);
+        //     return r;
+        // }
 
-        vector_t svd(Matrix4_& U, Matrix4_& V) const {
-            vector_t r;
-            internal::matrix_svd<number_t, 4>(data(), r.data(), U.data(), V.data());
-            return r;
-        }
+        // vector_t svd(Matrix4_& U, Matrix4_& V) const {
+        //     vector_t r;
+        //     internal::matrix_svd<number_t, 4>(data(), r.data(), U.data(), V.data());
+        //     return r;
+        // }
 
         Matrix4_ transpose() const {
             Matrix4_ r;

@@ -1,0 +1,3 @@
+[submodule "GLFW"]
+    path = liballofw/GLFW
+    url  = https://github.com/glfw/glfw.git
