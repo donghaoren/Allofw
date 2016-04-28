@@ -51,7 +51,6 @@
 
   PKG_SEARCH_MODULE ( YAMLCPP REQUIRED yaml-cpp )
   PKG_SEARCH_MODULE ( GLFW REQUIRED glfw3 )
-  PKG_SEARCH_MODULE ( ZeroMQ REQUIRED libzmq )
 
   # Boost C++ Libraries (we use headers only).
   FIND_PACKAGE ( Boost REQUIRED )
@@ -60,7 +59,7 @@
   FIND_PACKAGE ( FreeImage REQUIRED )
 
   INCLUDE_DIRECTORIES (
-    # ${Boost_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIRS}
     ${GLFW_INCLUDE_DIRS}
     ${YAMLCPP_INCLUDE_DIRS}
@@ -109,18 +108,6 @@
       pthread
   )
 
-  ADD_LIBRARY ( allofw-omniapp SHARED
-    src/omniapp.cpp
-  )
-
-  TARGET_LINK_LIBRARIES ( allofw-omniapp
-    LINK_PRIVATE
-      allofw
-      ${ZeroMQ_LDFLAGS}
-      ${OPENGL_LIBRARIES}
-      pthread
-  )
-
   IF ( ${WITH_SKIA} )
 
     ADD_LIBRARY ( allofw-graphics SHARED
@@ -156,7 +143,6 @@
       ADD_EXECUTABLE ( ${sample_name} samples/${sample_sources} )
       TARGET_LINK_LIBRARIES ( ${sample_name}
         allofw
-        allofw-omniapp
         ${OPENGL_LIBRARIES}
       )
       SET_TARGET_PROPERTIES ( ${sample_name}
@@ -164,8 +150,6 @@
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/samples"
       )
   ENDFUNCTION(ADD_SAMPLE_EXECUTABLE)
-
-  ADD_SAMPLE_EXECUTABLE ( cubes cubes.cpp )
 
 #----------------------------------------------------------------------------------------------------------------------
 # PKG-Config File
@@ -188,7 +172,6 @@
   INSTALL (
     TARGETS
       allofw
-      allofw-omniapp
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
