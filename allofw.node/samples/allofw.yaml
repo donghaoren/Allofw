@@ -1,0 +1,6 @@
+omnistereo:
+    capture_method: per_projection
+    resolution_scale: 1
+    warpblend:
+        generate: perspective
+        generate_fov: 90

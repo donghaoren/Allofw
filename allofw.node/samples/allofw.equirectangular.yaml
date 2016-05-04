@@ -1,0 +1,9 @@
+omnistereo:
+    resolution: 1024
+    capture_method: cubemap
+    warpblend:
+        generate: equirectangular
+
+window:
+    width: 800
+    height: 400
