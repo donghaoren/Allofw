@@ -29,7 +29,6 @@ var searchData=
   ['angle',['angle',['../structallofw_1_1_vector2__.html#a196b092185b789beeac4b575a1f218d3',1,'allofw::Vector2_']]],
   ['arc',['arc',['../classallofw_1_1_path2_d.html#a8e2224209ed8322a0164f7b5442b8e37',1,'allofw::Path2D']]],
   ['aspect_5fratio',['aspect_ratio',['../structallofw_1_1_warp_blend_1_1_viewport_info.html#a5b6a8240ff9d3258c9834cc660d01613',1,'allofw::WarpBlend::ViewportInfo']]],
-  ['details',['details',['../namespaceallofw_1_1details.html',1,'allofw']]],
   ['glutils',['glutils',['../namespaceallofw_1_1glutils.html',1,'allofw']]],
   ['internal',['internal',['../namespaceallofw_1_1internal.html',1,'allofw']]]
 ];

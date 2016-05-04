@@ -16,6 +16,7 @@ var searchData=
   ['setlinecap',['setLineCap',['../classallofw_1_1_paint2_d.html#a895c6c9f8f16c32982b9e568732eeb19',1,'allofw::Paint2D']]],
   ['setlinejoin',['setLineJoin',['../classallofw_1_1_paint2_d.html#a49630688cbbfdac6df48f9b698ced19e',1,'allofw::Paint2D']]],
   ['setmode',['setMode',['../classallofw_1_1_paint2_d.html#afca3bb6495ae430567ce6fdc203a45df',1,'allofw::Paint2D']]],
+  ['setpixelbuffer',['setPixelBuffer',['../classallofw_1_1_video_surface2_d.html#aa94b20a35e7ba9779644a684634fe37c',1,'allofw::VideoSurface2D']]],
   ['setpose',['setPose',['../classallofw_1_1_omni_stereo.html#a39261ac218cf15c4a3700fe94245a9a1',1,'allofw::OmniStereo']]],
   ['setresolution',['setResolution',['../classallofw_1_1_omni_stereo.html#ab42bea701bf31b90c99699926f25db86',1,'allofw::OmniStereo']]],
   ['setstate',['setState',['../classallofw_1_1_graphical_context2_d.html#a822a7a712e99d613acda9913820cdbbf',1,'allofw::GraphicalContext2D']]],
@@ -30,12 +31,9 @@ var searchData=
   ['setuniforms',['setUniforms',['../structallofw_1_1_omni_stereo_1_1_delegate_1_1_capture_info.html#a717c12993a6073d8cd2230e3d2bb02f9',1,'allofw::OmniStereo::Delegate::CaptureInfo::setUniforms()'],['../classallofw_1_1_omni_stereo.html#a2445a1a290e435ca966700c98e4250db',1,'allofw::OmniStereo::setUniforms()']]],
   ['shape',['shape',['../structallofw_1_1_matrix3__.html#a2ff6eba4f6cc7ba0188b4b0bf2f56c1b',1,'allofw::Matrix3_::shape()'],['../structallofw_1_1_matrix4__.html#a8b69e86418212c4f566b8f8517f40990',1,'allofw::Matrix4_::shape()'],['../structallofw_1_1_vector2__.html#a8ae38be54ae5500c27200522cfa64266',1,'allofw::Vector2_::shape()'],['../structallofw_1_1_vector3__.html#a6fc8956297399c8f00be01e09b03efa9',1,'allofw::Vector3_::shape()'],['../structallofw_1_1_vector4__.html#ac419612aee3c6853970e0247a7e74d5b',1,'allofw::Vector4_::shape()']]],
   ['shouldclose',['shouldClose',['../classallofw_1_1_open_g_l_window.html#aa32496e82422eededf62dfa851034428',1,'allofw::OpenGLWindow']]],
-  ['shouldstop',['shouldStop',['../classallofw_1_1details_1_1_omni_app_renderer_base.html#a2aff60267291a57544836a51addc8707',1,'allofw::details::OmniAppRendererBase::shouldStop()'],['../classallofw_1_1details_1_1_omni_app_simulator_base.html#ae11ebbd0be4026a334b59db01bc4cdeb',1,'allofw::details::OmniAppSimulatorBase::shouldStop()']]],
   ['sign',['sign',['../namespaceallofw.html#ad3714ee6b18f452c505d3a51715a58a9',1,'allofw']]],
   ['size',['size',['../classallofw_1_1_configuration_1_1_node.html#ab50edff410f245c25b4410977b342ec7',1,'allofw::Configuration::Node']]],
   ['skew',['skew',['../structallofw_1_1_matrix3__.html#aa172d91f438f70394ba7ba1ebc28cd12',1,'allofw::Matrix3_']]],
-  ['state',['state',['../classallofw_1_1_omni_app_renderer.html#a6dfc7b15b7b4f927ae56941de36ced89',1,'allofw::OmniAppRenderer::state()'],['../classallofw_1_1_omni_app_renderer.html#a98b37f2cd026d256f10091393919acd5',1,'allofw::OmniAppRenderer::state() const '],['../classallofw_1_1_omni_app_simulator.html#a700272b2e09514cf0c90ec9c7aec4147',1,'allofw::OmniAppSimulator::state()'],['../classallofw_1_1_omni_app_simulator.html#a83856825bca95490250fb0c86fa005a2',1,'allofw::OmniAppSimulator::state() const ']]],
   ['stereotexture',['StereoTexture',['../structallofw_1_1_omni_stereo_1_1_stereo_texture.html#a100d93a82c9a5a476c3c044fb19896e2',1,'allofw::OmniStereo::StereoTexture']]],
-  ['svd',['svd',['../structallofw_1_1_matrix3__.html#a4fb3ad51a2f9432f121612d70dafb8f6',1,'allofw::Matrix3_::svd() const '],['../structallofw_1_1_matrix3__.html#ae183d1b89e5b77aafcf01b2630d543e4',1,'allofw::Matrix3_::svd(Matrix3_ &amp;U, Matrix3_ &amp;V) const '],['../structallofw_1_1_matrix4__.html#ab92690f974226279517d08c06f1466df',1,'allofw::Matrix4_::svd() const '],['../structallofw_1_1_matrix4__.html#a29cfad10287f7e752da943a7801778da',1,'allofw::Matrix4_::svd(Matrix4_ &amp;U, Matrix4_ &amp;V) const ']]],
   ['swapbuffers',['swapBuffers',['../classallofw_1_1_open_g_l_window.html#ae39ec50d6ab72cecb255a260bf3aeec8',1,'allofw::OpenGLWindow']]]
 ];

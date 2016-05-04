@@ -8,6 +8,5 @@ var searchData=
   ['restore',['restore',['../classallofw_1_1_graphical_context2_d.html#ab90fb68570eac2a640675d708d70695f',1,'allofw::GraphicalContext2D']]],
   ['rotate',['rotate',['../classallofw_1_1_graphical_context2_d.html#a2554fb4d9ff93aeaa5c662c43899f039',1,'allofw::GraphicalContext2D::rotate()'],['../structallofw_1_1_quaternion__.html#a3362391463a10a27308f9905836f1949',1,'allofw::Quaternion_::rotate()']]],
   ['rotate90deg',['rotate90deg',['../structallofw_1_1_vector2__.html#a51a21c458391d2794b7cc78702e2cabf',1,'allofw::Vector2_']]],
-  ['rotation',['Rotation',['../structallofw_1_1_quaternion__.html#ac9f8fbc175cb7a3522bb181152ad0149',1,'allofw::Quaternion_']]],
-  ['run',['run',['../classallofw_1_1details_1_1_omni_app_runner_base.html#a2e69b0d7dac4b0215eb4d36780879d94',1,'allofw::details::OmniAppRunnerBase']]]
+  ['rotation',['Rotation',['../structallofw_1_1_quaternion__.html#ac9f8fbc175cb7a3522bb181152ad0149',1,'allofw::Quaternion_']]]
 ];

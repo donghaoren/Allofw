@@ -4,6 +4,7 @@ var searchData=
   ['kcompositemask_5ffront',['kCompositeMask_Front',['../classallofw_1_1_omni_stereo.html#a18641997a7dbab754c0af5b2c0e7fe12',1,'allofw::OmniStereo']]],
   ['kcompositemask_5fpanorama',['kCompositeMask_Panorama',['../classallofw_1_1_omni_stereo.html#aba0e1868775e86bfdcbd2cda383c7013',1,'allofw::OmniStereo']]],
   ['kcompositemask_5fpanorama_5fcubemap',['kCompositeMask_Panorama_Cubemap',['../classallofw_1_1_omni_stereo.html#aa2741e9224c7d78a753ddca62acea78a',1,'allofw::OmniStereo']]],
+  ['kcompositemask_5fpanorama_5fcubemap_5fyuv420p',['kCompositeMask_Panorama_Cubemap_YUV420P',['../classallofw_1_1_omni_stereo.html#a85053418f84b846c37784078ab090d8c',1,'allofw::OmniStereo']]],
   ['kcompositemask_5fpanorama_5fequirectangular',['kCompositeMask_Panorama_Equirectangular',['../classallofw_1_1_omni_stereo.html#a59dcf6274b9a3605d0fd39c2b9f1d13a',1,'allofw::OmniStereo']]],
   ['kcompositemask_5fscene',['kCompositeMask_Scene',['../classallofw_1_1_omni_stereo.html#a3617b4290794e16385de7858113b9b99',1,'allofw::OmniStereo']]],
   ['kerror',['kError',['../classallofw_1_1_logger.html#ae7d0de78f3f2cbe511d9f9da2b630fad',1,'allofw::Logger']]],
