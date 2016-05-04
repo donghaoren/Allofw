@@ -117,6 +117,7 @@
       ${GLEW_LIBRARIES}
       ${FREEIMAGE_LIBRARIES}
       ${GLFW_LIBRARIES}
+      glfw
       lodepng
       yaml-cpp
       pthread
