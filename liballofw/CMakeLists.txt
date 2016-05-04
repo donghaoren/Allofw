@@ -114,8 +114,6 @@
   TARGET_LINK_LIBRARIES ( allofw
     LINK_PRIVATE
       ${OPENGL_LIBRARIES}
-      ${GLEW_LIBRARIES}
-      ${FREEIMAGE_LIBRARIES}
       ${GLFW_LIBRARIES}
       glfw
       lodepng
@@ -136,10 +134,7 @@
         ${Skia_LIBRARIES}
         ${FFMPEG_LDFLAGS}
         ${OPENGL_LIBRARIES}
-        ${GLEW_LIBRARIES}
-        ${GLFW_LDFLAGS}
-        ${FREEIMAGE_LIBRARIES}
-        ${YAMLCPP_LDFLAGS}
+        yaml-cpp
     )
 
     INSTALL (
