@@ -37,6 +37,7 @@
   IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
     # For linux, report error when shared libraries contains undefined references.
     # Link c/c++ libraries statically.
+    SET ( CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}" )
     SET ( CMAKE_EXE_LINKER_FLAGS "-Wl,--no-undefined -static-libgcc -static-libstdc++" )
     SET ( CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined -static-libgcc -static-libstdc++" )
     ADD_DEFINITIONS ( -DPLATFORM_LINUX )
