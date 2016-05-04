@@ -64,15 +64,24 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     FIND_PACKAGE ( ZLIB )
     FIND_PACKAGE ( GIF )
     LIST ( APPEND Skia_LIBRARIES
+        "${Skia_LIBRARY_DIRS}/obj/gyp/libicuuc.a"
+        "${Skia_LIBRARY_DIRS}/obj/gyp/libsfntly.a"
         "${Skia_LIBRARY_DIRS}/obj/gyp/libetc1.a"
+        "${Skia_LIBRARY_DIRS}/obj/gyp/libzlib.a"
+        "${Skia_LIBRARY_DIRS}/obj/gyp/libgiflib.a"
         "${Skia_LIBRARY_DIRS}/obj/gyp/libSkKTX.a"
-        "${Skia_LIBRARY_DIRS}/obj/gyp/libskflate.a"
-        "${Skia_LIBRARY_DIRS}/obj/gyp/libjpeg.a"
+        "${Skia_LIBRARY_DIRS}/obj/gyp/libraw_codec.a"
+        "${Skia_LIBRARY_DIRS}/obj/gyp/libdng_sdk.a"
+        "${Skia_LIBRARY_DIRS}/obj/gyp/libpiex.a"
+        "${Skia_LIBRARY_DIRS}/libpng_static.a"
+        "${Skia_LIBRARY_DIRS}/obj/gyp/libjpeg-turbo.a"
         "${Skia_LIBRARY_DIRS}/obj/gyp/libwebp_enc.a"
         "${Skia_LIBRARY_DIRS}/obj/gyp/libwebp_dec.a"
         "${Skia_LIBRARY_DIRS}/obj/gyp/libwebp_utils.a"
         "${Skia_LIBRARY_DIRS}/obj/gyp/libwebp_dsp.a"
+        "${Skia_LIBRARY_DIRS}/obj/gyp/libwebp_dsp_enc.a"
         "${Skia_LIBRARY_DIRS}/obj/gyp/libwebp_demux.a"
+        -lrt
         ${FreeType_LIBRARIES}
         ${FontConfig_LIBRARIES}
         ${OPENGL_LIBRARIES}
