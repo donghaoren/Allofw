@@ -49,21 +49,33 @@
 #----------------------------------------------------------------------------------------------------------------------
 # Dependencies
 
-  PKG_SEARCH_MODULE ( YAMLCPP REQUIRED yaml-cpp )
-  PKG_SEARCH_MODULE ( GLFW REQUIRED glfw3 )
+  FILE ( GLOB YAML_CPP_SOURCES "dependencies/yaml-cpp/src/[a-zA-Z]*.cpp")
+  ADD_LIBRARY ( yaml-cpp
+    ${YAML_CPP_SOURCES}
+  )
+
+  ADD_LIBRARY ( lodepng
+    dependencies/lodepng/lodepng.cpp
+  )
+
+  SET ( GLFW_BUILD_EXAMPLES OFF )
+  SET ( GLFW_BUILD_TESTS OFF )
+  SET ( GLFW_BUILD_DOCS  OFF )
+  SET ( GLFW_INSTALL OFF )
+  SET ( GLFW_DOCUMENT_INTERNALS OFF )
+  ADD_SUBDIRECTORY ( dependencies/glfw )
 
   # Boost C++ Libraries (we use headers only).
   FIND_PACKAGE ( Boost REQUIRED )
   FIND_PACKAGE ( OpenGL REQUIRED )
-  FIND_PACKAGE ( GLEW REQUIRED )
-  FIND_PACKAGE ( FreeImage REQUIRED )
 
   INCLUDE_DIRECTORIES (
     ${Boost_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIRS}
-    ${GLFW_INCLUDE_DIRS}
-    ${YAMLCPP_INCLUDE_DIRS}
     ${FREEIMAGE_INCLUDE_PATH}
+    dependeicies/yaml-cpp/include
+    dependeicies/glfw/include
+    dependencies/lodepng
   )
 
   IF ( ${WITH_SKIA} )
@@ -102,9 +114,10 @@
     LINK_PRIVATE
       ${OPENGL_LIBRARIES}
       ${GLEW_LIBRARIES}
-      ${GLFW_LDFLAGS}
       ${FREEIMAGE_LIBRARIES}
-      ${YAMLCPP_LDFLAGS}
+      ${GLFW_LIBRARIES}
+      lodepng
+      yaml-cpp
       pthread
   )
 

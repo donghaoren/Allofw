@@ -3,7 +3,7 @@
 #include "allofw/logger.h"
 
 #include <yaml-cpp/yaml.h>
-#include <FreeImage.h>
+#include <lodepng.h>
 
 #include <vector>
 #include <cmath>
@@ -145,20 +145,20 @@ public:
             vp.viewport.viewport.w = proj["viewport"]["w"].as<float>();
             vp.viewport.viewport.h = proj["viewport"]["h"].as<float>();
             std::string blend_file = proj["blend"]["file"].as<std::string>();
-            FIBITMAP *blend_image = FreeImage_Load(FIF_PNG, (std::string(calibration_path) + "/" + blend_file).c_str(), PNG_DEFAULT);
-            blend_image = FreeImage_ConvertTo24Bits(blend_image);
-            vp.blend.size.w = FreeImage_GetWidth(blend_image);
-            vp.blend.size.h = FreeImage_GetHeight(blend_image);
+            std::vector<unsigned char> blend_image;
+            unsigned int blend_image_width, blend_image_height;
+            unsigned int error = lodepng::decode(blend_image, blend_image_width, blend_image_height, (std::string(calibration_path) + "/" + blend_file).c_str());
+            vp.blend.size.w = blend_image_width;
+            vp.blend.size.h = blend_image_height;
             vp.blend.data = new Vector4f[vp.blend.size.w * vp.blend.size.h];
             for(int y = 0; y < vp.blend.size.h; y++) {
-                BYTE* scanline = FreeImage_GetScanLine(blend_image, y);
+                unsigned char* scanline = &blend_image[y * vp.blend.size.w * 4];
                 Vector4f* out = vp.blend.data + y * vp.blend.size.w;
                 for(int x = 0; x < vp.blend.size.w; x++) {
-                    float value = scanline[x * 3 + 0] / 255.0;
+                    float value = scanline[x * 4 + 0] / 255.0;
                     out[x] = Vector4f(value, value, value, 1.0f);
                 }
             }
-            FreeImage_Unload(blend_image);
             std::string warp_file = proj["warp"]["file"].as<std::string>();
             int32_t warp_size[2];
             FILE* fwarp = fopen((std::string(calibration_path) + "/" + warp_file).c_str(), "rb");

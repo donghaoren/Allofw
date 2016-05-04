@@ -1,0 +1,9 @@
+[submodule "yaml-cpp"]
+	path = liballofw/dependencies/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "glfw"]
+	path = liballofw/dependencies/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "lodepng"]
+	path = liballofw/dependencies/lodepng
+	url = https://github.com/lvandeve/lodepng.git
