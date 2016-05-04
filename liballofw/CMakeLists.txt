@@ -49,9 +49,13 @@
 #----------------------------------------------------------------------------------------------------------------------
 # Dependencies
 
-  FILE ( GLOB YAML_CPP_SOURCES "dependencies/yaml-cpp/src/[a-zA-Z]*.cpp")
-  ADD_LIBRARY ( yaml-cpp
-    ${YAML_CPP_SOURCES}
+  INCLUDE_DIRECTORIES (
+    BEFORE SYSTEM
+      ${Boost_INCLUDE_DIRS}
+      ${OPENGL_INCLUDE_DIRS}
+      dependeicies/yaml-cpp/include
+      dependeicies/glfw/include
+      dependencies/lodepng
   )
 
   ADD_LIBRARY ( lodepng
@@ -69,13 +73,9 @@
   FIND_PACKAGE ( Boost REQUIRED )
   FIND_PACKAGE ( OpenGL REQUIRED )
 
-  INCLUDE_DIRECTORIES (
-    ${Boost_INCLUDE_DIRS}
-    ${OPENGL_INCLUDE_DIRS}
-    ${FREEIMAGE_INCLUDE_PATH}
-    dependeicies/yaml-cpp/include
-    dependeicies/glfw/include
-    dependencies/lodepng
+  FILE ( GLOB YAML_CPP_SOURCES "dependencies/yaml-cpp/src/[a-zA-Z]*.cpp")
+  ADD_LIBRARY ( yaml-cpp
+    ${YAML_CPP_SOURCES}
   )
 
   IF ( ${WITH_SKIA} )
