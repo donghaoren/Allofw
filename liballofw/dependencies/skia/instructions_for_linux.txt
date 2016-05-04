@@ -1,0 +1,4 @@
+gyp/common_variables.gypi:
+   Line 193, change 0 -> 1.
+gyp/common_conditions.gypi:
+   Line 408 "SK_SAMPLES_FOR_X" delete.
