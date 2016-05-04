@@ -42,6 +42,7 @@ For ubuntu:
     mkdir build
     cd build
     cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
+    # or "cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install -DWITH_SKIA=NO" if you didn't build Skia.
     make -j8
     make install
 
