@@ -53,8 +53,8 @@
     BEFORE SYSTEM
       ${Boost_INCLUDE_DIRS}
       ${OPENGL_INCLUDE_DIRS}
-      dependeicies/yaml-cpp/include
-      dependeicies/glfw/include
+      dependencies/yaml-cpp/include
+      dependencies/glfw/include
       dependencies/lodepng
   )
 
