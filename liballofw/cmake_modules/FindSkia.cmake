@@ -60,9 +60,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     PKG_CHECK_MODULES ( FontConfig fontconfig )
     FIND_PACKAGE ( OpenGL )
     FIND_PACKAGE ( Threads )
-    FIND_PACKAGE ( PNG )
-    FIND_PACKAGE ( ZLIB )
-    FIND_PACKAGE ( GIF )
     LIST ( APPEND Skia_LIBRARIES
         "${Skia_LIBRARY_DIRS}/obj/gyp/libicuuc.a"
         "${Skia_LIBRARY_DIRS}/obj/gyp/libsfntly.a"
