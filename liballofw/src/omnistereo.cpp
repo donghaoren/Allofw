@@ -734,7 +734,7 @@ private:
         LoggerScope logger(Logger::kInfo, "OmniStereo::initPerProjectionTextures");
         // Each viewport has a set of textures.
         tex_projections_.resize(warpblend_->getViewportCount());
-        //First
+
         for(ProjectionTexture& p : tex_projections_) {
             GLuint textures[4];
             glGenTextures(4, textures);
@@ -875,6 +875,7 @@ private:
         }
     }
     void allocatePerProjectionTextures() {
+        LoggerScope logger(Logger::kInfo, "OmniStereo::allocatePerProjectionTextures");
         glActiveTexture(GL_TEXTURE0);
         int eyes = stereo_enabled_ ? 2 : 1;
         for(ProjectionTexture& p : tex_projections_) {

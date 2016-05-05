@@ -501,8 +501,8 @@
 #define GL_CLIP_DISTANCE3                 0x3003
 #define GL_CLIP_DISTANCE4                 0x3004
 #define GL_CLIP_DISTANCE5                 0x3005
-#define GL_CLIP_DISTANCE6                 0x3006
-#define GL_CLIP_DISTANCE7                 0x3007
+// #define GL_CLIP_DISTANCE6                 0x3006
+// #define GL_CLIP_DISTANCE7                 0x3007
 #define GL_MAX_CLIP_DISTANCES             0x0D32
 #define GL_MAJOR_VERSION                  0x821B
 #define GL_MINOR_VERSION                  0x821C

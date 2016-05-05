@@ -8,6 +8,7 @@
       ],
       "libraries": [
         "<!@(pkg-config liballofw --libs)",
+        "<!@(pkg-config glew --libs)",
       ],
       "cflags!": [ "-fno-exceptions", "-fno-rtti" ],
       "cflags_cc!": [ "-fno-exceptions", "-fno-rtti" ],

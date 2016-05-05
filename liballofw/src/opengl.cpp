@@ -1,6 +1,7 @@
 #include "allofw/opengl.h"
+#include "allofw/opengl_utils.h"
 #include "allofw/logger.h"
-#define GLFW_INCLUDE_NONE
+// #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -88,6 +89,15 @@ public:
         glfwSetWindowRefreshCallback(window, cb_windowrefresh);
         glfwSetWindowFocusCallback(window, cb_windowfocus);
         glfwSetFramebufferSizeCallback(window, cb_framebuffersize);
+
+        glfwMakeContextCurrent(window);
+        glewExperimental = 1;
+        if(GLEW_OK != glewInit()) {
+            throw glfw_runtime_error("glewInit() failed.");
+        }
+        // Clear the OpenGL errors after glewInit, it's safe to do.
+        glGetError();
+        // glutils::checkGLErrors("After window");
     }
 
     // Callbacks.

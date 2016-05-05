@@ -71,6 +71,7 @@
   # Boost C++ Libraries (we use headers only).
   FIND_PACKAGE ( Boost REQUIRED )
   FIND_PACKAGE ( OpenGL REQUIRED )
+  FIND_PACKAGE ( GLEW REQUIRED )
 
   FILE ( GLOB YAML_CPP_SOURCES "dependencies/yaml-cpp/src/[a-zA-Z]*.cpp")
   ADD_LIBRARY ( yaml-cpp
@@ -112,6 +113,7 @@
   TARGET_LINK_LIBRARIES ( allofw
     LINK_PRIVATE
       ${OPENGL_LIBRARIES}
+      ${GLEW_LIBRARIES}
       ${GLFW_LIBRARIES}
       glfw
       lodepng
@@ -132,6 +134,7 @@
         ${Skia_LIBRARIES}
         ${FFMPEG_LDFLAGS}
         ${OPENGL_LIBRARIES}
+        ${GLEW_LIBRARIES}
         yaml-cpp
     )
 
