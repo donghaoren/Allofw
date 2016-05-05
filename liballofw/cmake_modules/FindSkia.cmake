@@ -85,9 +85,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         ${FreeType_LIBRARIES}
         ${FontConfig_LIBRARIES}
         ${OPENGL_LIBRARIES}
-        ${PNG_LIBRARIES}
-        ${GIF_LIBRARIES}
-        ${ZLIB_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
     )
     # In Linux, to avoid circular dependency problem, add start-group and end-group for Skia static files.
