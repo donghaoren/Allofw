@@ -2,10 +2,7 @@
 
 #include <iostream>
 
-#include <armadillo>
-
 using namespace std;
-using namespace arma;
 
 ALLOFW_NS_BEGIN
 
