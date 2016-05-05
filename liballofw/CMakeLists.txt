@@ -29,10 +29,6 @@
   SET ( EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin" )
   SET ( LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib" )
 
-  # Use libraries in the source directory if possible.
-  SET ( ENV{PKG_CONFIG_PATH} "${CMAKE_SOURCE_DIR}/dependencies/local/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}" )
-  FIND_PACKAGE ( PkgConfig )
-
   # OS specific configurations.
   IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
     # For linux, report error when shared libraries contains undefined references.
@@ -40,11 +36,11 @@
     SET ( CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}" )
     SET ( CMAKE_EXE_LINKER_FLAGS "-Wl,--no-undefined -static-libgcc -static-libstdc++" )
     SET ( CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined -static-libgcc -static-libstdc++" )
-    ADD_DEFINITIONS ( -DPLATFORM_LINUX )
+    ADD_DEFINITIONS ( -DALLOFW_PLATFORM_LINUX )
   ENDIF ( )
 
   IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
-    ADD_DEFINITIONS ( -DPLATFORM_MACOSX )
+    ADD_DEFINITIONS ( -DALLOFW_PLATFORM_MACOSX )
   ENDIF ( )
 
 #----------------------------------------------------------------------------------------------------------------------
@@ -81,6 +77,7 @@
 
   IF ( ${WITH_SKIA} )
     FIND_PACKAGE ( Skia REQUIRED )
+    FIND_PACKAGE ( PkgConfig )
     PKG_CHECK_MODULES ( FFMPEG REQUIRED libavcodec libavutil libavformat libswscale )
     INCLUDE_DIRECTORIES (
       ${Skia_INCLUDE_DIRS}
