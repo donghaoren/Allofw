@@ -43,6 +43,8 @@
     ADD_DEFINITIONS ( -DALLOFW_PLATFORM_MACOSX )
   ENDIF ( )
 
+  FIND_PACKAGE ( PkgConfig )
+
 #----------------------------------------------------------------------------------------------------------------------
 # Dependencies
 
@@ -77,7 +79,6 @@
 
   IF ( ${WITH_SKIA} )
     FIND_PACKAGE ( Skia REQUIRED )
-    FIND_PACKAGE ( PkgConfig )
     PKG_CHECK_MODULES ( FFMPEG REQUIRED libavcodec libavutil libavformat libswscale )
     INCLUDE_DIRECTORIES (
       ${Skia_INCLUDE_DIRS}
