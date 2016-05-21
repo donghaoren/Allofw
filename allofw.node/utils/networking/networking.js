@@ -14,10 +14,10 @@ var Networking = function(config, role) {
         });
         console.log("Renderer: Listening on " + config.broadcasting.renderer.sub);
     }
-    if(role == "controller") {
+    if(role == "simulator") {
         var pub = require("zmq").socket("pub");
-        pub.bind(config.broadcasting.controller.pub);
-        console.log("Controller: Braodcasting on " + config.broadcasting.controller.pub);
+        pub.bind(config.broadcasting.simulator.pub);
+        console.log("Controller: Braodcasting on " + config.broadcasting.simulator.pub);
         this.broadcast = function(path) {
             var obj = [ path, Array.prototype.slice.call(arguments, 1) ];
             pub.send(JSON.stringify(obj));

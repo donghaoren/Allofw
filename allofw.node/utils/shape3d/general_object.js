@@ -70,13 +70,16 @@ VariableValue.prototype.getByteLength = function() {
 
 var ShapeObject = function() {
     this.vars = { };
+    this.vars_order = [];
     this.attrs = { };
+    this.attrs_order = [];
     this.uniforms = { };
     this.vertex_array = new GL.VertexArray();
     this.vertex_buffer = new GL.Buffer();
 };
 
 ShapeObject.prototype.attr = function(type, name, value) {
+    if(!this.attrs[name]) this.attrs_order.push(name);
     this.attrs[name] = new AttributeValue(type, value);
     return this;
 };
@@ -87,8 +90,12 @@ ShapeObject.prototype.attrorder = function(names) {
 };
 
 ShapeObject.prototype.variable = function(type, name, value) {
-    if(this.vars[name]) this.vars[name].update(value);
-    else this.vars[name] = new VariableValue(type, value);
+    if(this.vars[name]) {
+        this.vars[name].update(value);
+    } else {
+        this.vars_order.push(name);
+        this.vars[name] = new VariableValue(type, value);
+    }
     return this;
 };
 
@@ -132,7 +139,8 @@ ShapeObject.prototype.compile = function(omni) {
 
     var layout_index = 0;
     var byte_offset = 0;
-    for(var name in this.vars) {
+    for(var i = 0; i < this.vars_order.length; i++) {
+        var name = this.vars_order[i];
         var variable = this.vars[name];
         variable.layout_index = layout_index;
         variable.byte_offset = byte_offset;

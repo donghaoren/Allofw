@@ -99,4 +99,15 @@
 
     utils.compileShaders = compileShaders;
 
+    utils.checkGLError = function(prefix) {
+        var err = GL.getError();
+        if(err != 0) {
+            if(prefix) {
+                allofw.log(allofw.kInfo, "OpenGL Error #" + err + " at " + prefix);
+            } else {
+                allofw.log(allofw.kInfo, "OpenGL Error #" + err);
+            }
+        }
+    };
+
 })();
