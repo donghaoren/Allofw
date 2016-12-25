@@ -2,6 +2,7 @@ import yaml
 import re
 
 from code_generation import DefineConstant, GenerateCode, DefineFunction
+from dts_generation import DTSDefineConstant, DTSGenerateCode, DTSDefineFunction
 from gltypes import types
 
 # Parse enums
@@ -40,6 +41,7 @@ for line in prepared:
         enum = m.group(1)
         value = int(m.group(2), 0)
         DefineConstant(name = enum[3:], c_name = enum, value = value, type = "Uint32")
+        DTSDefineConstant(name = enum[3:], c_name = enum, value = value, type = "Uint32")
         continue
 
     if line[0] == '#': continue
@@ -78,6 +80,7 @@ for line in prepared:
             code_lines.append("return info.GetReturnValue().Set(result_js);")
 
         DefineFunction(name[2].lower() + name[3:], "\n".join(map(lambda x: "    " + x, code_lines)))
+        DTSDefineFunction(name[2].lower() + name[3:], args, return_type)
         #print return_type, name, args
         continue
 
@@ -108,3 +111,7 @@ code = GenerateCode()
 
 with open("glbind.cpp", "wb") as f:
     f.write(code.encode("utf-8"))
+
+code_dts = DTSGenerateCode()
+with open("glbind.d.ts", "wb") as f:
+    f.write(code_dts.encode("utf-8"))

@@ -23,7 +23,7 @@ void* glbind_get_buffer_data(v8::Handle<v8::Value> value) {
 
 class NODE_Sampler : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -48,7 +48,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_Sampler::constructor;
 
-void NODE_Sampler::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_Sampler::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("Sampler").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -63,7 +63,7 @@ void NODE_Sampler::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "Sampler", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("Sampler").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_Sampler::New) {
@@ -109,7 +109,7 @@ NAN_METHOD(NODE_Sampler::NODE_toString) {
 
 class NODE_Framebuffer : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -134,7 +134,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_Framebuffer::constructor;
 
-void NODE_Framebuffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_Framebuffer::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("Framebuffer").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -149,7 +149,7 @@ void NODE_Framebuffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "Framebuffer", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("Framebuffer").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_Framebuffer::New) {
@@ -195,7 +195,7 @@ NAN_METHOD(NODE_Framebuffer::NODE_toString) {
 
 class NODE_Shader : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -220,7 +220,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_Shader::constructor;
 
-void NODE_Shader::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_Shader::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("Shader").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -235,7 +235,7 @@ void NODE_Shader::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "Shader", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("Shader").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_Shader::New) {
@@ -281,7 +281,7 @@ NAN_METHOD(NODE_Shader::NODE_toString) {
 
 class NODE_Texture : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -306,7 +306,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_Texture::constructor;
 
-void NODE_Texture::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_Texture::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("Texture").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -321,7 +321,7 @@ void NODE_Texture::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "Texture", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("Texture").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_Texture::New) {
@@ -367,7 +367,7 @@ NAN_METHOD(NODE_Texture::NODE_toString) {
 
 class NODE_ProgramPipeline : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -392,7 +392,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_ProgramPipeline::constructor;
 
-void NODE_ProgramPipeline::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_ProgramPipeline::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("ProgramPipeline").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -407,7 +407,7 @@ void NODE_ProgramPipeline::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "ProgramPipeline", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("ProgramPipeline").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_ProgramPipeline::New) {
@@ -453,7 +453,7 @@ NAN_METHOD(NODE_ProgramPipeline::NODE_toString) {
 
 class NODE_Renderbuffer : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -478,7 +478,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_Renderbuffer::constructor;
 
-void NODE_Renderbuffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_Renderbuffer::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("Renderbuffer").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -493,7 +493,7 @@ void NODE_Renderbuffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "Renderbuffer", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("Renderbuffer").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_Renderbuffer::New) {
@@ -539,7 +539,7 @@ NAN_METHOD(NODE_Renderbuffer::NODE_toString) {
 
 class NODE_VertexArray : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -564,7 +564,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_VertexArray::constructor;
 
-void NODE_VertexArray::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_VertexArray::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("VertexArray").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -579,7 +579,7 @@ void NODE_VertexArray::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "VertexArray", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("VertexArray").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_VertexArray::New) {
@@ -625,7 +625,7 @@ NAN_METHOD(NODE_VertexArray::NODE_toString) {
 
 class NODE_Query : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -650,7 +650,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_Query::constructor;
 
-void NODE_Query::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_Query::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("Query").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -665,7 +665,7 @@ void NODE_Query::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "Query", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("Query").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_Query::New) {
@@ -711,7 +711,7 @@ NAN_METHOD(NODE_Query::NODE_toString) {
 
 class NODE_Buffer : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -736,7 +736,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_Buffer::constructor;
 
-void NODE_Buffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_Buffer::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("Buffer").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -751,7 +751,7 @@ void NODE_Buffer::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "Buffer", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("Buffer").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_Buffer::New) {
@@ -797,7 +797,7 @@ NAN_METHOD(NODE_Buffer::NODE_toString) {
 
 class NODE_Program : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -822,7 +822,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_Program::constructor;
 
-void NODE_Program::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_Program::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("Program").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -837,7 +837,7 @@ void NODE_Program::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "Program", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("Program").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_Program::New) {
@@ -883,7 +883,7 @@ NAN_METHOD(NODE_Program::NODE_toString) {
 
 class NODE_TransformFeedback : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::ObjectTemplate> exports);
+    static void Init(v8::Handle<v8::Object> exports);
     GLuint gl_handle;
 
     static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -908,7 +908,7 @@ private:
 
 Nan::Persistent<v8::Function> NODE_TransformFeedback::constructor;
 
-void NODE_TransformFeedback::Init(v8::Handle<v8::ObjectTemplate> exports) {
+void NODE_TransformFeedback::Init(v8::Handle<v8::Object> exports) {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New<v8::String>("TransformFeedback").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -923,7 +923,7 @@ void NODE_TransformFeedback::Init(v8::Handle<v8::ObjectTemplate> exports) {
     constructor.Reset(tpl->GetFunction());
 
     // Export constructor.
-    Nan::SetTemplate(exports, "TransformFeedback", Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("TransformFeedback").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
 NAN_METHOD(NODE_TransformFeedback::New) {
@@ -967,7 +967,7 @@ NAN_METHOD(NODE_TransformFeedback::NODE_toString) {
 }
 
 
-void defineObjects(v8::Handle<v8::ObjectTemplate> exports) {
+void defineObjects(v8::Handle<v8::Object> exports) {
     NODE_Sampler::Init(exports);
     NODE_Framebuffer::Init(exports);
     NODE_Shader::Init(exports);
@@ -982,936 +982,936 @@ void defineObjects(v8::Handle<v8::ObjectTemplate> exports) {
 }
 
 
-void defineConstants(v8::Handle<v8::ObjectTemplate> exports) {
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_BUFFER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_BUFFER_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_BUFFER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BUFFER_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_BUFFER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_BUFFER_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FALSE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FALSE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRUE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POINTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINE_LOOP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_LOOP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINE_STRIP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_STRIP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRIANGLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRIANGLE_STRIP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLE_STRIP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRIANGLE_FAN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLE_FAN), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NEVER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NEVER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LESS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LESS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("EQUAL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_EQUAL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LEQUAL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LEQUAL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GREATER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GREATER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NOTEQUAL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NOTEQUAL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GEQUAL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEQUAL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ALWAYS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALWAYS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ZERO").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ZERO), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ONE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SRC_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ONE_MINUS_SRC_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_SRC_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SRC_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ONE_MINUS_SRC_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_SRC_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DST_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DST_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ONE_MINUS_DST_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_DST_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DST_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DST_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ONE_MINUS_DST_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_DST_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SRC_ALPHA_SATURATE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC_ALPHA_SATURATE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NONE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NONE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRONT_LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT_LEFT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRONT_RIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT_RIGHT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BACK_LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BACK_LEFT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BACK_RIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BACK_RIGHT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRONT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BACK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BACK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LEFT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RIGHT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRONT_AND_BACK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT_AND_BACK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NO_ERROR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NO_ERROR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INVALID_ENUM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVALID_ENUM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INVALID_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVALID_VALUE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INVALID_OPERATION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVALID_OPERATION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("OUT_OF_MEMORY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OUT_OF_MEMORY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CCW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CCW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POINT_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POINT_SIZE_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_SIZE_RANGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POINT_SIZE_GRANULARITY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_SIZE_GRANULARITY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINE_SMOOTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_SMOOTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINE_WIDTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_WIDTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINE_WIDTH_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_WIDTH_RANGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINE_WIDTH_GRANULARITY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_WIDTH_GRANULARITY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POLYGON_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_MODE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POLYGON_SMOOTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_SMOOTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CULL_FACE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CULL_FACE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CULL_FACE_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CULL_FACE_MODE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRONT_FACE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT_FACE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_RANGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_TEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_TEST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_WRITEMASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_WRITEMASK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_CLEAR_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_CLEAR_VALUE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_FUNC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_FUNC), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_TEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_TEST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_CLEAR_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_CLEAR_VALUE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_FUNC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_FUNC), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_VALUE_MASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_VALUE_MASK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_FAIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_FAIL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_PASS_DEPTH_FAIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_PASS_DEPTH_FAIL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_PASS_DEPTH_PASS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_PASS_DEPTH_PASS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_REF").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_REF), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_WRITEMASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_WRITEMASK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VIEWPORT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VIEWPORT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DITHER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DITHER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_DST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_DST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_SRC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_SRC), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LOGIC_OP_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LOGIC_OP_MODE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_LOGIC_OP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_LOGIC_OP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("READ_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SCISSOR_BOX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SCISSOR_BOX), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SCISSOR_TEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SCISSOR_TEST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_CLEAR_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_CLEAR_VALUE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_WRITEMASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_WRITEMASK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLEBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLEBUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STEREO").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STEREO), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINE_SMOOTH_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_SMOOTH_HINT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POLYGON_SMOOTH_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_SMOOTH_HINT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNPACK_SWAP_BYTES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_SWAP_BYTES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNPACK_LSB_FIRST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_LSB_FIRST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNPACK_ROW_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_ROW_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNPACK_SKIP_ROWS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_SKIP_ROWS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNPACK_SKIP_PIXELS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_SKIP_PIXELS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNPACK_ALIGNMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_ALIGNMENT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PACK_SWAP_BYTES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_SWAP_BYTES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PACK_LSB_FIRST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_LSB_FIRST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PACK_ROW_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_ROW_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PACK_SKIP_ROWS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_SKIP_ROWS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PACK_SKIP_PIXELS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_SKIP_PIXELS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PACK_ALIGNMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_ALIGNMENT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TEXTURE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VIEWPORT_DIMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VIEWPORT_DIMS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SUBPIXEL_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SUBPIXEL_BITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_1D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_2D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POLYGON_OFFSET_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_UNITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POLYGON_OFFSET_POINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_POINT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POLYGON_OFFSET_LINE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_LINE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POLYGON_OFFSET_FILL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_FILL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POLYGON_OFFSET_FACTOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_FACTOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_1D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_2D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_WIDTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_WIDTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_HEIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_HEIGHT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_INTERNAL_FORMAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_INTERNAL_FORMAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BORDER_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BORDER_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_RED_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_RED_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_GREEN_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_GREEN_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BLUE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BLUE_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_ALPHA_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_ALPHA_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DONT_CARE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DONT_CARE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FASTEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FASTEST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NICEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NICEST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BYTE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BYTE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_BYTE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_BYTE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SHORT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHORT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_SHORT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLEAR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLEAR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("AND").ToLocalChecked(), Nan::New<v8::Uint32>(GL_AND), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("AND_REVERSE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_AND_REVERSE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COPY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COPY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("AND_INVERTED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_AND_INVERTED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NOOP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NOOP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("XOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_XOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("OR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("EQUIV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_EQUIV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INVERT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVERT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("OR_REVERSE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OR_REVERSE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COPY_INVERTED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COPY_INVERTED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("OR_INVERTED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OR_INVERTED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NAND").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NAND), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SET), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_INDEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_COMPONENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GREEN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GREEN), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLUE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FILL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FILL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("KEEP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_KEEP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("REPLACE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_REPLACE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INCR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INCR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DECR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DECR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VENDOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VENDOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERSION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERSION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("EXTENSIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_EXTENSIONS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NEAREST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NEAREST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINEAR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINEAR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NEAREST_MIPMAP_NEAREST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NEAREST_MIPMAP_NEAREST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINEAR_MIPMAP_NEAREST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINEAR_MIPMAP_NEAREST), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NEAREST_MIPMAP_LINEAR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NEAREST_MIPMAP_LINEAR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINEAR_MIPMAP_LINEAR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINEAR_MIPMAP_LINEAR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_MAG_FILTER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MAG_FILTER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_MIN_FILTER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MIN_FILTER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_WRAP_S").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_WRAP_S), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_WRAP_T").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_WRAP_T), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_1D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_2D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("REPEAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_REPEAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R3_G3_B2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R3_G3_B2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB5), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB10").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB10), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB12), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB5_A1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB5_A1), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB10_A2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB10_A2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA12), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_BYTE_3_3_2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_BYTE_3_3_2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_SHORT_4_4_4_4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_4_4_4_4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_SHORT_5_5_5_1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_5_5_5_1), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_8_8_8_8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_8_8_8_8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_10_10_10_2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_10_10_10_2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_3D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PACK_SKIP_IMAGES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_SKIP_IMAGES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PACK_IMAGE_HEIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_IMAGE_HEIGHT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNPACK_SKIP_IMAGES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_SKIP_IMAGES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNPACK_IMAGE_HEIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_IMAGE_HEIGHT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_3D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_3D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_DEPTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_DEPTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_WRAP_R").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_WRAP_R), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_3D_TEXTURE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_3D_TEXTURE_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_BYTE_2_3_3_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_BYTE_2_3_3_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_SHORT_5_6_5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_5_6_5), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_SHORT_5_6_5_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_5_6_5_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_SHORT_4_4_4_4_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_4_4_4_4_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_SHORT_1_5_5_5_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_1_5_5_5_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_8_8_8_8_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_8_8_8_8_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_2_10_10_10_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_2_10_10_10_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BGR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BGR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BGRA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BGRA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_ELEMENTS_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_ELEMENTS_VERTICES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_ELEMENTS_INDICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_ELEMENTS_INDICES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLAMP_TO_EDGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLAMP_TO_EDGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_MIN_LOD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MIN_LOD), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_MAX_LOD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MAX_LOD), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BASE_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BASE_LEVEL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_MAX_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MAX_LEVEL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SMOOTH_POINT_SIZE_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SMOOTH_POINT_SIZE_RANGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SMOOTH_POINT_SIZE_GRANULARITY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SMOOTH_POINT_SIZE_GRANULARITY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SMOOTH_LINE_WIDTH_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SMOOTH_LINE_WIDTH_RANGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SMOOTH_LINE_WIDTH_GRANULARITY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SMOOTH_LINE_WIDTH_GRANULARITY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ALIASED_LINE_WIDTH_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALIASED_LINE_WIDTH_RANGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CONSTANT_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONSTANT_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ONE_MINUS_CONSTANT_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_CONSTANT_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CONSTANT_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONSTANT_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ONE_MINUS_CONSTANT_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_CONSTANT_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FUNC_ADD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FUNC_ADD), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MIN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_EQUATION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_EQUATION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FUNC_SUBTRACT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FUNC_SUBTRACT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FUNC_REVERSE_SUBTRACT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FUNC_REVERSE_SUBTRACT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE0").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE0), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE1), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE5), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE6").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE6), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE7").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE7), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE9").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE9), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE10").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE10), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE11").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE11), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE12), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE13").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE13), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE14").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE14), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE15").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE15), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE16), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE17").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE17), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE18").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE18), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE19").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE19), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE20").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE20), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE21").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE21), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE22").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE22), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE23").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE23), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE24").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE24), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE25").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE25), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE26").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE26), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE27").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE27), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE28").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE28), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE29").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE29), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE30").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE30), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE31").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE31), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_TEXTURE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_TEXTURE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MULTISAMPLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_ALPHA_TO_COVERAGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_ALPHA_TO_COVERAGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_ALPHA_TO_ONE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_ALPHA_TO_ONE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_COVERAGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_COVERAGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_BUFFERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_BUFFERS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_COVERAGE_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_COVERAGE_VALUE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_COVERAGE_INVERT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_COVERAGE_INVERT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_CUBE_MAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_CUBE_MAP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_POSITIVE_X").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_POSITIVE_X), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_NEGATIVE_X").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_NEGATIVE_X), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_POSITIVE_Y").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_POSITIVE_Y), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_NEGATIVE_Y").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_POSITIVE_Z").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_POSITIVE_Z), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_NEGATIVE_Z").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_CUBE_MAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_CUBE_MAP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_CUBE_MAP_TEXTURE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_CUBE_MAP_TEXTURE_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGB), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RGBA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGBA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_COMPRESSION_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPRESSION_HINT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_COMPRESSED_IMAGE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPRESSED_IMAGE_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_COMPRESSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPRESSED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NUM_COMPRESSED_TEXTURE_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_COMPRESSED_TEXTURE_FORMATS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_TEXTURE_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_TEXTURE_FORMATS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLAMP_TO_BORDER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLAMP_TO_BORDER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_DST_RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_DST_RGB), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_SRC_RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_SRC_RGB), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_DST_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_DST_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_SRC_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_SRC_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POINT_FADE_THRESHOLD_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_FADE_THRESHOLD_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_COMPONENT16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT16), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_COMPONENT24").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT24), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_COMPONENT32").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT32), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MIRRORED_REPEAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIRRORED_REPEAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TEXTURE_LOD_BIAS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_LOD_BIAS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_LOD_BIAS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_LOD_BIAS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INCR_WRAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INCR_WRAP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DECR_WRAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DECR_WRAP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_DEPTH_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_DEPTH_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_COMPARE_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPARE_MODE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_COMPARE_FUNC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPARE_FUNC), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BUFFER_USAGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_USAGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("QUERY_COUNTER_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_COUNTER_BITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CURRENT_QUERY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CURRENT_QUERY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("QUERY_RESULT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_RESULT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("QUERY_RESULT_AVAILABLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_RESULT_AVAILABLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ARRAY_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ARRAY_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ELEMENT_ARRAY_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ELEMENT_ARRAY_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ARRAY_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ARRAY_BUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ELEMENT_ARRAY_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ELEMENT_ARRAY_BUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("READ_ONLY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_ONLY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("WRITE_ONLY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_WRITE_ONLY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("READ_WRITE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_WRITE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BUFFER_ACCESS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_ACCESS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BUFFER_MAPPED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_MAPPED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BUFFER_MAP_POINTER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_MAP_POINTER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STREAM_DRAW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STREAM_DRAW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STREAM_READ").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STREAM_READ), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STREAM_COPY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STREAM_COPY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STATIC_DRAW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STATIC_DRAW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STATIC_READ").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STATIC_READ), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STATIC_COPY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STATIC_COPY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DYNAMIC_DRAW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DYNAMIC_DRAW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DYNAMIC_READ").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DYNAMIC_READ), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DYNAMIC_COPY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DYNAMIC_COPY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLES_PASSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLES_PASSED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_EQUATION_RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_EQUATION_RGB), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_ENABLED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_ENABLED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_STRIDE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_STRIDE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CURRENT_VERTEX_ATTRIB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CURRENT_VERTEX_ATTRIB), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_PROGRAM_POINT_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_PROGRAM_POINT_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_POINTER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_POINTER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_BACK_FUNC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_FUNC), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_BACK_FAIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_FAIL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_BACK_PASS_DEPTH_FAIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_PASS_DEPTH_FAIL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_BACK_PASS_DEPTH_PASS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_PASS_DEPTH_PASS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_DRAW_BUFFERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_DRAW_BUFFERS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER0").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER0), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER1), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER5), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER6").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER6), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER7").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER7), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER9").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER9), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER10").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER10), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER11").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER11), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER12), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER13").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER13), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER14").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER14), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_BUFFER15").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER15), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLEND_EQUATION_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_EQUATION_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VERTEX_ATTRIBS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_ATTRIBS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_NORMALIZED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAGMENT_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAGMENT_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_FRAGMENT_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VERTEX_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VARYING_FLOATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VARYING_FLOATS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VERTEX_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_COMBINED_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SHADER_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADER_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_VEC2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_VEC3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_VEC4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_VEC2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_VEC3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_VEC4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BOOL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BOOL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BOOL_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BOOL_VEC2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BOOL_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BOOL_VEC3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BOOL_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BOOL_VEC4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_MAT2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_MAT3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_MAT4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_1D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_3D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_CUBE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_CUBE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_1D_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_1D_SHADOW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_2D_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_SHADOW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DELETE_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DELETE_STATUS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPILE_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPILE_STATUS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINK_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINK_STATUS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VALIDATE_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VALIDATE_STATUS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INFO_LOG_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INFO_LOG_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ATTACHED_SHADERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ATTACHED_SHADERS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_UNIFORMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_UNIFORMS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_UNIFORM_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_UNIFORM_MAX_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SHADER_SOURCE_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADER_SOURCE_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_ATTRIBUTES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_ATTRIBUTES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_ATTRIBUTE_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAGMENT_SHADER_DERIVATIVE_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAGMENT_SHADER_DERIVATIVE_HINT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SHADING_LANGUAGE_VERSION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADING_LANGUAGE_VERSION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CURRENT_PROGRAM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CURRENT_PROGRAM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("POINT_SPRITE_COORD_ORIGIN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_SPRITE_COORD_ORIGIN), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LOWER_LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LOWER_LEFT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UPPER_LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UPPER_LEFT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_BACK_REF").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_REF), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_BACK_VALUE_MASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_VALUE_MASK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_BACK_WRITEMASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_WRITEMASK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PIXEL_PACK_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PIXEL_PACK_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PIXEL_UNPACK_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PIXEL_UNPACK_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PIXEL_PACK_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PIXEL_PACK_BUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PIXEL_UNPACK_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PIXEL_UNPACK_BUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_MAT2x3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT2x3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_MAT2x4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT2x4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_MAT3x2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT3x2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_MAT3x4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT3x4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_MAT4x2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT4x2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_MAT4x3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT4x3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SRGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRGB), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SRGB8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRGB8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SRGB_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRGB_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SRGB8_ALPHA8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRGB8_ALPHA8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_SRGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_SRGB_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPARE_REF_TO_TEXTURE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPARE_REF_TO_TEXTURE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLIP_DISTANCE0").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE0), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLIP_DISTANCE1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE1), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLIP_DISTANCE2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLIP_DISTANCE3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLIP_DISTANCE4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLIP_DISTANCE5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE5), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_CLIP_DISTANCES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_CLIP_DISTANCES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAJOR_VERSION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAJOR_VERSION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MINOR_VERSION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MINOR_VERSION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NUM_EXTENSIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_EXTENSIONS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CONTEXT_FLAGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_FLAGS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RG").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RG), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA32F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB32F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA16F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB16F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_INTEGER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_ARRAY_TEXTURE_LAYERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_ARRAY_TEXTURE_LAYERS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MIN_PROGRAM_TEXEL_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN_PROGRAM_TEXEL_OFFSET), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_PROGRAM_TEXEL_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_PROGRAM_TEXEL_OFFSET), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CLAMP_READ_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLAMP_READ_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FIXED_ONLY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FIXED_ONLY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VARYING_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VARYING_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_1D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_1D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_2D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_2D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_1D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_2D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R11F_G11F_B10F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R11F_G11F_B10F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_10F_11F_11F_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_10F_11F_11F_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB9_E5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB9_E5), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_5_9_9_9_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_5_9_9_9_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_SHARED_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SHARED_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_MODE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_VARYINGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_VARYINGS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_START").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_START), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PRIMITIVES_GENERATED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PRIMITIVES_GENERATED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RASTERIZER_DISCARD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RASTERIZER_DISCARD), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INTERLEAVED_ATTRIBS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INTERLEAVED_ATTRIBS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SEPARATE_ATTRIBS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SEPARATE_ATTRIBS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA32UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA32UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB32UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB32UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA16UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB16UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA8UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA8UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB8UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB8UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA32I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA32I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB32I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB32I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA16I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB16I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA8I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA8I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB8I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB8I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RED_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RED_INTEGER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GREEN_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GREEN_INTEGER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BLUE_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLUE_INTEGER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB_INTEGER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA_INTEGER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BGR_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BGR_INTEGER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BGRA_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BGRA_INTEGER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_1D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_1D_ARRAY_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_1D_ARRAY_SHADOW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_2D_ARRAY_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_ARRAY_SHADOW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_CUBE_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_CUBE_SHADOW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_VEC2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_VEC3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_VEC4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_1D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_3D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_CUBE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_CUBE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_1D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_1D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_3D), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_CUBE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_CUBE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_1D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("QUERY_WAIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_WAIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("QUERY_NO_WAIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_NO_WAIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("QUERY_BY_REGION_WAIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_BY_REGION_WAIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("QUERY_BY_REGION_NO_WAIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_BY_REGION_NO_WAIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BUFFER_ACCESS_FLAGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_ACCESS_FLAGS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BUFFER_MAP_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_MAP_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("BUFFER_MAP_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_MAP_OFFSET), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_2D_RECT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_RECT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_2D_RECT_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_RECT_SHADOW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_2D_RECT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D_RECT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D_RECT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_RECT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TEXTURE_BUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_BUFFER_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BUFFER_DATA_STORE_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BUFFER_DATA_STORE_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_RECTANGLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_RECTANGLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_RECTANGLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_RECTANGLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_RECTANGLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_RECTANGLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_RECTANGLE_TEXTURE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_RECTANGLE_TEXTURE_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R8_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R8_SNORM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG8_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG8_SNORM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB8_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB8_SNORM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA8_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA8_SNORM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R16_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16_SNORM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG16_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16_SNORM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB16_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16_SNORM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGBA16_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16_SNORM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SIGNED_NORMALIZED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SIGNED_NORMALIZED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PRIMITIVE_RESTART").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PRIMITIVE_RESTART), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PRIMITIVE_RESTART_INDEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PRIMITIVE_RESTART_INDEX), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CONTEXT_CORE_PROFILE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_CORE_PROFILE_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CONTEXT_COMPATIBILITY_PROFILE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_COMPATIBILITY_PROFILE_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINES_ADJACENCY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINES_ADJACENCY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LINE_STRIP_ADJACENCY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_STRIP_ADJACENCY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRIANGLES_ADJACENCY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLES_ADJACENCY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRIANGLE_STRIP_ADJACENCY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLE_STRIP_ADJACENCY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROGRAM_POINT_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_POINT_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_GEOMETRY_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_LAYERED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_LAYERED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GEOMETRY_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GEOMETRY_VERTICES_OUT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_VERTICES_OUT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GEOMETRY_INPUT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_INPUT_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GEOMETRY_OUTPUT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_OUTPUT_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_GEOMETRY_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_GEOMETRY_OUTPUT_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_OUTPUT_VERTICES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VERTEX_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_OUTPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_GEOMETRY_INPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_INPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_GEOMETRY_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_FRAGMENT_INPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_INPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CONTEXT_PROFILE_MASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_PROFILE_MASK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_DIVISOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_DIVISOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_SHADING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_SHADING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MIN_SAMPLE_SHADING_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN_SAMPLE_SHADING_VALUE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MIN_PROGRAM_TEXTURE_GATHER_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_PROGRAM_TEXTURE_GATHER_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_CUBE_MAP_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_CUBE_MAP_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_CUBE_MAP_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_CUBE_MAP_ARRAY_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_CUBE_MAP_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_COMPONENT32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT32F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH32F_STENCIL8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH32F_STENCIL8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FLOAT_32_UNSIGNED_INT_24_8_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_32_UNSIGNED_INT_24_8_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INVALID_FRAMEBUFFER_OPERATION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVALID_FRAMEBUFFER_OPERATION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_RED_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_GREEN_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_BLUE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_DEFAULT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_DEFAULT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_UNDEFINED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_UNDEFINED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_STENCIL_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_STENCIL_ATTACHMENT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_RENDERBUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_RENDERBUFFER_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_STENCIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_STENCIL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_24_8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_24_8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH24_STENCIL8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH24_STENCIL8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_STENCIL_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_STENCIL_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_RED_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_RED_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_GREEN_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_GREEN_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BLUE_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BLUE_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_ALPHA_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_ALPHA_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_DEPTH_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_DEPTH_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_NORMALIZED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_NORMALIZED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("READ_FRAMEBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_FRAMEBUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_FRAMEBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_FRAMEBUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("READ_FRAMEBUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_FRAMEBUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_SAMPLES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_OBJECT_NAME").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_COMPLETE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_COMPLETE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_READ_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_UNSUPPORTED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_UNSUPPORTED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_COLOR_ATTACHMENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COLOR_ATTACHMENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT0").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT0), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT1), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT5), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT6").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT6), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT7").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT7), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT9").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT9), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT10").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT10), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT11").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT11), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT12), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT13").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT13), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT14").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT14), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COLOR_ATTACHMENT15").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT15), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_ATTACHMENT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_ATTACHMENT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_WIDTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_WIDTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_HEIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_HEIGHT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_INTERNAL_FORMAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_INTERNAL_FORMAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_INDEX1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX1), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_INDEX4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_INDEX8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("STENCIL_INDEX16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX16), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_RED_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_RED_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_GREEN_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_GREEN_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_BLUE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_BLUE_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_ALPHA_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_ALPHA_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_DEPTH_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_DEPTH_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RENDERBUFFER_STENCIL_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_STENCIL_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SAMPLES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAMEBUFFER_SRGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_SRGB), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("HALF_FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_HALF_FLOAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAP_READ_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_READ_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAP_WRITE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_WRITE_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAP_INVALIDATE_RANGE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_INVALIDATE_RANGE_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAP_INVALIDATE_BUFFER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_INVALIDATE_BUFFER_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAP_FLUSH_EXPLICIT_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_FLUSH_EXPLICIT_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAP_UNSYNCHRONIZED_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_UNSYNCHRONIZED_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RED_RGTC1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RED_RGTC1), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_SIGNED_RED_RGTC1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SIGNED_RED_RGTC1), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RG_RGTC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RG_RGTC2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_SIGNED_RG_RGTC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SIGNED_RG_RGTC2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG_INTEGER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG8), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R16F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R32F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG16F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG32F), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R8I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R8I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R8UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R8UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R16I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R16UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R32I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R32I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("R32UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R32UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG8I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG8I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG8UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG8UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG16I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG16UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG32I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG32I), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RG32UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG32UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_ARRAY_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ARRAY_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BUFFER_START").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER_START), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VERTEX_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_UNIFORM_BLOCKS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_GEOMETRY_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_UNIFORM_BLOCKS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_FRAGMENT_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_UNIFORM_BLOCKS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_COMBINED_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_UNIFORM_BLOCKS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_UNIFORM_BUFFER_BINDINGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_UNIFORM_BUFFER_BINDINGS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_UNIFORM_BLOCK_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_UNIFORM_BLOCK_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BUFFER_OFFSET_ALIGNMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_UNIFORM_BLOCKS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_NAME_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_NAME_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_INDEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_INDEX), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_OFFSET), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_ARRAY_STRIDE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_ARRAY_STRIDE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_MATRIX_STRIDE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_MATRIX_STRIDE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_IS_ROW_MAJOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_IS_ROW_MAJOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_DATA_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_DATA_SIZE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_NAME_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_NAME_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_ACTIVE_UNIFORMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COPY_READ_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COPY_READ_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COPY_WRITE_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COPY_WRITE_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_CLAMP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_CLAMP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FIRST_VERTEX_CONVENTION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FIRST_VERTEX_CONVENTION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LAST_VERTEX_CONVENTION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LAST_VERTEX_CONVENTION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROVOKING_VERTEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROVOKING_VERTEX), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_SEAMLESS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_SEAMLESS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_SERVER_WAIT_TIMEOUT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SERVER_WAIT_TIMEOUT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("OBJECT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OBJECT_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SYNC_CONDITION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_CONDITION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SYNC_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_STATUS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SYNC_FLAGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_FLAGS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SYNC_FENCE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_FENCE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SYNC_GPU_COMMANDS_COMPLETE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_GPU_COMMANDS_COMPLETE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNALED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNALED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SIGNALED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SIGNALED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ALREADY_SIGNALED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALREADY_SIGNALED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TIMEOUT_EXPIRED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TIMEOUT_EXPIRED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("CONDITION_SATISFIED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONDITION_SATISFIED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("WAIT_FAILED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_WAIT_FAILED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SYNC_FLUSH_COMMANDS_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_FLUSH_COMMANDS_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_POSITION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_POSITION), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_MASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_MASK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLE_MASK_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_MASK_VALUE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_SAMPLE_MASK_WORDS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SAMPLE_MASK_WORDS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_2D_MULTISAMPLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_2D_MULTISAMPLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_2D_MULTISAMPLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SAMPLES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_FIXED_SAMPLE_LOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_FIXED_SAMPLE_LOCATIONS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_MULTISAMPLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D_MULTISAMPLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_SAMPLER_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_COLOR_TEXTURE_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COLOR_TEXTURE_SAMPLES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_DEPTH_TEXTURE_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_DEPTH_TEXTURE_SAMPLES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_INTEGER_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_INTEGER_SAMPLES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SRC1_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC1_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SRC1_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC1_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ONE_MINUS_SRC1_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_SRC1_COLOR), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ONE_MINUS_SRC1_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_SRC1_ALPHA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_DUAL_SOURCE_DRAW_BUFFERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_DUAL_SOURCE_DRAW_BUFFERS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ANY_SAMPLES_PASSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ANY_SAMPLES_PASSED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SAMPLER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB10_A2UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB10_A2UI), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_R").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_R), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_G").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_G), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_B").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_B), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_A").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_A), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_RGBA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_RGBA), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TIME_ELAPSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TIME_ELAPSED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TIMESTAMP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TIMESTAMP), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("INT_2_10_10_10_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_2_10_10_10_REV), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_INDIRECT_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_INDIRECT_BUFFER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DRAW_INDIRECT_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_INDIRECT_BUFFER_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GEOMETRY_SHADER_INVOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_SHADER_INVOCATIONS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_GEOMETRY_SHADER_INVOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_SHADER_INVOCATIONS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MIN_FRAGMENT_INTERPOLATION_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN_FRAGMENT_INTERPOLATION_OFFSET), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_FRAGMENT_INTERPOLATION_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_INTERPOLATION_OFFSET), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAGMENT_INTERPOLATION_OFFSET_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAGMENT_INTERPOLATION_OFFSET_BITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_VEC2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_VEC3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_VEC4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_MAT2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_MAT3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_MAT4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_MAT2x3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT2x3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_MAT2x4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT2x4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_MAT3x2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT3x2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_MAT3x4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT3x4), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_MAT4x2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT4x2), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DOUBLE_MAT4x3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT4x3), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINE_UNIFORMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINE_UNIFORMS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINE_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINE_MAX_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_SUBROUTINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SUBROUTINES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_SUBROUTINE_UNIFORM_LOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NUM_COMPATIBLE_SUBROUTINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_COMPATIBLE_SUBROUTINES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPATIBLE_SUBROUTINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPATIBLE_SUBROUTINES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PATCHES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PATCHES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PATCH_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PATCH_VERTICES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PATCH_DEFAULT_INNER_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PATCH_DEFAULT_INNER_LEVEL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PATCH_DEFAULT_OUTER_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PATCH_DEFAULT_OUTER_LEVEL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TESS_CONTROL_OUTPUT_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_CONTROL_OUTPUT_VERTICES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TESS_GEN_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_GEN_MODE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TESS_GEN_SPACING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_GEN_SPACING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TESS_GEN_VERTEX_ORDER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_GEN_VERTEX_ORDER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TESS_GEN_POINT_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_GEN_POINT_MODE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("QUADS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUADS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ISOLINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ISOLINES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRACTIONAL_ODD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRACTIONAL_ODD), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRACTIONAL_EVEN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRACTIONAL_EVEN), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_PATCH_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_PATCH_VERTICES), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_GEN_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_GEN_LEVEL), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_PATCH_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_PATCH_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_INPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_INPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TESS_EVALUATION_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_EVALUATION_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TESS_CONTROL_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_CONTROL_SHADER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_PAUSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_ACTIVE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TRANSFORM_FEEDBACK_BUFFERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VERTEX_STREAMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_STREAMS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FIXED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FIXED), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("IMPLEMENTATION_COLOR_READ_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_IMPLEMENTATION_COLOR_READ_TYPE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("IMPLEMENTATION_COLOR_READ_FORMAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_IMPLEMENTATION_COLOR_READ_FORMAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LOW_FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LOW_FLOAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MEDIUM_FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MEDIUM_FLOAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("HIGH_FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_HIGH_FLOAT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LOW_INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LOW_INT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MEDIUM_INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MEDIUM_INT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("HIGH_INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_HIGH_INT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SHADER_COMPILER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADER_COMPILER), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SHADER_BINARY_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADER_BINARY_FORMATS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NUM_SHADER_BINARY_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_SHADER_BINARY_FORMATS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VERTEX_UNIFORM_VECTORS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_UNIFORM_VECTORS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VARYING_VECTORS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VARYING_VECTORS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_FRAGMENT_UNIFORM_VECTORS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_UNIFORM_VECTORS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("RGB565").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB565), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROGRAM_BINARY_RETRIEVABLE_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_BINARY_RETRIEVABLE_HINT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROGRAM_BINARY_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_BINARY_LENGTH), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("NUM_PROGRAM_BINARY_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_PROGRAM_BINARY_FORMATS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROGRAM_BINARY_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_BINARY_FORMATS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VERTEX_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_SHADER_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("FRAGMENT_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAGMENT_SHADER_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("GEOMETRY_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_SHADER_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TESS_CONTROL_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_CONTROL_SHADER_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TESS_EVALUATION_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_EVALUATION_SHADER_BIT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ALL_SHADER_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALL_SHADER_BITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROGRAM_SEPARABLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_SEPARABLE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("ACTIVE_PROGRAM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_PROGRAM), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("PROGRAM_PIPELINE_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_PIPELINE_BINDING), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_VIEWPORTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VIEWPORTS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VIEWPORT_SUBPIXEL_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VIEWPORT_SUBPIXEL_BITS), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VIEWPORT_BOUNDS_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VIEWPORT_BOUNDS_RANGE), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("LAYER_PROVOKING_VERTEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LAYER_PROVOKING_VERTEX), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("VIEWPORT_INDEX_PROVOKING_VERTEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VIEWPORT_INDEX_PROVOKING_VERTEX), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("UNDEFINED_VERTEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNDEFINED_VERTEX), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_BOUNDS_TEST_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_BOUNDS_TEST_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DEPTH_BOUNDS_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_BOUNDS_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SCALED_RESOLVE_FASTEST_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SCALED_RESOLVE_FASTEST_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SCALED_RESOLVE_NICEST_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SCALED_RESOLVE_NICEST_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RGB_S3TC_DXT1_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGB_S3TC_DXT1_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RGBA_S3TC_DXT1_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RGBA_S3TC_DXT3_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_RGBA_S3TC_DXT5_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_SRGB_S3TC_DXT1_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_S3TC_DXT1_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_MAX_ANISOTROPY_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MAX_ANISOTROPY_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MAX_TEXTURE_MAX_ANISOTROPY_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MIRROR_CLAMP_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIRROR_CLAMP_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MIRROR_CLAMP_TO_EDGE_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIRROR_CLAMP_TO_EDGE_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("MIRROR_CLAMP_TO_BORDER_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIRROR_CLAMP_TO_BORDER_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("TEXTURE_SRGB_DECODE_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SRGB_DECODE_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("DECODE_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DECODE_EXT), v8::ReadOnly);
-    Nan::SetTemplate(exports, Nan::New<v8::String>("SKIP_DECODE_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SKIP_DECODE_EXT), v8::ReadOnly);
+void defineConstants(v8::Handle<v8::Object> exports) {
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_BUFFER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_BUFFER_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_BUFFER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BUFFER_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_BUFFER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_BUFFER_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("FALSE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FALSE));
+    Nan::Set(exports, Nan::New<v8::String>("TRUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRUE));
+    Nan::Set(exports, Nan::New<v8::String>("POINTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINTS));
+    Nan::Set(exports, Nan::New<v8::String>("LINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINES));
+    Nan::Set(exports, Nan::New<v8::String>("LINE_LOOP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_LOOP));
+    Nan::Set(exports, Nan::New<v8::String>("LINE_STRIP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_STRIP));
+    Nan::Set(exports, Nan::New<v8::String>("TRIANGLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLES));
+    Nan::Set(exports, Nan::New<v8::String>("TRIANGLE_STRIP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLE_STRIP));
+    Nan::Set(exports, Nan::New<v8::String>("TRIANGLE_FAN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLE_FAN));
+    Nan::Set(exports, Nan::New<v8::String>("NEVER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NEVER));
+    Nan::Set(exports, Nan::New<v8::String>("LESS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LESS));
+    Nan::Set(exports, Nan::New<v8::String>("EQUAL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_EQUAL));
+    Nan::Set(exports, Nan::New<v8::String>("LEQUAL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LEQUAL));
+    Nan::Set(exports, Nan::New<v8::String>("GREATER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GREATER));
+    Nan::Set(exports, Nan::New<v8::String>("NOTEQUAL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NOTEQUAL));
+    Nan::Set(exports, Nan::New<v8::String>("GEQUAL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEQUAL));
+    Nan::Set(exports, Nan::New<v8::String>("ALWAYS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALWAYS));
+    Nan::Set(exports, Nan::New<v8::String>("ZERO").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ZERO));
+    Nan::Set(exports, Nan::New<v8::String>("ONE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE));
+    Nan::Set(exports, Nan::New<v8::String>("SRC_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("ONE_MINUS_SRC_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_SRC_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("SRC_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("ONE_MINUS_SRC_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_SRC_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("DST_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DST_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("ONE_MINUS_DST_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_DST_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("DST_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DST_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("ONE_MINUS_DST_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_DST_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("SRC_ALPHA_SATURATE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC_ALPHA_SATURATE));
+    Nan::Set(exports, Nan::New<v8::String>("NONE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NONE));
+    Nan::Set(exports, Nan::New<v8::String>("FRONT_LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT_LEFT));
+    Nan::Set(exports, Nan::New<v8::String>("FRONT_RIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT_RIGHT));
+    Nan::Set(exports, Nan::New<v8::String>("BACK_LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BACK_LEFT));
+    Nan::Set(exports, Nan::New<v8::String>("BACK_RIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BACK_RIGHT));
+    Nan::Set(exports, Nan::New<v8::String>("FRONT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT));
+    Nan::Set(exports, Nan::New<v8::String>("BACK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BACK));
+    Nan::Set(exports, Nan::New<v8::String>("LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LEFT));
+    Nan::Set(exports, Nan::New<v8::String>("RIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RIGHT));
+    Nan::Set(exports, Nan::New<v8::String>("FRONT_AND_BACK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT_AND_BACK));
+    Nan::Set(exports, Nan::New<v8::String>("NO_ERROR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NO_ERROR));
+    Nan::Set(exports, Nan::New<v8::String>("INVALID_ENUM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVALID_ENUM));
+    Nan::Set(exports, Nan::New<v8::String>("INVALID_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVALID_VALUE));
+    Nan::Set(exports, Nan::New<v8::String>("INVALID_OPERATION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVALID_OPERATION));
+    Nan::Set(exports, Nan::New<v8::String>("OUT_OF_MEMORY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OUT_OF_MEMORY));
+    Nan::Set(exports, Nan::New<v8::String>("CW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CW));
+    Nan::Set(exports, Nan::New<v8::String>("CCW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CCW));
+    Nan::Set(exports, Nan::New<v8::String>("POINT_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("POINT_SIZE_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_SIZE_RANGE));
+    Nan::Set(exports, Nan::New<v8::String>("POINT_SIZE_GRANULARITY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_SIZE_GRANULARITY));
+    Nan::Set(exports, Nan::New<v8::String>("LINE_SMOOTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_SMOOTH));
+    Nan::Set(exports, Nan::New<v8::String>("LINE_WIDTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_WIDTH));
+    Nan::Set(exports, Nan::New<v8::String>("LINE_WIDTH_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_WIDTH_RANGE));
+    Nan::Set(exports, Nan::New<v8::String>("LINE_WIDTH_GRANULARITY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_WIDTH_GRANULARITY));
+    Nan::Set(exports, Nan::New<v8::String>("POLYGON_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_MODE));
+    Nan::Set(exports, Nan::New<v8::String>("POLYGON_SMOOTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_SMOOTH));
+    Nan::Set(exports, Nan::New<v8::String>("CULL_FACE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CULL_FACE));
+    Nan::Set(exports, Nan::New<v8::String>("CULL_FACE_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CULL_FACE_MODE));
+    Nan::Set(exports, Nan::New<v8::String>("FRONT_FACE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRONT_FACE));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_RANGE));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_TEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_TEST));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_WRITEMASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_WRITEMASK));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_CLEAR_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_CLEAR_VALUE));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_FUNC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_FUNC));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_TEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_TEST));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_CLEAR_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_CLEAR_VALUE));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_FUNC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_FUNC));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_VALUE_MASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_VALUE_MASK));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_FAIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_FAIL));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_PASS_DEPTH_FAIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_PASS_DEPTH_FAIL));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_PASS_DEPTH_PASS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_PASS_DEPTH_PASS));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_REF").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_REF));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_WRITEMASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_WRITEMASK));
+    Nan::Set(exports, Nan::New<v8::String>("VIEWPORT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VIEWPORT));
+    Nan::Set(exports, Nan::New<v8::String>("DITHER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DITHER));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_DST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_DST));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_SRC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_SRC));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND));
+    Nan::Set(exports, Nan::New<v8::String>("LOGIC_OP_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LOGIC_OP_MODE));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_LOGIC_OP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_LOGIC_OP));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("READ_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("SCISSOR_BOX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SCISSOR_BOX));
+    Nan::Set(exports, Nan::New<v8::String>("SCISSOR_TEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SCISSOR_TEST));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_CLEAR_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_CLEAR_VALUE));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_WRITEMASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_WRITEMASK));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLEBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLEBUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("STEREO").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STEREO));
+    Nan::Set(exports, Nan::New<v8::String>("LINE_SMOOTH_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_SMOOTH_HINT));
+    Nan::Set(exports, Nan::New<v8::String>("POLYGON_SMOOTH_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_SMOOTH_HINT));
+    Nan::Set(exports, Nan::New<v8::String>("UNPACK_SWAP_BYTES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_SWAP_BYTES));
+    Nan::Set(exports, Nan::New<v8::String>("UNPACK_LSB_FIRST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_LSB_FIRST));
+    Nan::Set(exports, Nan::New<v8::String>("UNPACK_ROW_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_ROW_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("UNPACK_SKIP_ROWS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_SKIP_ROWS));
+    Nan::Set(exports, Nan::New<v8::String>("UNPACK_SKIP_PIXELS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_SKIP_PIXELS));
+    Nan::Set(exports, Nan::New<v8::String>("UNPACK_ALIGNMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_ALIGNMENT));
+    Nan::Set(exports, Nan::New<v8::String>("PACK_SWAP_BYTES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_SWAP_BYTES));
+    Nan::Set(exports, Nan::New<v8::String>("PACK_LSB_FIRST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_LSB_FIRST));
+    Nan::Set(exports, Nan::New<v8::String>("PACK_ROW_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_ROW_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("PACK_SKIP_ROWS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_SKIP_ROWS));
+    Nan::Set(exports, Nan::New<v8::String>("PACK_SKIP_PIXELS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_SKIP_PIXELS));
+    Nan::Set(exports, Nan::New<v8::String>("PACK_ALIGNMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_ALIGNMENT));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TEXTURE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VIEWPORT_DIMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VIEWPORT_DIMS));
+    Nan::Set(exports, Nan::New<v8::String>("SUBPIXEL_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SUBPIXEL_BITS));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_1D));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_2D));
+    Nan::Set(exports, Nan::New<v8::String>("POLYGON_OFFSET_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_UNITS));
+    Nan::Set(exports, Nan::New<v8::String>("POLYGON_OFFSET_POINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_POINT));
+    Nan::Set(exports, Nan::New<v8::String>("POLYGON_OFFSET_LINE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_LINE));
+    Nan::Set(exports, Nan::New<v8::String>("POLYGON_OFFSET_FILL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_FILL));
+    Nan::Set(exports, Nan::New<v8::String>("POLYGON_OFFSET_FACTOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POLYGON_OFFSET_FACTOR));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_1D));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_2D));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_WIDTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_WIDTH));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_HEIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_HEIGHT));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_INTERNAL_FORMAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_INTERNAL_FORMAT));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BORDER_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BORDER_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_RED_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_RED_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_GREEN_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_GREEN_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BLUE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BLUE_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_ALPHA_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_ALPHA_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("DONT_CARE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DONT_CARE));
+    Nan::Set(exports, Nan::New<v8::String>("FASTEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FASTEST));
+    Nan::Set(exports, Nan::New<v8::String>("NICEST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NICEST));
+    Nan::Set(exports, Nan::New<v8::String>("BYTE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BYTE));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_BYTE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_BYTE));
+    Nan::Set(exports, Nan::New<v8::String>("SHORT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHORT));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_SHORT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT));
+    Nan::Set(exports, Nan::New<v8::String>("INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE));
+    Nan::Set(exports, Nan::New<v8::String>("CLEAR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLEAR));
+    Nan::Set(exports, Nan::New<v8::String>("AND").ToLocalChecked(), Nan::New<v8::Uint32>(GL_AND));
+    Nan::Set(exports, Nan::New<v8::String>("AND_REVERSE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_AND_REVERSE));
+    Nan::Set(exports, Nan::New<v8::String>("COPY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COPY));
+    Nan::Set(exports, Nan::New<v8::String>("AND_INVERTED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_AND_INVERTED));
+    Nan::Set(exports, Nan::New<v8::String>("NOOP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NOOP));
+    Nan::Set(exports, Nan::New<v8::String>("XOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_XOR));
+    Nan::Set(exports, Nan::New<v8::String>("OR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OR));
+    Nan::Set(exports, Nan::New<v8::String>("NOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NOR));
+    Nan::Set(exports, Nan::New<v8::String>("EQUIV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_EQUIV));
+    Nan::Set(exports, Nan::New<v8::String>("INVERT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVERT));
+    Nan::Set(exports, Nan::New<v8::String>("OR_REVERSE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OR_REVERSE));
+    Nan::Set(exports, Nan::New<v8::String>("COPY_INVERTED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COPY_INVERTED));
+    Nan::Set(exports, Nan::New<v8::String>("OR_INVERTED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OR_INVERTED));
+    Nan::Set(exports, Nan::New<v8::String>("NAND").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NAND));
+    Nan::Set(exports, Nan::New<v8::String>("SET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SET));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_INDEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_COMPONENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT));
+    Nan::Set(exports, Nan::New<v8::String>("RED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RED));
+    Nan::Set(exports, Nan::New<v8::String>("GREEN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GREEN));
+    Nan::Set(exports, Nan::New<v8::String>("BLUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLUE));
+    Nan::Set(exports, Nan::New<v8::String>("ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA));
+    Nan::Set(exports, Nan::New<v8::String>("POINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT));
+    Nan::Set(exports, Nan::New<v8::String>("LINE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE));
+    Nan::Set(exports, Nan::New<v8::String>("FILL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FILL));
+    Nan::Set(exports, Nan::New<v8::String>("KEEP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_KEEP));
+    Nan::Set(exports, Nan::New<v8::String>("REPLACE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_REPLACE));
+    Nan::Set(exports, Nan::New<v8::String>("INCR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INCR));
+    Nan::Set(exports, Nan::New<v8::String>("DECR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DECR));
+    Nan::Set(exports, Nan::New<v8::String>("VENDOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VENDOR));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERER));
+    Nan::Set(exports, Nan::New<v8::String>("VERSION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERSION));
+    Nan::Set(exports, Nan::New<v8::String>("EXTENSIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_EXTENSIONS));
+    Nan::Set(exports, Nan::New<v8::String>("NEAREST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NEAREST));
+    Nan::Set(exports, Nan::New<v8::String>("LINEAR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINEAR));
+    Nan::Set(exports, Nan::New<v8::String>("NEAREST_MIPMAP_NEAREST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NEAREST_MIPMAP_NEAREST));
+    Nan::Set(exports, Nan::New<v8::String>("LINEAR_MIPMAP_NEAREST").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINEAR_MIPMAP_NEAREST));
+    Nan::Set(exports, Nan::New<v8::String>("NEAREST_MIPMAP_LINEAR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NEAREST_MIPMAP_LINEAR));
+    Nan::Set(exports, Nan::New<v8::String>("LINEAR_MIPMAP_LINEAR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINEAR_MIPMAP_LINEAR));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_MAG_FILTER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MAG_FILTER));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_MIN_FILTER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MIN_FILTER));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_WRAP_S").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_WRAP_S));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_WRAP_T").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_WRAP_T));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_1D));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_2D));
+    Nan::Set(exports, Nan::New<v8::String>("REPEAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_REPEAT));
+    Nan::Set(exports, Nan::New<v8::String>("R3_G3_B2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R3_G3_B2));
+    Nan::Set(exports, Nan::New<v8::String>("RGB4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB4));
+    Nan::Set(exports, Nan::New<v8::String>("RGB5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB5));
+    Nan::Set(exports, Nan::New<v8::String>("RGB8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB8));
+    Nan::Set(exports, Nan::New<v8::String>("RGB10").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB10));
+    Nan::Set(exports, Nan::New<v8::String>("RGB12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB12));
+    Nan::Set(exports, Nan::New<v8::String>("RGB16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA2));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA4));
+    Nan::Set(exports, Nan::New<v8::String>("RGB5_A1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB5_A1));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA8));
+    Nan::Set(exports, Nan::New<v8::String>("RGB10_A2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB10_A2));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA12));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_BYTE_3_3_2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_BYTE_3_3_2));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_SHORT_4_4_4_4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_4_4_4_4));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_SHORT_5_5_5_1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_5_5_5_1));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_8_8_8_8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_8_8_8_8));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_10_10_10_2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_10_10_10_2));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_3D));
+    Nan::Set(exports, Nan::New<v8::String>("PACK_SKIP_IMAGES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_SKIP_IMAGES));
+    Nan::Set(exports, Nan::New<v8::String>("PACK_IMAGE_HEIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PACK_IMAGE_HEIGHT));
+    Nan::Set(exports, Nan::New<v8::String>("UNPACK_SKIP_IMAGES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_SKIP_IMAGES));
+    Nan::Set(exports, Nan::New<v8::String>("UNPACK_IMAGE_HEIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNPACK_IMAGE_HEIGHT));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_3D));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_3D));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_DEPTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_DEPTH));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_WRAP_R").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_WRAP_R));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_3D_TEXTURE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_3D_TEXTURE_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_BYTE_2_3_3_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_BYTE_2_3_3_REV));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_SHORT_5_6_5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_5_6_5));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_SHORT_5_6_5_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_5_6_5_REV));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_SHORT_4_4_4_4_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_4_4_4_4_REV));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_SHORT_1_5_5_5_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_SHORT_1_5_5_5_REV));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_8_8_8_8_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_8_8_8_8_REV));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_2_10_10_10_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_2_10_10_10_REV));
+    Nan::Set(exports, Nan::New<v8::String>("BGR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BGR));
+    Nan::Set(exports, Nan::New<v8::String>("BGRA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BGRA));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_ELEMENTS_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_ELEMENTS_VERTICES));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_ELEMENTS_INDICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_ELEMENTS_INDICES));
+    Nan::Set(exports, Nan::New<v8::String>("CLAMP_TO_EDGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLAMP_TO_EDGE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_MIN_LOD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MIN_LOD));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_MAX_LOD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MAX_LOD));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BASE_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BASE_LEVEL));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_MAX_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MAX_LEVEL));
+    Nan::Set(exports, Nan::New<v8::String>("SMOOTH_POINT_SIZE_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SMOOTH_POINT_SIZE_RANGE));
+    Nan::Set(exports, Nan::New<v8::String>("SMOOTH_POINT_SIZE_GRANULARITY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SMOOTH_POINT_SIZE_GRANULARITY));
+    Nan::Set(exports, Nan::New<v8::String>("SMOOTH_LINE_WIDTH_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SMOOTH_LINE_WIDTH_RANGE));
+    Nan::Set(exports, Nan::New<v8::String>("SMOOTH_LINE_WIDTH_GRANULARITY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SMOOTH_LINE_WIDTH_GRANULARITY));
+    Nan::Set(exports, Nan::New<v8::String>("ALIASED_LINE_WIDTH_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALIASED_LINE_WIDTH_RANGE));
+    Nan::Set(exports, Nan::New<v8::String>("CONSTANT_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONSTANT_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("ONE_MINUS_CONSTANT_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_CONSTANT_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("CONSTANT_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONSTANT_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("ONE_MINUS_CONSTANT_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_CONSTANT_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("FUNC_ADD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FUNC_ADD));
+    Nan::Set(exports, Nan::New<v8::String>("MIN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN));
+    Nan::Set(exports, Nan::New<v8::String>("MAX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_EQUATION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_EQUATION));
+    Nan::Set(exports, Nan::New<v8::String>("FUNC_SUBTRACT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FUNC_SUBTRACT));
+    Nan::Set(exports, Nan::New<v8::String>("FUNC_REVERSE_SUBTRACT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FUNC_REVERSE_SUBTRACT));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE0").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE0));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE1));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE2));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE3));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE4));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE5));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE6").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE6));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE7").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE7));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE8));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE9").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE9));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE10").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE10));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE11").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE11));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE12));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE13").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE13));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE14").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE14));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE15").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE15));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE16));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE17").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE17));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE18").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE18));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE19").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE19));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE20").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE20));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE21").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE21));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE22").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE22));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE23").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE23));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE24").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE24));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE25").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE25));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE26").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE26));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE27").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE27));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE28").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE28));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE29").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE29));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE30").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE30));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE31").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE31));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_TEXTURE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_TEXTURE));
+    Nan::Set(exports, Nan::New<v8::String>("MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MULTISAMPLE));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_ALPHA_TO_COVERAGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_ALPHA_TO_COVERAGE));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_ALPHA_TO_ONE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_ALPHA_TO_ONE));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_COVERAGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_COVERAGE));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_BUFFERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_BUFFERS));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLES));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_COVERAGE_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_COVERAGE_VALUE));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_COVERAGE_INVERT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_COVERAGE_INVERT));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_CUBE_MAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_CUBE_MAP));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_POSITIVE_X").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_POSITIVE_X));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_NEGATIVE_X").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_NEGATIVE_X));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_POSITIVE_Y").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_POSITIVE_Y));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_NEGATIVE_Y").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_POSITIVE_Z").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_POSITIVE_Z));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_NEGATIVE_Z").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_CUBE_MAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_CUBE_MAP));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_CUBE_MAP_TEXTURE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_CUBE_MAP_TEXTURE_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGB));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RGBA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGBA));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_COMPRESSION_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPRESSION_HINT));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_COMPRESSED_IMAGE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPRESSED_IMAGE_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_COMPRESSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPRESSED));
+    Nan::Set(exports, Nan::New<v8::String>("NUM_COMPRESSED_TEXTURE_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_COMPRESSED_TEXTURE_FORMATS));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_TEXTURE_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_TEXTURE_FORMATS));
+    Nan::Set(exports, Nan::New<v8::String>("CLAMP_TO_BORDER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLAMP_TO_BORDER));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_DST_RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_DST_RGB));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_SRC_RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_SRC_RGB));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_DST_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_DST_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_SRC_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_SRC_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("POINT_FADE_THRESHOLD_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_FADE_THRESHOLD_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_COMPONENT16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT16));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_COMPONENT24").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT24));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_COMPONENT32").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT32));
+    Nan::Set(exports, Nan::New<v8::String>("MIRRORED_REPEAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIRRORED_REPEAT));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TEXTURE_LOD_BIAS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_LOD_BIAS));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_LOD_BIAS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_LOD_BIAS));
+    Nan::Set(exports, Nan::New<v8::String>("INCR_WRAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INCR_WRAP));
+    Nan::Set(exports, Nan::New<v8::String>("DECR_WRAP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DECR_WRAP));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_DEPTH_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_DEPTH_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_COMPARE_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPARE_MODE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_COMPARE_FUNC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_COMPARE_FUNC));
+    Nan::Set(exports, Nan::New<v8::String>("BUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("BUFFER_USAGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_USAGE));
+    Nan::Set(exports, Nan::New<v8::String>("QUERY_COUNTER_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_COUNTER_BITS));
+    Nan::Set(exports, Nan::New<v8::String>("CURRENT_QUERY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CURRENT_QUERY));
+    Nan::Set(exports, Nan::New<v8::String>("QUERY_RESULT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_RESULT));
+    Nan::Set(exports, Nan::New<v8::String>("QUERY_RESULT_AVAILABLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_RESULT_AVAILABLE));
+    Nan::Set(exports, Nan::New<v8::String>("ARRAY_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ARRAY_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("ELEMENT_ARRAY_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ELEMENT_ARRAY_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("ARRAY_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ARRAY_BUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("ELEMENT_ARRAY_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ELEMENT_ARRAY_BUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("READ_ONLY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_ONLY));
+    Nan::Set(exports, Nan::New<v8::String>("WRITE_ONLY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_WRITE_ONLY));
+    Nan::Set(exports, Nan::New<v8::String>("READ_WRITE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_WRITE));
+    Nan::Set(exports, Nan::New<v8::String>("BUFFER_ACCESS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_ACCESS));
+    Nan::Set(exports, Nan::New<v8::String>("BUFFER_MAPPED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_MAPPED));
+    Nan::Set(exports, Nan::New<v8::String>("BUFFER_MAP_POINTER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_MAP_POINTER));
+    Nan::Set(exports, Nan::New<v8::String>("STREAM_DRAW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STREAM_DRAW));
+    Nan::Set(exports, Nan::New<v8::String>("STREAM_READ").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STREAM_READ));
+    Nan::Set(exports, Nan::New<v8::String>("STREAM_COPY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STREAM_COPY));
+    Nan::Set(exports, Nan::New<v8::String>("STATIC_DRAW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STATIC_DRAW));
+    Nan::Set(exports, Nan::New<v8::String>("STATIC_READ").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STATIC_READ));
+    Nan::Set(exports, Nan::New<v8::String>("STATIC_COPY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STATIC_COPY));
+    Nan::Set(exports, Nan::New<v8::String>("DYNAMIC_DRAW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DYNAMIC_DRAW));
+    Nan::Set(exports, Nan::New<v8::String>("DYNAMIC_READ").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DYNAMIC_READ));
+    Nan::Set(exports, Nan::New<v8::String>("DYNAMIC_COPY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DYNAMIC_COPY));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLES_PASSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLES_PASSED));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_EQUATION_RGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_EQUATION_RGB));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_ENABLED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_ENABLED));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_STRIDE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_STRIDE));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("CURRENT_VERTEX_ATTRIB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CURRENT_VERTEX_ATTRIB));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_PROGRAM_POINT_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_PROGRAM_POINT_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_POINTER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_POINTER));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_BACK_FUNC").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_FUNC));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_BACK_FAIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_FAIL));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_BACK_PASS_DEPTH_FAIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_PASS_DEPTH_FAIL));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_BACK_PASS_DEPTH_PASS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_PASS_DEPTH_PASS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_DRAW_BUFFERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_DRAW_BUFFERS));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER0").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER0));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER1));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER2));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER3));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER4));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER5));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER6").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER6));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER7").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER7));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER8));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER9").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER9));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER10").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER10));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER11").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER11));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER12));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER13").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER13));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER14").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER14));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_BUFFER15").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_BUFFER15));
+    Nan::Set(exports, Nan::New<v8::String>("BLEND_EQUATION_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLEND_EQUATION_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VERTEX_ATTRIBS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_ATTRIBS));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_NORMALIZED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_IMAGE_UNITS));
+    Nan::Set(exports, Nan::New<v8::String>("FRAGMENT_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAGMENT_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_FRAGMENT_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VERTEX_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VARYING_FLOATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VARYING_FLOATS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VERTEX_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_COMBINED_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
+    Nan::Set(exports, Nan::New<v8::String>("SHADER_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADER_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_VEC2));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_VEC3));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_VEC4));
+    Nan::Set(exports, Nan::New<v8::String>("INT_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_VEC2));
+    Nan::Set(exports, Nan::New<v8::String>("INT_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_VEC3));
+    Nan::Set(exports, Nan::New<v8::String>("INT_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_VEC4));
+    Nan::Set(exports, Nan::New<v8::String>("BOOL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BOOL));
+    Nan::Set(exports, Nan::New<v8::String>("BOOL_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BOOL_VEC2));
+    Nan::Set(exports, Nan::New<v8::String>("BOOL_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BOOL_VEC3));
+    Nan::Set(exports, Nan::New<v8::String>("BOOL_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BOOL_VEC4));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_MAT2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT2));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_MAT3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT3));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_MAT4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT4));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_1D));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_3D));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_CUBE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_CUBE));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_1D_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_1D_SHADOW));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_2D_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_SHADOW));
+    Nan::Set(exports, Nan::New<v8::String>("DELETE_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DELETE_STATUS));
+    Nan::Set(exports, Nan::New<v8::String>("COMPILE_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPILE_STATUS));
+    Nan::Set(exports, Nan::New<v8::String>("LINK_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINK_STATUS));
+    Nan::Set(exports, Nan::New<v8::String>("VALIDATE_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VALIDATE_STATUS));
+    Nan::Set(exports, Nan::New<v8::String>("INFO_LOG_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INFO_LOG_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("ATTACHED_SHADERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ATTACHED_SHADERS));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_UNIFORMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_UNIFORMS));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_UNIFORM_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_UNIFORM_MAX_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("SHADER_SOURCE_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADER_SOURCE_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_ATTRIBUTES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_ATTRIBUTES));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_ATTRIBUTE_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("FRAGMENT_SHADER_DERIVATIVE_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAGMENT_SHADER_DERIVATIVE_HINT));
+    Nan::Set(exports, Nan::New<v8::String>("SHADING_LANGUAGE_VERSION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADING_LANGUAGE_VERSION));
+    Nan::Set(exports, Nan::New<v8::String>("CURRENT_PROGRAM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CURRENT_PROGRAM));
+    Nan::Set(exports, Nan::New<v8::String>("POINT_SPRITE_COORD_ORIGIN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_POINT_SPRITE_COORD_ORIGIN));
+    Nan::Set(exports, Nan::New<v8::String>("LOWER_LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LOWER_LEFT));
+    Nan::Set(exports, Nan::New<v8::String>("UPPER_LEFT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UPPER_LEFT));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_BACK_REF").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_REF));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_BACK_VALUE_MASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_VALUE_MASK));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_BACK_WRITEMASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_BACK_WRITEMASK));
+    Nan::Set(exports, Nan::New<v8::String>("PIXEL_PACK_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PIXEL_PACK_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("PIXEL_UNPACK_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PIXEL_UNPACK_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("PIXEL_PACK_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PIXEL_PACK_BUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("PIXEL_UNPACK_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PIXEL_UNPACK_BUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_MAT2x3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT2x3));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_MAT2x4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT2x4));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_MAT3x2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT3x2));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_MAT3x4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT3x4));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_MAT4x2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT4x2));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_MAT4x3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_MAT4x3));
+    Nan::Set(exports, Nan::New<v8::String>("SRGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRGB));
+    Nan::Set(exports, Nan::New<v8::String>("SRGB8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRGB8));
+    Nan::Set(exports, Nan::New<v8::String>("SRGB_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRGB_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("SRGB8_ALPHA8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRGB8_ALPHA8));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_SRGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_SRGB_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("COMPARE_REF_TO_TEXTURE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPARE_REF_TO_TEXTURE));
+    Nan::Set(exports, Nan::New<v8::String>("CLIP_DISTANCE0").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE0));
+    Nan::Set(exports, Nan::New<v8::String>("CLIP_DISTANCE1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE1));
+    Nan::Set(exports, Nan::New<v8::String>("CLIP_DISTANCE2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE2));
+    Nan::Set(exports, Nan::New<v8::String>("CLIP_DISTANCE3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE3));
+    Nan::Set(exports, Nan::New<v8::String>("CLIP_DISTANCE4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE4));
+    Nan::Set(exports, Nan::New<v8::String>("CLIP_DISTANCE5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLIP_DISTANCE5));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_CLIP_DISTANCES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_CLIP_DISTANCES));
+    Nan::Set(exports, Nan::New<v8::String>("MAJOR_VERSION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAJOR_VERSION));
+    Nan::Set(exports, Nan::New<v8::String>("MINOR_VERSION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MINOR_VERSION));
+    Nan::Set(exports, Nan::New<v8::String>("NUM_EXTENSIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_EXTENSIONS));
+    Nan::Set(exports, Nan::New<v8::String>("CONTEXT_FLAGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_FLAGS));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RED));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RG").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RG));
+    Nan::Set(exports, Nan::New<v8::String>("CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA32F));
+    Nan::Set(exports, Nan::New<v8::String>("RGB32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB32F));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA16F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16F));
+    Nan::Set(exports, Nan::New<v8::String>("RGB16F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16F));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_INTEGER));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_ARRAY_TEXTURE_LAYERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_ARRAY_TEXTURE_LAYERS));
+    Nan::Set(exports, Nan::New<v8::String>("MIN_PROGRAM_TEXEL_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN_PROGRAM_TEXEL_OFFSET));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_PROGRAM_TEXEL_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_PROGRAM_TEXEL_OFFSET));
+    Nan::Set(exports, Nan::New<v8::String>("CLAMP_READ_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CLAMP_READ_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("FIXED_ONLY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FIXED_ONLY));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VARYING_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VARYING_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_1D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_1D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_2D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_2D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_1D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_2D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("R11F_G11F_B10F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R11F_G11F_B10F));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_10F_11F_11F_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_10F_11F_11F_REV));
+    Nan::Set(exports, Nan::New<v8::String>("RGB9_E5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB9_E5));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_5_9_9_9_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_5_9_9_9_REV));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_SHARED_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SHARED_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_MODE));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_VARYINGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_VARYINGS));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_START").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_START));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("PRIMITIVES_GENERATED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PRIMITIVES_GENERATED));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN));
+    Nan::Set(exports, Nan::New<v8::String>("RASTERIZER_DISCARD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RASTERIZER_DISCARD));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS));
+    Nan::Set(exports, Nan::New<v8::String>("INTERLEAVED_ATTRIBS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INTERLEAVED_ATTRIBS));
+    Nan::Set(exports, Nan::New<v8::String>("SEPARATE_ATTRIBS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SEPARATE_ATTRIBS));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA32UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA32UI));
+    Nan::Set(exports, Nan::New<v8::String>("RGB32UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB32UI));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA16UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16UI));
+    Nan::Set(exports, Nan::New<v8::String>("RGB16UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16UI));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA8UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA8UI));
+    Nan::Set(exports, Nan::New<v8::String>("RGB8UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB8UI));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA32I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA32I));
+    Nan::Set(exports, Nan::New<v8::String>("RGB32I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB32I));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA16I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16I));
+    Nan::Set(exports, Nan::New<v8::String>("RGB16I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16I));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA8I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA8I));
+    Nan::Set(exports, Nan::New<v8::String>("RGB8I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB8I));
+    Nan::Set(exports, Nan::New<v8::String>("RED_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RED_INTEGER));
+    Nan::Set(exports, Nan::New<v8::String>("GREEN_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GREEN_INTEGER));
+    Nan::Set(exports, Nan::New<v8::String>("BLUE_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BLUE_INTEGER));
+    Nan::Set(exports, Nan::New<v8::String>("RGB_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB_INTEGER));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA_INTEGER));
+    Nan::Set(exports, Nan::New<v8::String>("BGR_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BGR_INTEGER));
+    Nan::Set(exports, Nan::New<v8::String>("BGRA_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BGRA_INTEGER));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_1D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_1D_ARRAY_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_1D_ARRAY_SHADOW));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_2D_ARRAY_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_ARRAY_SHADOW));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_CUBE_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_CUBE_SHADOW));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_VEC2));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_VEC3));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_VEC4));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_1D));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_3D));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_CUBE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_CUBE));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_1D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_1D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_1D));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_3D").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_3D));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_CUBE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_CUBE));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_1D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_1D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("QUERY_WAIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_WAIT));
+    Nan::Set(exports, Nan::New<v8::String>("QUERY_NO_WAIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_NO_WAIT));
+    Nan::Set(exports, Nan::New<v8::String>("QUERY_BY_REGION_WAIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_BY_REGION_WAIT));
+    Nan::Set(exports, Nan::New<v8::String>("QUERY_BY_REGION_NO_WAIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUERY_BY_REGION_NO_WAIT));
+    Nan::Set(exports, Nan::New<v8::String>("BUFFER_ACCESS_FLAGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_ACCESS_FLAGS));
+    Nan::Set(exports, Nan::New<v8::String>("BUFFER_MAP_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_MAP_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("BUFFER_MAP_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_BUFFER_MAP_OFFSET));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_2D_RECT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_RECT));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_2D_RECT_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_RECT_SHADOW));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_2D_RECT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D_RECT));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D_RECT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_RECT));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TEXTURE_BUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_BUFFER_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BUFFER_DATA_STORE_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BUFFER_DATA_STORE_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_RECTANGLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_RECTANGLE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_RECTANGLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_RECTANGLE));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_RECTANGLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_RECTANGLE));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_RECTANGLE_TEXTURE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_RECTANGLE_TEXTURE_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("R8_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R8_SNORM));
+    Nan::Set(exports, Nan::New<v8::String>("RG8_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG8_SNORM));
+    Nan::Set(exports, Nan::New<v8::String>("RGB8_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB8_SNORM));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA8_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA8_SNORM));
+    Nan::Set(exports, Nan::New<v8::String>("R16_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16_SNORM));
+    Nan::Set(exports, Nan::New<v8::String>("RG16_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16_SNORM));
+    Nan::Set(exports, Nan::New<v8::String>("RGB16_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB16_SNORM));
+    Nan::Set(exports, Nan::New<v8::String>("RGBA16_SNORM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGBA16_SNORM));
+    Nan::Set(exports, Nan::New<v8::String>("SIGNED_NORMALIZED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SIGNED_NORMALIZED));
+    Nan::Set(exports, Nan::New<v8::String>("PRIMITIVE_RESTART").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PRIMITIVE_RESTART));
+    Nan::Set(exports, Nan::New<v8::String>("PRIMITIVE_RESTART_INDEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PRIMITIVE_RESTART_INDEX));
+    Nan::Set(exports, Nan::New<v8::String>("CONTEXT_CORE_PROFILE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_CORE_PROFILE_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("CONTEXT_COMPATIBILITY_PROFILE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_COMPATIBILITY_PROFILE_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("LINES_ADJACENCY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINES_ADJACENCY));
+    Nan::Set(exports, Nan::New<v8::String>("LINE_STRIP_ADJACENCY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LINE_STRIP_ADJACENCY));
+    Nan::Set(exports, Nan::New<v8::String>("TRIANGLES_ADJACENCY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLES_ADJACENCY));
+    Nan::Set(exports, Nan::New<v8::String>("TRIANGLE_STRIP_ADJACENCY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRIANGLE_STRIP_ADJACENCY));
+    Nan::Set(exports, Nan::New<v8::String>("PROGRAM_POINT_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_POINT_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_GEOMETRY_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_LAYERED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_LAYERED));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS));
+    Nan::Set(exports, Nan::New<v8::String>("GEOMETRY_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("GEOMETRY_VERTICES_OUT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_VERTICES_OUT));
+    Nan::Set(exports, Nan::New<v8::String>("GEOMETRY_INPUT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_INPUT_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("GEOMETRY_OUTPUT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_OUTPUT_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_GEOMETRY_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_GEOMETRY_OUTPUT_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_OUTPUT_VERTICES));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VERTEX_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_OUTPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_GEOMETRY_INPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_INPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_GEOMETRY_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_FRAGMENT_INPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_INPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("CONTEXT_PROFILE_MASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONTEXT_PROFILE_MASK));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ATTRIB_ARRAY_DIVISOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ATTRIB_ARRAY_DIVISOR));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_SHADING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_SHADING));
+    Nan::Set(exports, Nan::New<v8::String>("MIN_SAMPLE_SHADING_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN_SAMPLE_SHADING_VALUE));
+    Nan::Set(exports, Nan::New<v8::String>("MIN_PROGRAM_TEXTURE_GATHER_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_PROGRAM_TEXTURE_GATHER_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_CUBE_MAP_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_CUBE_MAP_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_CUBE_MAP_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_CUBE_MAP_ARRAY_SHADOW").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_CUBE_MAP_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_COMPONENT32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_COMPONENT32F));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH32F_STENCIL8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH32F_STENCIL8));
+    Nan::Set(exports, Nan::New<v8::String>("FLOAT_32_UNSIGNED_INT_24_8_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FLOAT_32_UNSIGNED_INT_24_8_REV));
+    Nan::Set(exports, Nan::New<v8::String>("INVALID_FRAMEBUFFER_OPERATION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INVALID_FRAMEBUFFER_OPERATION));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_RED_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_GREEN_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_BLUE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_DEFAULT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_DEFAULT));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_UNDEFINED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_UNDEFINED));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_STENCIL_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_STENCIL_ATTACHMENT));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_RENDERBUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_RENDERBUFFER_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_STENCIL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_STENCIL));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_24_8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_24_8));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH24_STENCIL8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH24_STENCIL8));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_STENCIL_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_STENCIL_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_RED_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_RED_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_GREEN_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_GREEN_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BLUE_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BLUE_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_ALPHA_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_ALPHA_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_DEPTH_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_DEPTH_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_NORMALIZED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_NORMALIZED));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("READ_FRAMEBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_FRAMEBUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_FRAMEBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_FRAMEBUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("READ_FRAMEBUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_READ_FRAMEBUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_SAMPLES));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_OBJECT_NAME").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_COMPLETE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_COMPLETE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_READ_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_UNSUPPORTED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_UNSUPPORTED));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_COLOR_ATTACHMENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COLOR_ATTACHMENTS));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT0").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT0));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT1));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT2));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT3));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT4));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT5").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT5));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT6").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT6));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT7").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT7));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT8));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT9").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT9));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT10").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT10));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT11").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT11));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT12").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT12));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT13").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT13));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT14").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT14));
+    Nan::Set(exports, Nan::New<v8::String>("COLOR_ATTACHMENT15").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COLOR_ATTACHMENT15));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_ATTACHMENT));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_ATTACHMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_ATTACHMENT));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_WIDTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_WIDTH));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_HEIGHT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_HEIGHT));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_INTERNAL_FORMAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_INTERNAL_FORMAT));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_INDEX1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX1));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_INDEX4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX4));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_INDEX8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX8));
+    Nan::Set(exports, Nan::New<v8::String>("STENCIL_INDEX16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_STENCIL_INDEX16));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_RED_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_RED_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_GREEN_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_GREEN_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_BLUE_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_BLUE_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_ALPHA_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_ALPHA_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_DEPTH_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_DEPTH_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("RENDERBUFFER_STENCIL_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RENDERBUFFER_STENCIL_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_INCOMPLETE_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SAMPLES));
+    Nan::Set(exports, Nan::New<v8::String>("FRAMEBUFFER_SRGB").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAMEBUFFER_SRGB));
+    Nan::Set(exports, Nan::New<v8::String>("HALF_FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_HALF_FLOAT));
+    Nan::Set(exports, Nan::New<v8::String>("MAP_READ_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_READ_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("MAP_WRITE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_WRITE_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("MAP_INVALIDATE_RANGE_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_INVALIDATE_RANGE_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("MAP_INVALIDATE_BUFFER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_INVALIDATE_BUFFER_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("MAP_FLUSH_EXPLICIT_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_FLUSH_EXPLICIT_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("MAP_UNSYNCHRONIZED_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAP_UNSYNCHRONIZED_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RED_RGTC1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RED_RGTC1));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_SIGNED_RED_RGTC1").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SIGNED_RED_RGTC1));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RG_RGTC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RG_RGTC2));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_SIGNED_RG_RGTC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SIGNED_RG_RGTC2));
+    Nan::Set(exports, Nan::New<v8::String>("RG").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG));
+    Nan::Set(exports, Nan::New<v8::String>("RG_INTEGER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG_INTEGER));
+    Nan::Set(exports, Nan::New<v8::String>("R8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R8));
+    Nan::Set(exports, Nan::New<v8::String>("R16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16));
+    Nan::Set(exports, Nan::New<v8::String>("RG8").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG8));
+    Nan::Set(exports, Nan::New<v8::String>("RG16").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16));
+    Nan::Set(exports, Nan::New<v8::String>("R16F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16F));
+    Nan::Set(exports, Nan::New<v8::String>("R32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R32F));
+    Nan::Set(exports, Nan::New<v8::String>("RG16F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16F));
+    Nan::Set(exports, Nan::New<v8::String>("RG32F").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG32F));
+    Nan::Set(exports, Nan::New<v8::String>("R8I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R8I));
+    Nan::Set(exports, Nan::New<v8::String>("R8UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R8UI));
+    Nan::Set(exports, Nan::New<v8::String>("R16I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16I));
+    Nan::Set(exports, Nan::New<v8::String>("R16UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R16UI));
+    Nan::Set(exports, Nan::New<v8::String>("R32I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R32I));
+    Nan::Set(exports, Nan::New<v8::String>("R32UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_R32UI));
+    Nan::Set(exports, Nan::New<v8::String>("RG8I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG8I));
+    Nan::Set(exports, Nan::New<v8::String>("RG8UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG8UI));
+    Nan::Set(exports, Nan::New<v8::String>("RG16I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16I));
+    Nan::Set(exports, Nan::New<v8::String>("RG16UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG16UI));
+    Nan::Set(exports, Nan::New<v8::String>("RG32I").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG32I));
+    Nan::Set(exports, Nan::New<v8::String>("RG32UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RG32UI));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_ARRAY_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_ARRAY_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BUFFER_START").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER_START));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BUFFER_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VERTEX_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_UNIFORM_BLOCKS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_GEOMETRY_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_UNIFORM_BLOCKS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_FRAGMENT_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_UNIFORM_BLOCKS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_COMBINED_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_UNIFORM_BLOCKS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_UNIFORM_BUFFER_BINDINGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_UNIFORM_BUFFER_BINDINGS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_UNIFORM_BLOCK_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_UNIFORM_BLOCK_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BUFFER_OFFSET_ALIGNMENT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_UNIFORM_BLOCKS));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_NAME_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_NAME_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_INDEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_INDEX));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_OFFSET));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_ARRAY_STRIDE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_ARRAY_STRIDE));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_MATRIX_STRIDE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_MATRIX_STRIDE));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_IS_ROW_MAJOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_IS_ROW_MAJOR));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_DATA_SIZE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_DATA_SIZE));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_NAME_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_NAME_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_ACTIVE_UNIFORMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("COPY_READ_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COPY_READ_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("COPY_WRITE_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COPY_WRITE_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_CLAMP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_CLAMP));
+    Nan::Set(exports, Nan::New<v8::String>("FIRST_VERTEX_CONVENTION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FIRST_VERTEX_CONVENTION));
+    Nan::Set(exports, Nan::New<v8::String>("LAST_VERTEX_CONVENTION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LAST_VERTEX_CONVENTION));
+    Nan::Set(exports, Nan::New<v8::String>("PROVOKING_VERTEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROVOKING_VERTEX));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_CUBE_MAP_SEAMLESS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_CUBE_MAP_SEAMLESS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_SERVER_WAIT_TIMEOUT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SERVER_WAIT_TIMEOUT));
+    Nan::Set(exports, Nan::New<v8::String>("OBJECT_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_OBJECT_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("SYNC_CONDITION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_CONDITION));
+    Nan::Set(exports, Nan::New<v8::String>("SYNC_STATUS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_STATUS));
+    Nan::Set(exports, Nan::New<v8::String>("SYNC_FLAGS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_FLAGS));
+    Nan::Set(exports, Nan::New<v8::String>("SYNC_FENCE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_FENCE));
+    Nan::Set(exports, Nan::New<v8::String>("SYNC_GPU_COMMANDS_COMPLETE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_GPU_COMMANDS_COMPLETE));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNALED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNALED));
+    Nan::Set(exports, Nan::New<v8::String>("SIGNALED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SIGNALED));
+    Nan::Set(exports, Nan::New<v8::String>("ALREADY_SIGNALED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALREADY_SIGNALED));
+    Nan::Set(exports, Nan::New<v8::String>("TIMEOUT_EXPIRED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TIMEOUT_EXPIRED));
+    Nan::Set(exports, Nan::New<v8::String>("CONDITION_SATISFIED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_CONDITION_SATISFIED));
+    Nan::Set(exports, Nan::New<v8::String>("WAIT_FAILED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_WAIT_FAILED));
+    Nan::Set(exports, Nan::New<v8::String>("SYNC_FLUSH_COMMANDS_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SYNC_FLUSH_COMMANDS_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_POSITION").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_POSITION));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_MASK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_MASK));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLE_MASK_VALUE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLE_MASK_VALUE));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_SAMPLE_MASK_WORDS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SAMPLE_MASK_WORDS));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_2D_MULTISAMPLE));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_2D_MULTISAMPLE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_2D_MULTISAMPLE_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_2D_MULTISAMPLE));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SAMPLES));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_FIXED_SAMPLE_LOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_FIXED_SAMPLE_LOCATIONS));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_MULTISAMPLE));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D_MULTISAMPLE));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_2D_MULTISAMPLE_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("INT_SAMPLER_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_COLOR_TEXTURE_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COLOR_TEXTURE_SAMPLES));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_DEPTH_TEXTURE_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_DEPTH_TEXTURE_SAMPLES));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_INTEGER_SAMPLES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_INTEGER_SAMPLES));
+    Nan::Set(exports, Nan::New<v8::String>("SRC1_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC1_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("SRC1_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SRC1_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("ONE_MINUS_SRC1_COLOR").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_SRC1_COLOR));
+    Nan::Set(exports, Nan::New<v8::String>("ONE_MINUS_SRC1_ALPHA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ONE_MINUS_SRC1_ALPHA));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_DUAL_SOURCE_DRAW_BUFFERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_DUAL_SOURCE_DRAW_BUFFERS));
+    Nan::Set(exports, Nan::New<v8::String>("ANY_SAMPLES_PASSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ANY_SAMPLES_PASSED));
+    Nan::Set(exports, Nan::New<v8::String>("SAMPLER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SAMPLER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("RGB10_A2UI").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB10_A2UI));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_R").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_R));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_G").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_G));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_B").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_B));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_A").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_A));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_SWIZZLE_RGBA").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SWIZZLE_RGBA));
+    Nan::Set(exports, Nan::New<v8::String>("TIME_ELAPSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TIME_ELAPSED));
+    Nan::Set(exports, Nan::New<v8::String>("TIMESTAMP").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TIMESTAMP));
+    Nan::Set(exports, Nan::New<v8::String>("INT_2_10_10_10_REV").ToLocalChecked(), Nan::New<v8::Uint32>(GL_INT_2_10_10_10_REV));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_INDIRECT_BUFFER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_INDIRECT_BUFFER));
+    Nan::Set(exports, Nan::New<v8::String>("DRAW_INDIRECT_BUFFER_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DRAW_INDIRECT_BUFFER_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("GEOMETRY_SHADER_INVOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_SHADER_INVOCATIONS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_GEOMETRY_SHADER_INVOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_GEOMETRY_SHADER_INVOCATIONS));
+    Nan::Set(exports, Nan::New<v8::String>("MIN_FRAGMENT_INTERPOLATION_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIN_FRAGMENT_INTERPOLATION_OFFSET));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_FRAGMENT_INTERPOLATION_OFFSET").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_INTERPOLATION_OFFSET));
+    Nan::Set(exports, Nan::New<v8::String>("FRAGMENT_INTERPOLATION_OFFSET_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAGMENT_INTERPOLATION_OFFSET_BITS));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_VEC2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_VEC2));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_VEC3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_VEC3));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_VEC4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_VEC4));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_MAT2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT2));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_MAT3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT3));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_MAT4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT4));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_MAT2x3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT2x3));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_MAT2x4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT2x4));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_MAT3x2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT3x2));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_MAT3x4").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT3x4));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_MAT4x2").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT4x2));
+    Nan::Set(exports, Nan::New<v8::String>("DOUBLE_MAT4x3").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DOUBLE_MAT4x3));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINES));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINE_UNIFORMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINE_UNIFORMS));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINE_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINE_MAX_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_SUBROUTINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SUBROUTINES));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_SUBROUTINE_UNIFORM_LOCATIONS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS));
+    Nan::Set(exports, Nan::New<v8::String>("NUM_COMPATIBLE_SUBROUTINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_COMPATIBLE_SUBROUTINES));
+    Nan::Set(exports, Nan::New<v8::String>("COMPATIBLE_SUBROUTINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPATIBLE_SUBROUTINES));
+    Nan::Set(exports, Nan::New<v8::String>("PATCHES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PATCHES));
+    Nan::Set(exports, Nan::New<v8::String>("PATCH_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PATCH_VERTICES));
+    Nan::Set(exports, Nan::New<v8::String>("PATCH_DEFAULT_INNER_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PATCH_DEFAULT_INNER_LEVEL));
+    Nan::Set(exports, Nan::New<v8::String>("PATCH_DEFAULT_OUTER_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PATCH_DEFAULT_OUTER_LEVEL));
+    Nan::Set(exports, Nan::New<v8::String>("TESS_CONTROL_OUTPUT_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_CONTROL_OUTPUT_VERTICES));
+    Nan::Set(exports, Nan::New<v8::String>("TESS_GEN_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_GEN_MODE));
+    Nan::Set(exports, Nan::New<v8::String>("TESS_GEN_SPACING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_GEN_SPACING));
+    Nan::Set(exports, Nan::New<v8::String>("TESS_GEN_VERTEX_ORDER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_GEN_VERTEX_ORDER));
+    Nan::Set(exports, Nan::New<v8::String>("TESS_GEN_POINT_MODE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_GEN_POINT_MODE));
+    Nan::Set(exports, Nan::New<v8::String>("QUADS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_QUADS));
+    Nan::Set(exports, Nan::New<v8::String>("ISOLINES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ISOLINES));
+    Nan::Set(exports, Nan::New<v8::String>("FRACTIONAL_ODD").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRACTIONAL_ODD));
+    Nan::Set(exports, Nan::New<v8::String>("FRACTIONAL_EVEN").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRACTIONAL_EVEN));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_PATCH_VERTICES").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_PATCH_VERTICES));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_GEN_LEVEL").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_GEN_LEVEL));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_PATCH_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_PATCH_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_OUTPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_UNIFORM_BLOCKS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_CONTROL_INPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TESS_EVALUATION_INPUT_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("TESS_EVALUATION_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_EVALUATION_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("TESS_CONTROL_SHADER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_CONTROL_SHADER));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_PAUSED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BUFFER_ACTIVE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE));
+    Nan::Set(exports, Nan::New<v8::String>("TRANSFORM_FEEDBACK_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TRANSFORM_FEEDBACK_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TRANSFORM_FEEDBACK_BUFFERS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VERTEX_STREAMS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_STREAMS));
+    Nan::Set(exports, Nan::New<v8::String>("FIXED").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FIXED));
+    Nan::Set(exports, Nan::New<v8::String>("IMPLEMENTATION_COLOR_READ_TYPE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_IMPLEMENTATION_COLOR_READ_TYPE));
+    Nan::Set(exports, Nan::New<v8::String>("IMPLEMENTATION_COLOR_READ_FORMAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_IMPLEMENTATION_COLOR_READ_FORMAT));
+    Nan::Set(exports, Nan::New<v8::String>("LOW_FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LOW_FLOAT));
+    Nan::Set(exports, Nan::New<v8::String>("MEDIUM_FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MEDIUM_FLOAT));
+    Nan::Set(exports, Nan::New<v8::String>("HIGH_FLOAT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_HIGH_FLOAT));
+    Nan::Set(exports, Nan::New<v8::String>("LOW_INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LOW_INT));
+    Nan::Set(exports, Nan::New<v8::String>("MEDIUM_INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MEDIUM_INT));
+    Nan::Set(exports, Nan::New<v8::String>("HIGH_INT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_HIGH_INT));
+    Nan::Set(exports, Nan::New<v8::String>("SHADER_COMPILER").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADER_COMPILER));
+    Nan::Set(exports, Nan::New<v8::String>("SHADER_BINARY_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SHADER_BINARY_FORMATS));
+    Nan::Set(exports, Nan::New<v8::String>("NUM_SHADER_BINARY_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_SHADER_BINARY_FORMATS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VERTEX_UNIFORM_VECTORS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VERTEX_UNIFORM_VECTORS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VARYING_VECTORS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VARYING_VECTORS));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_FRAGMENT_UNIFORM_VECTORS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_FRAGMENT_UNIFORM_VECTORS));
+    Nan::Set(exports, Nan::New<v8::String>("RGB565").ToLocalChecked(), Nan::New<v8::Uint32>(GL_RGB565));
+    Nan::Set(exports, Nan::New<v8::String>("PROGRAM_BINARY_RETRIEVABLE_HINT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_BINARY_RETRIEVABLE_HINT));
+    Nan::Set(exports, Nan::New<v8::String>("PROGRAM_BINARY_LENGTH").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_BINARY_LENGTH));
+    Nan::Set(exports, Nan::New<v8::String>("NUM_PROGRAM_BINARY_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_NUM_PROGRAM_BINARY_FORMATS));
+    Nan::Set(exports, Nan::New<v8::String>("PROGRAM_BINARY_FORMATS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_BINARY_FORMATS));
+    Nan::Set(exports, Nan::New<v8::String>("VERTEX_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VERTEX_SHADER_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("FRAGMENT_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_FRAGMENT_SHADER_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("GEOMETRY_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_GEOMETRY_SHADER_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("TESS_CONTROL_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_CONTROL_SHADER_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("TESS_EVALUATION_SHADER_BIT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TESS_EVALUATION_SHADER_BIT));
+    Nan::Set(exports, Nan::New<v8::String>("ALL_SHADER_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ALL_SHADER_BITS));
+    Nan::Set(exports, Nan::New<v8::String>("PROGRAM_SEPARABLE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_SEPARABLE));
+    Nan::Set(exports, Nan::New<v8::String>("ACTIVE_PROGRAM").ToLocalChecked(), Nan::New<v8::Uint32>(GL_ACTIVE_PROGRAM));
+    Nan::Set(exports, Nan::New<v8::String>("PROGRAM_PIPELINE_BINDING").ToLocalChecked(), Nan::New<v8::Uint32>(GL_PROGRAM_PIPELINE_BINDING));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_VIEWPORTS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_VIEWPORTS));
+    Nan::Set(exports, Nan::New<v8::String>("VIEWPORT_SUBPIXEL_BITS").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VIEWPORT_SUBPIXEL_BITS));
+    Nan::Set(exports, Nan::New<v8::String>("VIEWPORT_BOUNDS_RANGE").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VIEWPORT_BOUNDS_RANGE));
+    Nan::Set(exports, Nan::New<v8::String>("LAYER_PROVOKING_VERTEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_LAYER_PROVOKING_VERTEX));
+    Nan::Set(exports, Nan::New<v8::String>("VIEWPORT_INDEX_PROVOKING_VERTEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_VIEWPORT_INDEX_PROVOKING_VERTEX));
+    Nan::Set(exports, Nan::New<v8::String>("UNDEFINED_VERTEX").ToLocalChecked(), Nan::New<v8::Uint32>(GL_UNDEFINED_VERTEX));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_BOUNDS_TEST_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_BOUNDS_TEST_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("DEPTH_BOUNDS_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DEPTH_BOUNDS_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("SCALED_RESOLVE_FASTEST_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SCALED_RESOLVE_FASTEST_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("SCALED_RESOLVE_NICEST_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SCALED_RESOLVE_NICEST_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RGB_S3TC_DXT1_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGB_S3TC_DXT1_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RGBA_S3TC_DXT1_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RGBA_S3TC_DXT3_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_RGBA_S3TC_DXT5_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_SRGB_S3TC_DXT1_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_S3TC_DXT1_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_MAX_ANISOTROPY_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_MAX_ANISOTROPY_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("MAX_TEXTURE_MAX_ANISOTROPY_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("MIRROR_CLAMP_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIRROR_CLAMP_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("MIRROR_CLAMP_TO_EDGE_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIRROR_CLAMP_TO_EDGE_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("MIRROR_CLAMP_TO_BORDER_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_MIRROR_CLAMP_TO_BORDER_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("TEXTURE_SRGB_DECODE_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_TEXTURE_SRGB_DECODE_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("DECODE_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_DECODE_EXT));
+    Nan::Set(exports, Nan::New<v8::String>("SKIP_DECODE_EXT").ToLocalChecked(), Nan::New<v8::Uint32>(GL_SKIP_DECODE_EXT));
 }
 
 #if (GL_DEPTH_BUFFER_BIT != 256)
@@ -5190,7 +5190,7 @@ NAN_METHOD(EXPORT_getDoublev) {
 }
 NAN_METHOD(EXPORT_getError) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd85a8>
+    // <gltypes.Type instance at 0x1073d3878>
     GLenum result;
     result = glGetError();
     v8::Handle<v8::Value> result_js = Nan::New<v8::Uint32>(result);
@@ -5248,7 +5248,7 @@ NAN_METHOD(EXPORT_getIntegerv) {
 }
 NAN_METHOD(EXPORT_getString) {
     Nan::HandleScope scope;
-    // <gltypes.UStringType instance at 0x102dd8a70>
+    // <gltypes.UStringType instance at 0x1073d3d40>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     const GLubyte* result;
@@ -5406,7 +5406,7 @@ NAN_METHOD(EXPORT_getTexLevelParameteriv) {
 }
 NAN_METHOD(EXPORT_isEnabled) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLboolean result;
@@ -5676,7 +5676,7 @@ NAN_METHOD(EXPORT_genTextures) {
 }
 NAN_METHOD(EXPORT_isTexture) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -6269,7 +6269,7 @@ NAN_METHOD(EXPORT_genQueries) {
 }
 NAN_METHOD(EXPORT_isQuery) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -6423,7 +6423,7 @@ NAN_METHOD(EXPORT_genBuffers) {
 }
 NAN_METHOD(EXPORT_isBuffer) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -6524,7 +6524,7 @@ NAN_METHOD(EXPORT_getBufferSubData) {
 }
 NAN_METHOD(EXPORT_mapBuffer) {
     Nan::HandleScope scope;
-    // <gltypes.PointerType instance at 0x102e71758>
+    // <gltypes.PointerType instance at 0x107505830>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLenum arg1;
@@ -6536,7 +6536,7 @@ NAN_METHOD(EXPORT_mapBuffer) {
 }
 NAN_METHOD(EXPORT_unmapBuffer) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLboolean result;
@@ -6693,7 +6693,7 @@ NAN_METHOD(EXPORT_compileShader) {
 }
 NAN_METHOD(EXPORT_createProgram) {
     Nan::HandleScope scope;
-    // <gltypes.ClassType instance at 0x102dd8b90>
+    // <gltypes.ClassType instance at 0x1073d3e60>
     GLuint result;
     result = glCreateProgram();
     v8::Handle<v8::Value> result_js = NODE_Program::fromGLHandle(result);
@@ -6701,7 +6701,7 @@ NAN_METHOD(EXPORT_createProgram) {
 }
 NAN_METHOD(EXPORT_createShader) {
     Nan::HandleScope scope;
-    // <gltypes.ClassType instance at 0x102dd8bd8>
+    // <gltypes.ClassType instance at 0x1073d3ea8>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLuint result;
@@ -6951,7 +6951,7 @@ NAN_METHOD(EXPORT_getAttachedShaders) {
 }
 NAN_METHOD(EXPORT_getAttribLocation) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd8638>
+    // <gltypes.Type instance at 0x1073d3908>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -7174,7 +7174,7 @@ NAN_METHOD(EXPORT_getShaderSource) {
 }
 NAN_METHOD(EXPORT_getUniformLocation) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd8638>
+    // <gltypes.Type instance at 0x1073d3908>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -7334,7 +7334,7 @@ NAN_METHOD(EXPORT_getVertexAttribiv) {
 }
 NAN_METHOD(EXPORT_isProgram) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -7348,7 +7348,7 @@ NAN_METHOD(EXPORT_isProgram) {
 }
 NAN_METHOD(EXPORT_isShader) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -8849,7 +8849,7 @@ NAN_METHOD(EXPORT_disablei) {
 }
 NAN_METHOD(EXPORT_isEnabledi) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLuint arg1;
@@ -9546,7 +9546,7 @@ NAN_METHOD(EXPORT_bindFragDataLocation) {
 }
 NAN_METHOD(EXPORT_getFragDataLocation) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd8638>
+    // <gltypes.Type instance at 0x1073d3908>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -9926,7 +9926,7 @@ NAN_METHOD(EXPORT_clearBufferfi) {
 }
 NAN_METHOD(EXPORT_getStringi) {
     Nan::HandleScope scope;
-    // <gltypes.UStringType instance at 0x102dd8a70>
+    // <gltypes.UStringType instance at 0x1073d3d40>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLuint arg1;
@@ -10152,7 +10152,7 @@ NAN_METHOD(EXPORT_blendFuncSeparatei) {
 }
 NAN_METHOD(EXPORT_isRenderbuffer) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -10236,7 +10236,7 @@ NAN_METHOD(EXPORT_getRenderbufferParameteriv) {
 }
 NAN_METHOD(EXPORT_isFramebuffer) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -10279,7 +10279,7 @@ NAN_METHOD(EXPORT_genFramebuffers) {
 }
 NAN_METHOD(EXPORT_checkFramebufferStatus) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd85a8>
+    // <gltypes.Type instance at 0x1073d3878>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLenum result;
@@ -10468,7 +10468,7 @@ NAN_METHOD(EXPORT_framebufferTextureLayer) {
 }
 NAN_METHOD(EXPORT_mapBufferRange) {
     Nan::HandleScope scope;
-    // <gltypes.PointerType instance at 0x102e6e098>
+    // <gltypes.PointerType instance at 0x107505a70>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLintptr arg1;
@@ -10523,7 +10523,7 @@ NAN_METHOD(EXPORT_genVertexArrays) {
 }
 NAN_METHOD(EXPORT_isVertexArray) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -10637,7 +10637,7 @@ NAN_METHOD(EXPORT_getActiveUniformName) {
 }
 NAN_METHOD(EXPORT_getUniformBlockIndex) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd8758>
+    // <gltypes.Type instance at 0x1073d3a28>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -10998,7 +10998,7 @@ NAN_METHOD(EXPORT_bindFragDataLocationIndexed) {
 }
 NAN_METHOD(EXPORT_getFragDataIndex) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd8638>
+    // <gltypes.Type instance at 0x1073d3908>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -11044,7 +11044,7 @@ NAN_METHOD(EXPORT_genSamplers) {
 }
 NAN_METHOD(EXPORT_isSampler) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -12088,7 +12088,7 @@ NAN_METHOD(EXPORT_getUniformdv) {
 }
 NAN_METHOD(EXPORT_getSubroutineUniformLocation) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd8638>
+    // <gltypes.Type instance at 0x1073d3908>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -12121,7 +12121,7 @@ NAN_METHOD(EXPORT_getSubroutineUniformLocation) {
 }
 NAN_METHOD(EXPORT_getSubroutineIndex) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd8758>
+    // <gltypes.Type instance at 0x1073d3a28>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -12444,7 +12444,7 @@ NAN_METHOD(EXPORT_genTransformFeedbacks) {
 }
 NAN_METHOD(EXPORT_isTransformFeedback) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -12829,7 +12829,7 @@ NAN_METHOD(EXPORT_genProgramPipelines) {
 }
 NAN_METHOD(EXPORT_isProgramPipeline) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x102dd84d0>
+    // <gltypes.Type instance at 0x1073d37a0>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -14855,469 +14855,468 @@ NAN_METHOD(EXPORT_shaderSource) {
     delete [] jstrings;
 
 }
-void defineFunctions(v8::Handle<v8::ObjectTemplate> exports) {
-    Nan::SetTemplate(exports, "cullFace", Nan::New<v8::FunctionTemplate>(EXPORT_cullFace));
-    Nan::SetTemplate(exports, "frontFace", Nan::New<v8::FunctionTemplate>(EXPORT_frontFace));
-    Nan::SetTemplate(exports, "hint", Nan::New<v8::FunctionTemplate>(EXPORT_hint));
-    Nan::SetTemplate(exports, "lineWidth", Nan::New<v8::FunctionTemplate>(EXPORT_lineWidth));
-    Nan::SetTemplate(exports, "pointSize", Nan::New<v8::FunctionTemplate>(EXPORT_pointSize));
-    Nan::SetTemplate(exports, "polygonMode", Nan::New<v8::FunctionTemplate>(EXPORT_polygonMode));
-    Nan::SetTemplate(exports, "scissor", Nan::New<v8::FunctionTemplate>(EXPORT_scissor));
-    Nan::SetTemplate(exports, "texParameterf", Nan::New<v8::FunctionTemplate>(EXPORT_texParameterf));
-    Nan::SetTemplate(exports, "texParameterfv", Nan::New<v8::FunctionTemplate>(EXPORT_texParameterfv));
-    Nan::SetTemplate(exports, "texParameteri", Nan::New<v8::FunctionTemplate>(EXPORT_texParameteri));
-    Nan::SetTemplate(exports, "texParameteriv", Nan::New<v8::FunctionTemplate>(EXPORT_texParameteriv));
-    Nan::SetTemplate(exports, "texImage1D", Nan::New<v8::FunctionTemplate>(EXPORT_texImage1D));
-    Nan::SetTemplate(exports, "texImage2D", Nan::New<v8::FunctionTemplate>(EXPORT_texImage2D));
-    Nan::SetTemplate(exports, "drawBuffer", Nan::New<v8::FunctionTemplate>(EXPORT_drawBuffer));
-    Nan::SetTemplate(exports, "clear", Nan::New<v8::FunctionTemplate>(EXPORT_clear));
-    Nan::SetTemplate(exports, "clearColor", Nan::New<v8::FunctionTemplate>(EXPORT_clearColor));
-    Nan::SetTemplate(exports, "clearStencil", Nan::New<v8::FunctionTemplate>(EXPORT_clearStencil));
-    Nan::SetTemplate(exports, "clearDepth", Nan::New<v8::FunctionTemplate>(EXPORT_clearDepth));
-    Nan::SetTemplate(exports, "stencilMask", Nan::New<v8::FunctionTemplate>(EXPORT_stencilMask));
-    Nan::SetTemplate(exports, "colorMask", Nan::New<v8::FunctionTemplate>(EXPORT_colorMask));
-    Nan::SetTemplate(exports, "depthMask", Nan::New<v8::FunctionTemplate>(EXPORT_depthMask));
-    Nan::SetTemplate(exports, "disable", Nan::New<v8::FunctionTemplate>(EXPORT_disable));
-    Nan::SetTemplate(exports, "enable", Nan::New<v8::FunctionTemplate>(EXPORT_enable));
-    Nan::SetTemplate(exports, "finish", Nan::New<v8::FunctionTemplate>(EXPORT_finish));
-    Nan::SetTemplate(exports, "flush", Nan::New<v8::FunctionTemplate>(EXPORT_flush));
-    Nan::SetTemplate(exports, "blendFunc", Nan::New<v8::FunctionTemplate>(EXPORT_blendFunc));
-    Nan::SetTemplate(exports, "logicOp", Nan::New<v8::FunctionTemplate>(EXPORT_logicOp));
-    Nan::SetTemplate(exports, "stencilFunc", Nan::New<v8::FunctionTemplate>(EXPORT_stencilFunc));
-    Nan::SetTemplate(exports, "stencilOp", Nan::New<v8::FunctionTemplate>(EXPORT_stencilOp));
-    Nan::SetTemplate(exports, "depthFunc", Nan::New<v8::FunctionTemplate>(EXPORT_depthFunc));
-    Nan::SetTemplate(exports, "pixelStoref", Nan::New<v8::FunctionTemplate>(EXPORT_pixelStoref));
-    Nan::SetTemplate(exports, "pixelStorei", Nan::New<v8::FunctionTemplate>(EXPORT_pixelStorei));
-    Nan::SetTemplate(exports, "readBuffer", Nan::New<v8::FunctionTemplate>(EXPORT_readBuffer));
-    Nan::SetTemplate(exports, "readPixels", Nan::New<v8::FunctionTemplate>(EXPORT_readPixels));
-    Nan::SetTemplate(exports, "getBooleanv", Nan::New<v8::FunctionTemplate>(EXPORT_getBooleanv));
-    Nan::SetTemplate(exports, "getDoublev", Nan::New<v8::FunctionTemplate>(EXPORT_getDoublev));
-    Nan::SetTemplate(exports, "getError", Nan::New<v8::FunctionTemplate>(EXPORT_getError));
-    Nan::SetTemplate(exports, "getFloatv", Nan::New<v8::FunctionTemplate>(EXPORT_getFloatv));
-    Nan::SetTemplate(exports, "getIntegerv", Nan::New<v8::FunctionTemplate>(EXPORT_getIntegerv));
-    Nan::SetTemplate(exports, "getString", Nan::New<v8::FunctionTemplate>(EXPORT_getString));
-    Nan::SetTemplate(exports, "getTexImage", Nan::New<v8::FunctionTemplate>(EXPORT_getTexImage));
-    Nan::SetTemplate(exports, "getTexParameterfv", Nan::New<v8::FunctionTemplate>(EXPORT_getTexParameterfv));
-    Nan::SetTemplate(exports, "getTexParameteriv", Nan::New<v8::FunctionTemplate>(EXPORT_getTexParameteriv));
-    Nan::SetTemplate(exports, "getTexLevelParameterfv", Nan::New<v8::FunctionTemplate>(EXPORT_getTexLevelParameterfv));
-    Nan::SetTemplate(exports, "getTexLevelParameteriv", Nan::New<v8::FunctionTemplate>(EXPORT_getTexLevelParameteriv));
-    Nan::SetTemplate(exports, "isEnabled", Nan::New<v8::FunctionTemplate>(EXPORT_isEnabled));
-    Nan::SetTemplate(exports, "depthRange", Nan::New<v8::FunctionTemplate>(EXPORT_depthRange));
-    Nan::SetTemplate(exports, "viewport", Nan::New<v8::FunctionTemplate>(EXPORT_viewport));
-    Nan::SetTemplate(exports, "drawArrays", Nan::New<v8::FunctionTemplate>(EXPORT_drawArrays));
-    Nan::SetTemplate(exports, "drawElements", Nan::New<v8::FunctionTemplate>(EXPORT_drawElements));
-    Nan::SetTemplate(exports, "polygonOffset", Nan::New<v8::FunctionTemplate>(EXPORT_polygonOffset));
-    Nan::SetTemplate(exports, "copyTexImage1D", Nan::New<v8::FunctionTemplate>(EXPORT_copyTexImage1D));
-    Nan::SetTemplate(exports, "copyTexImage2D", Nan::New<v8::FunctionTemplate>(EXPORT_copyTexImage2D));
-    Nan::SetTemplate(exports, "copyTexSubImage1D", Nan::New<v8::FunctionTemplate>(EXPORT_copyTexSubImage1D));
-    Nan::SetTemplate(exports, "copyTexSubImage2D", Nan::New<v8::FunctionTemplate>(EXPORT_copyTexSubImage2D));
-    Nan::SetTemplate(exports, "texSubImage1D", Nan::New<v8::FunctionTemplate>(EXPORT_texSubImage1D));
-    Nan::SetTemplate(exports, "texSubImage2D", Nan::New<v8::FunctionTemplate>(EXPORT_texSubImage2D));
-    Nan::SetTemplate(exports, "bindTexture", Nan::New<v8::FunctionTemplate>(EXPORT_bindTexture));
-    Nan::SetTemplate(exports, "genTextures", Nan::New<v8::FunctionTemplate>(EXPORT_genTextures));
-    Nan::SetTemplate(exports, "isTexture", Nan::New<v8::FunctionTemplate>(EXPORT_isTexture));
-    Nan::SetTemplate(exports, "blendColor", Nan::New<v8::FunctionTemplate>(EXPORT_blendColor));
-    Nan::SetTemplate(exports, "blendEquation", Nan::New<v8::FunctionTemplate>(EXPORT_blendEquation));
-    Nan::SetTemplate(exports, "drawRangeElements", Nan::New<v8::FunctionTemplate>(EXPORT_drawRangeElements));
-    Nan::SetTemplate(exports, "texImage3D", Nan::New<v8::FunctionTemplate>(EXPORT_texImage3D));
-    Nan::SetTemplate(exports, "texSubImage3D", Nan::New<v8::FunctionTemplate>(EXPORT_texSubImage3D));
-    Nan::SetTemplate(exports, "copyTexSubImage3D", Nan::New<v8::FunctionTemplate>(EXPORT_copyTexSubImage3D));
-    Nan::SetTemplate(exports, "activeTexture", Nan::New<v8::FunctionTemplate>(EXPORT_activeTexture));
-    Nan::SetTemplate(exports, "sampleCoverage", Nan::New<v8::FunctionTemplate>(EXPORT_sampleCoverage));
-    Nan::SetTemplate(exports, "compressedTexImage3D", Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexImage3D));
-    Nan::SetTemplate(exports, "compressedTexImage2D", Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexImage2D));
-    Nan::SetTemplate(exports, "compressedTexImage1D", Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexImage1D));
-    Nan::SetTemplate(exports, "compressedTexSubImage3D", Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexSubImage3D));
-    Nan::SetTemplate(exports, "compressedTexSubImage2D", Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexSubImage2D));
-    Nan::SetTemplate(exports, "compressedTexSubImage1D", Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexSubImage1D));
-    Nan::SetTemplate(exports, "getCompressedTexImage", Nan::New<v8::FunctionTemplate>(EXPORT_getCompressedTexImage));
-    Nan::SetTemplate(exports, "blendFuncSeparate", Nan::New<v8::FunctionTemplate>(EXPORT_blendFuncSeparate));
-    Nan::SetTemplate(exports, "multiDrawArrays", Nan::New<v8::FunctionTemplate>(EXPORT_multiDrawArrays));
-    Nan::SetTemplate(exports, "pointParameterf", Nan::New<v8::FunctionTemplate>(EXPORT_pointParameterf));
-    Nan::SetTemplate(exports, "pointParameterfv", Nan::New<v8::FunctionTemplate>(EXPORT_pointParameterfv));
-    Nan::SetTemplate(exports, "pointParameteri", Nan::New<v8::FunctionTemplate>(EXPORT_pointParameteri));
-    Nan::SetTemplate(exports, "pointParameteriv", Nan::New<v8::FunctionTemplate>(EXPORT_pointParameteriv));
-    Nan::SetTemplate(exports, "genQueries", Nan::New<v8::FunctionTemplate>(EXPORT_genQueries));
-    Nan::SetTemplate(exports, "isQuery", Nan::New<v8::FunctionTemplate>(EXPORT_isQuery));
-    Nan::SetTemplate(exports, "beginQuery", Nan::New<v8::FunctionTemplate>(EXPORT_beginQuery));
-    Nan::SetTemplate(exports, "endQuery", Nan::New<v8::FunctionTemplate>(EXPORT_endQuery));
-    Nan::SetTemplate(exports, "getQueryiv", Nan::New<v8::FunctionTemplate>(EXPORT_getQueryiv));
-    Nan::SetTemplate(exports, "getQueryObjectiv", Nan::New<v8::FunctionTemplate>(EXPORT_getQueryObjectiv));
-    Nan::SetTemplate(exports, "getQueryObjectuiv", Nan::New<v8::FunctionTemplate>(EXPORT_getQueryObjectuiv));
-    Nan::SetTemplate(exports, "bindBuffer", Nan::New<v8::FunctionTemplate>(EXPORT_bindBuffer));
-    Nan::SetTemplate(exports, "genBuffers", Nan::New<v8::FunctionTemplate>(EXPORT_genBuffers));
-    Nan::SetTemplate(exports, "isBuffer", Nan::New<v8::FunctionTemplate>(EXPORT_isBuffer));
-    Nan::SetTemplate(exports, "bufferData", Nan::New<v8::FunctionTemplate>(EXPORT_bufferData));
-    Nan::SetTemplate(exports, "bufferSubData", Nan::New<v8::FunctionTemplate>(EXPORT_bufferSubData));
-    Nan::SetTemplate(exports, "getBufferSubData", Nan::New<v8::FunctionTemplate>(EXPORT_getBufferSubData));
-    Nan::SetTemplate(exports, "mapBuffer", Nan::New<v8::FunctionTemplate>(EXPORT_mapBuffer));
-    Nan::SetTemplate(exports, "unmapBuffer", Nan::New<v8::FunctionTemplate>(EXPORT_unmapBuffer));
-    Nan::SetTemplate(exports, "getBufferParameteriv", Nan::New<v8::FunctionTemplate>(EXPORT_getBufferParameteriv));
-    Nan::SetTemplate(exports, "blendEquationSeparate", Nan::New<v8::FunctionTemplate>(EXPORT_blendEquationSeparate));
-    Nan::SetTemplate(exports, "drawBuffers", Nan::New<v8::FunctionTemplate>(EXPORT_drawBuffers));
-    Nan::SetTemplate(exports, "stencilOpSeparate", Nan::New<v8::FunctionTemplate>(EXPORT_stencilOpSeparate));
-    Nan::SetTemplate(exports, "stencilFuncSeparate", Nan::New<v8::FunctionTemplate>(EXPORT_stencilFuncSeparate));
-    Nan::SetTemplate(exports, "stencilMaskSeparate", Nan::New<v8::FunctionTemplate>(EXPORT_stencilMaskSeparate));
-    Nan::SetTemplate(exports, "attachShader", Nan::New<v8::FunctionTemplate>(EXPORT_attachShader));
-    Nan::SetTemplate(exports, "bindAttribLocation", Nan::New<v8::FunctionTemplate>(EXPORT_bindAttribLocation));
-    Nan::SetTemplate(exports, "compileShader", Nan::New<v8::FunctionTemplate>(EXPORT_compileShader));
-    Nan::SetTemplate(exports, "createProgram", Nan::New<v8::FunctionTemplate>(EXPORT_createProgram));
-    Nan::SetTemplate(exports, "createShader", Nan::New<v8::FunctionTemplate>(EXPORT_createShader));
-    Nan::SetTemplate(exports, "detachShader", Nan::New<v8::FunctionTemplate>(EXPORT_detachShader));
-    Nan::SetTemplate(exports, "disableVertexAttribArray", Nan::New<v8::FunctionTemplate>(EXPORT_disableVertexAttribArray));
-    Nan::SetTemplate(exports, "enableVertexAttribArray", Nan::New<v8::FunctionTemplate>(EXPORT_enableVertexAttribArray));
-    Nan::SetTemplate(exports, "getActiveAttrib", Nan::New<v8::FunctionTemplate>(EXPORT_getActiveAttrib));
-    Nan::SetTemplate(exports, "getActiveUniform", Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniform));
-    Nan::SetTemplate(exports, "getAttachedShaders", Nan::New<v8::FunctionTemplate>(EXPORT_getAttachedShaders));
-    Nan::SetTemplate(exports, "getAttribLocation", Nan::New<v8::FunctionTemplate>(EXPORT_getAttribLocation));
-    Nan::SetTemplate(exports, "getProgramiv", Nan::New<v8::FunctionTemplate>(EXPORT_getProgramiv));
-    Nan::SetTemplate(exports, "getProgramInfoLog", Nan::New<v8::FunctionTemplate>(EXPORT_getProgramInfoLog));
-    Nan::SetTemplate(exports, "getShaderiv", Nan::New<v8::FunctionTemplate>(EXPORT_getShaderiv));
-    Nan::SetTemplate(exports, "getShaderInfoLog", Nan::New<v8::FunctionTemplate>(EXPORT_getShaderInfoLog));
-    Nan::SetTemplate(exports, "getShaderSource", Nan::New<v8::FunctionTemplate>(EXPORT_getShaderSource));
-    Nan::SetTemplate(exports, "getUniformLocation", Nan::New<v8::FunctionTemplate>(EXPORT_getUniformLocation));
-    Nan::SetTemplate(exports, "getUniformfv", Nan::New<v8::FunctionTemplate>(EXPORT_getUniformfv));
-    Nan::SetTemplate(exports, "getUniformiv", Nan::New<v8::FunctionTemplate>(EXPORT_getUniformiv));
-    Nan::SetTemplate(exports, "getVertexAttribdv", Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribdv));
-    Nan::SetTemplate(exports, "getVertexAttribfv", Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribfv));
-    Nan::SetTemplate(exports, "getVertexAttribiv", Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribiv));
-    Nan::SetTemplate(exports, "isProgram", Nan::New<v8::FunctionTemplate>(EXPORT_isProgram));
-    Nan::SetTemplate(exports, "isShader", Nan::New<v8::FunctionTemplate>(EXPORT_isShader));
-    Nan::SetTemplate(exports, "linkProgram", Nan::New<v8::FunctionTemplate>(EXPORT_linkProgram));
-    Nan::SetTemplate(exports, "useProgram", Nan::New<v8::FunctionTemplate>(EXPORT_useProgram));
-    Nan::SetTemplate(exports, "uniform1f", Nan::New<v8::FunctionTemplate>(EXPORT_uniform1f));
-    Nan::SetTemplate(exports, "uniform2f", Nan::New<v8::FunctionTemplate>(EXPORT_uniform2f));
-    Nan::SetTemplate(exports, "uniform3f", Nan::New<v8::FunctionTemplate>(EXPORT_uniform3f));
-    Nan::SetTemplate(exports, "uniform4f", Nan::New<v8::FunctionTemplate>(EXPORT_uniform4f));
-    Nan::SetTemplate(exports, "uniform1i", Nan::New<v8::FunctionTemplate>(EXPORT_uniform1i));
-    Nan::SetTemplate(exports, "uniform2i", Nan::New<v8::FunctionTemplate>(EXPORT_uniform2i));
-    Nan::SetTemplate(exports, "uniform3i", Nan::New<v8::FunctionTemplate>(EXPORT_uniform3i));
-    Nan::SetTemplate(exports, "uniform4i", Nan::New<v8::FunctionTemplate>(EXPORT_uniform4i));
-    Nan::SetTemplate(exports, "uniform1fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform1fv));
-    Nan::SetTemplate(exports, "uniform2fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform2fv));
-    Nan::SetTemplate(exports, "uniform3fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform3fv));
-    Nan::SetTemplate(exports, "uniform4fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform4fv));
-    Nan::SetTemplate(exports, "uniform1iv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform1iv));
-    Nan::SetTemplate(exports, "uniform2iv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform2iv));
-    Nan::SetTemplate(exports, "uniform3iv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform3iv));
-    Nan::SetTemplate(exports, "uniform4iv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform4iv));
-    Nan::SetTemplate(exports, "uniformMatrix2fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2fv));
-    Nan::SetTemplate(exports, "uniformMatrix3fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3fv));
-    Nan::SetTemplate(exports, "uniformMatrix4fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4fv));
-    Nan::SetTemplate(exports, "validateProgram", Nan::New<v8::FunctionTemplate>(EXPORT_validateProgram));
-    Nan::SetTemplate(exports, "vertexAttrib1d", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1d));
-    Nan::SetTemplate(exports, "vertexAttrib1dv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1dv));
-    Nan::SetTemplate(exports, "vertexAttrib1f", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1f));
-    Nan::SetTemplate(exports, "vertexAttrib1fv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1fv));
-    Nan::SetTemplate(exports, "vertexAttrib1s", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1s));
-    Nan::SetTemplate(exports, "vertexAttrib1sv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1sv));
-    Nan::SetTemplate(exports, "vertexAttrib2d", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2d));
-    Nan::SetTemplate(exports, "vertexAttrib2dv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2dv));
-    Nan::SetTemplate(exports, "vertexAttrib2f", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2f));
-    Nan::SetTemplate(exports, "vertexAttrib2fv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2fv));
-    Nan::SetTemplate(exports, "vertexAttrib2s", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2s));
-    Nan::SetTemplate(exports, "vertexAttrib2sv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2sv));
-    Nan::SetTemplate(exports, "vertexAttrib3d", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3d));
-    Nan::SetTemplate(exports, "vertexAttrib3dv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3dv));
-    Nan::SetTemplate(exports, "vertexAttrib3f", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3f));
-    Nan::SetTemplate(exports, "vertexAttrib3fv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3fv));
-    Nan::SetTemplate(exports, "vertexAttrib3s", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3s));
-    Nan::SetTemplate(exports, "vertexAttrib3sv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3sv));
-    Nan::SetTemplate(exports, "vertexAttrib4Nbv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nbv));
-    Nan::SetTemplate(exports, "vertexAttrib4Niv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Niv));
-    Nan::SetTemplate(exports, "vertexAttrib4Nsv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nsv));
-    Nan::SetTemplate(exports, "vertexAttrib4Nub", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nub));
-    Nan::SetTemplate(exports, "vertexAttrib4Nubv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nubv));
-    Nan::SetTemplate(exports, "vertexAttrib4Nuiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nuiv));
-    Nan::SetTemplate(exports, "vertexAttrib4Nusv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nusv));
-    Nan::SetTemplate(exports, "vertexAttrib4bv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4bv));
-    Nan::SetTemplate(exports, "vertexAttrib4d", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4d));
-    Nan::SetTemplate(exports, "vertexAttrib4dv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4dv));
-    Nan::SetTemplate(exports, "vertexAttrib4f", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4f));
-    Nan::SetTemplate(exports, "vertexAttrib4fv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4fv));
-    Nan::SetTemplate(exports, "vertexAttrib4iv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4iv));
-    Nan::SetTemplate(exports, "vertexAttrib4s", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4s));
-    Nan::SetTemplate(exports, "vertexAttrib4sv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4sv));
-    Nan::SetTemplate(exports, "vertexAttrib4ubv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4ubv));
-    Nan::SetTemplate(exports, "vertexAttrib4uiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4uiv));
-    Nan::SetTemplate(exports, "vertexAttrib4usv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4usv));
-    Nan::SetTemplate(exports, "vertexAttribPointer", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribPointer));
-    Nan::SetTemplate(exports, "uniformMatrix2x3fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2x3fv));
-    Nan::SetTemplate(exports, "uniformMatrix3x2fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3x2fv));
-    Nan::SetTemplate(exports, "uniformMatrix2x4fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2x4fv));
-    Nan::SetTemplate(exports, "uniformMatrix4x2fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4x2fv));
-    Nan::SetTemplate(exports, "uniformMatrix3x4fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3x4fv));
-    Nan::SetTemplate(exports, "uniformMatrix4x3fv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4x3fv));
-    Nan::SetTemplate(exports, "colorMaski", Nan::New<v8::FunctionTemplate>(EXPORT_colorMaski));
-    Nan::SetTemplate(exports, "getBooleani_v", Nan::New<v8::FunctionTemplate>(EXPORT_getBooleani_v));
-    Nan::SetTemplate(exports, "getIntegeri_v", Nan::New<v8::FunctionTemplate>(EXPORT_getIntegeri_v));
-    Nan::SetTemplate(exports, "enablei", Nan::New<v8::FunctionTemplate>(EXPORT_enablei));
-    Nan::SetTemplate(exports, "disablei", Nan::New<v8::FunctionTemplate>(EXPORT_disablei));
-    Nan::SetTemplate(exports, "isEnabledi", Nan::New<v8::FunctionTemplate>(EXPORT_isEnabledi));
-    Nan::SetTemplate(exports, "beginTransformFeedback", Nan::New<v8::FunctionTemplate>(EXPORT_beginTransformFeedback));
-    Nan::SetTemplate(exports, "endTransformFeedback", Nan::New<v8::FunctionTemplate>(EXPORT_endTransformFeedback));
-    Nan::SetTemplate(exports, "bindBufferRange", Nan::New<v8::FunctionTemplate>(EXPORT_bindBufferRange));
-    Nan::SetTemplate(exports, "bindBufferBase", Nan::New<v8::FunctionTemplate>(EXPORT_bindBufferBase));
-    Nan::SetTemplate(exports, "getTransformFeedbackVarying", Nan::New<v8::FunctionTemplate>(EXPORT_getTransformFeedbackVarying));
-    Nan::SetTemplate(exports, "clampColor", Nan::New<v8::FunctionTemplate>(EXPORT_clampColor));
-    Nan::SetTemplate(exports, "beginConditionalRender", Nan::New<v8::FunctionTemplate>(EXPORT_beginConditionalRender));
-    Nan::SetTemplate(exports, "endConditionalRender", Nan::New<v8::FunctionTemplate>(EXPORT_endConditionalRender));
-    Nan::SetTemplate(exports, "vertexAttribIPointer", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribIPointer));
-    Nan::SetTemplate(exports, "getVertexAttribIiv", Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribIiv));
-    Nan::SetTemplate(exports, "getVertexAttribIuiv", Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribIuiv));
-    Nan::SetTemplate(exports, "vertexAttribI1i", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI1i));
-    Nan::SetTemplate(exports, "vertexAttribI2i", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI2i));
-    Nan::SetTemplate(exports, "vertexAttribI3i", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI3i));
-    Nan::SetTemplate(exports, "vertexAttribI4i", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4i));
-    Nan::SetTemplate(exports, "vertexAttribI1ui", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI1ui));
-    Nan::SetTemplate(exports, "vertexAttribI2ui", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI2ui));
-    Nan::SetTemplate(exports, "vertexAttribI3ui", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI3ui));
-    Nan::SetTemplate(exports, "vertexAttribI4ui", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4ui));
-    Nan::SetTemplate(exports, "vertexAttribI1iv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI1iv));
-    Nan::SetTemplate(exports, "vertexAttribI2iv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI2iv));
-    Nan::SetTemplate(exports, "vertexAttribI3iv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI3iv));
-    Nan::SetTemplate(exports, "vertexAttribI4iv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4iv));
-    Nan::SetTemplate(exports, "vertexAttribI1uiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI1uiv));
-    Nan::SetTemplate(exports, "vertexAttribI2uiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI2uiv));
-    Nan::SetTemplate(exports, "vertexAttribI3uiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI3uiv));
-    Nan::SetTemplate(exports, "vertexAttribI4uiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4uiv));
-    Nan::SetTemplate(exports, "vertexAttribI4bv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4bv));
-    Nan::SetTemplate(exports, "vertexAttribI4sv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4sv));
-    Nan::SetTemplate(exports, "vertexAttribI4ubv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4ubv));
-    Nan::SetTemplate(exports, "vertexAttribI4usv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4usv));
-    Nan::SetTemplate(exports, "getUniformuiv", Nan::New<v8::FunctionTemplate>(EXPORT_getUniformuiv));
-    Nan::SetTemplate(exports, "bindFragDataLocation", Nan::New<v8::FunctionTemplate>(EXPORT_bindFragDataLocation));
-    Nan::SetTemplate(exports, "getFragDataLocation", Nan::New<v8::FunctionTemplate>(EXPORT_getFragDataLocation));
-    Nan::SetTemplate(exports, "uniform1ui", Nan::New<v8::FunctionTemplate>(EXPORT_uniform1ui));
-    Nan::SetTemplate(exports, "uniform2ui", Nan::New<v8::FunctionTemplate>(EXPORT_uniform2ui));
-    Nan::SetTemplate(exports, "uniform3ui", Nan::New<v8::FunctionTemplate>(EXPORT_uniform3ui));
-    Nan::SetTemplate(exports, "uniform4ui", Nan::New<v8::FunctionTemplate>(EXPORT_uniform4ui));
-    Nan::SetTemplate(exports, "uniform1uiv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform1uiv));
-    Nan::SetTemplate(exports, "uniform2uiv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform2uiv));
-    Nan::SetTemplate(exports, "uniform3uiv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform3uiv));
-    Nan::SetTemplate(exports, "uniform4uiv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform4uiv));
-    Nan::SetTemplate(exports, "texParameterIiv", Nan::New<v8::FunctionTemplate>(EXPORT_texParameterIiv));
-    Nan::SetTemplate(exports, "texParameterIuiv", Nan::New<v8::FunctionTemplate>(EXPORT_texParameterIuiv));
-    Nan::SetTemplate(exports, "getTexParameterIiv", Nan::New<v8::FunctionTemplate>(EXPORT_getTexParameterIiv));
-    Nan::SetTemplate(exports, "getTexParameterIuiv", Nan::New<v8::FunctionTemplate>(EXPORT_getTexParameterIuiv));
-    Nan::SetTemplate(exports, "clearBufferiv", Nan::New<v8::FunctionTemplate>(EXPORT_clearBufferiv));
-    Nan::SetTemplate(exports, "clearBufferuiv", Nan::New<v8::FunctionTemplate>(EXPORT_clearBufferuiv));
-    Nan::SetTemplate(exports, "clearBufferfv", Nan::New<v8::FunctionTemplate>(EXPORT_clearBufferfv));
-    Nan::SetTemplate(exports, "clearBufferfi", Nan::New<v8::FunctionTemplate>(EXPORT_clearBufferfi));
-    Nan::SetTemplate(exports, "getStringi", Nan::New<v8::FunctionTemplate>(EXPORT_getStringi));
-    Nan::SetTemplate(exports, "drawArraysInstanced", Nan::New<v8::FunctionTemplate>(EXPORT_drawArraysInstanced));
-    Nan::SetTemplate(exports, "drawElementsInstanced", Nan::New<v8::FunctionTemplate>(EXPORT_drawElementsInstanced));
-    Nan::SetTemplate(exports, "texBuffer", Nan::New<v8::FunctionTemplate>(EXPORT_texBuffer));
-    Nan::SetTemplate(exports, "primitiveRestartIndex", Nan::New<v8::FunctionTemplate>(EXPORT_primitiveRestartIndex));
-    Nan::SetTemplate(exports, "getInteger64i_v", Nan::New<v8::FunctionTemplate>(EXPORT_getInteger64i_v));
-    Nan::SetTemplate(exports, "getBufferParameteri64v", Nan::New<v8::FunctionTemplate>(EXPORT_getBufferParameteri64v));
-    Nan::SetTemplate(exports, "framebufferTexture", Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTexture));
-    Nan::SetTemplate(exports, "vertexAttribDivisor", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribDivisor));
-    Nan::SetTemplate(exports, "minSampleShading", Nan::New<v8::FunctionTemplate>(EXPORT_minSampleShading));
-    Nan::SetTemplate(exports, "blendEquationi", Nan::New<v8::FunctionTemplate>(EXPORT_blendEquationi));
-    Nan::SetTemplate(exports, "blendEquationSeparatei", Nan::New<v8::FunctionTemplate>(EXPORT_blendEquationSeparatei));
-    Nan::SetTemplate(exports, "blendFunci", Nan::New<v8::FunctionTemplate>(EXPORT_blendFunci));
-    Nan::SetTemplate(exports, "blendFuncSeparatei", Nan::New<v8::FunctionTemplate>(EXPORT_blendFuncSeparatei));
-    Nan::SetTemplate(exports, "isRenderbuffer", Nan::New<v8::FunctionTemplate>(EXPORT_isRenderbuffer));
-    Nan::SetTemplate(exports, "bindRenderbuffer", Nan::New<v8::FunctionTemplate>(EXPORT_bindRenderbuffer));
-    Nan::SetTemplate(exports, "genRenderbuffers", Nan::New<v8::FunctionTemplate>(EXPORT_genRenderbuffers));
-    Nan::SetTemplate(exports, "renderbufferStorage", Nan::New<v8::FunctionTemplate>(EXPORT_renderbufferStorage));
-    Nan::SetTemplate(exports, "getRenderbufferParameteriv", Nan::New<v8::FunctionTemplate>(EXPORT_getRenderbufferParameteriv));
-    Nan::SetTemplate(exports, "isFramebuffer", Nan::New<v8::FunctionTemplate>(EXPORT_isFramebuffer));
-    Nan::SetTemplate(exports, "bindFramebuffer", Nan::New<v8::FunctionTemplate>(EXPORT_bindFramebuffer));
-    Nan::SetTemplate(exports, "genFramebuffers", Nan::New<v8::FunctionTemplate>(EXPORT_genFramebuffers));
-    Nan::SetTemplate(exports, "checkFramebufferStatus", Nan::New<v8::FunctionTemplate>(EXPORT_checkFramebufferStatus));
-    Nan::SetTemplate(exports, "framebufferTexture1D", Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTexture1D));
-    Nan::SetTemplate(exports, "framebufferTexture2D", Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTexture2D));
-    Nan::SetTemplate(exports, "framebufferTexture3D", Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTexture3D));
-    Nan::SetTemplate(exports, "framebufferRenderbuffer", Nan::New<v8::FunctionTemplate>(EXPORT_framebufferRenderbuffer));
-    Nan::SetTemplate(exports, "getFramebufferAttachmentParameteriv", Nan::New<v8::FunctionTemplate>(EXPORT_getFramebufferAttachmentParameteriv));
-    Nan::SetTemplate(exports, "generateMipmap", Nan::New<v8::FunctionTemplate>(EXPORT_generateMipmap));
-    Nan::SetTemplate(exports, "blitFramebuffer", Nan::New<v8::FunctionTemplate>(EXPORT_blitFramebuffer));
-    Nan::SetTemplate(exports, "renderbufferStorageMultisample", Nan::New<v8::FunctionTemplate>(EXPORT_renderbufferStorageMultisample));
-    Nan::SetTemplate(exports, "framebufferTextureLayer", Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTextureLayer));
-    Nan::SetTemplate(exports, "mapBufferRange", Nan::New<v8::FunctionTemplate>(EXPORT_mapBufferRange));
-    Nan::SetTemplate(exports, "flushMappedBufferRange", Nan::New<v8::FunctionTemplate>(EXPORT_flushMappedBufferRange));
-    Nan::SetTemplate(exports, "bindVertexArray", Nan::New<v8::FunctionTemplate>(EXPORT_bindVertexArray));
-    Nan::SetTemplate(exports, "genVertexArrays", Nan::New<v8::FunctionTemplate>(EXPORT_genVertexArrays));
-    Nan::SetTemplate(exports, "isVertexArray", Nan::New<v8::FunctionTemplate>(EXPORT_isVertexArray));
-    Nan::SetTemplate(exports, "getActiveUniformsiv", Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniformsiv));
-    Nan::SetTemplate(exports, "getActiveUniformName", Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniformName));
-    Nan::SetTemplate(exports, "getUniformBlockIndex", Nan::New<v8::FunctionTemplate>(EXPORT_getUniformBlockIndex));
-    Nan::SetTemplate(exports, "getActiveUniformBlockiv", Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniformBlockiv));
-    Nan::SetTemplate(exports, "getActiveUniformBlockName", Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniformBlockName));
-    Nan::SetTemplate(exports, "uniformBlockBinding", Nan::New<v8::FunctionTemplate>(EXPORT_uniformBlockBinding));
-    Nan::SetTemplate(exports, "copyBufferSubData", Nan::New<v8::FunctionTemplate>(EXPORT_copyBufferSubData));
-    Nan::SetTemplate(exports, "drawElementsBaseVertex", Nan::New<v8::FunctionTemplate>(EXPORT_drawElementsBaseVertex));
-    Nan::SetTemplate(exports, "drawRangeElementsBaseVertex", Nan::New<v8::FunctionTemplate>(EXPORT_drawRangeElementsBaseVertex));
-    Nan::SetTemplate(exports, "drawElementsInstancedBaseVertex", Nan::New<v8::FunctionTemplate>(EXPORT_drawElementsInstancedBaseVertex));
-    Nan::SetTemplate(exports, "provokingVertex", Nan::New<v8::FunctionTemplate>(EXPORT_provokingVertex));
-    Nan::SetTemplate(exports, "texImage2DMultisample", Nan::New<v8::FunctionTemplate>(EXPORT_texImage2DMultisample));
-    Nan::SetTemplate(exports, "texImage3DMultisample", Nan::New<v8::FunctionTemplate>(EXPORT_texImage3DMultisample));
-    Nan::SetTemplate(exports, "getMultisamplefv", Nan::New<v8::FunctionTemplate>(EXPORT_getMultisamplefv));
-    Nan::SetTemplate(exports, "sampleMaski", Nan::New<v8::FunctionTemplate>(EXPORT_sampleMaski));
-    Nan::SetTemplate(exports, "bindFragDataLocationIndexed", Nan::New<v8::FunctionTemplate>(EXPORT_bindFragDataLocationIndexed));
-    Nan::SetTemplate(exports, "getFragDataIndex", Nan::New<v8::FunctionTemplate>(EXPORT_getFragDataIndex));
-    Nan::SetTemplate(exports, "genSamplers", Nan::New<v8::FunctionTemplate>(EXPORT_genSamplers));
-    Nan::SetTemplate(exports, "isSampler", Nan::New<v8::FunctionTemplate>(EXPORT_isSampler));
-    Nan::SetTemplate(exports, "bindSampler", Nan::New<v8::FunctionTemplate>(EXPORT_bindSampler));
-    Nan::SetTemplate(exports, "samplerParameteri", Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameteri));
-    Nan::SetTemplate(exports, "samplerParameteriv", Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameteriv));
-    Nan::SetTemplate(exports, "samplerParameterf", Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameterf));
-    Nan::SetTemplate(exports, "samplerParameterfv", Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameterfv));
-    Nan::SetTemplate(exports, "samplerParameterIiv", Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameterIiv));
-    Nan::SetTemplate(exports, "samplerParameterIuiv", Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameterIuiv));
-    Nan::SetTemplate(exports, "getSamplerParameteriv", Nan::New<v8::FunctionTemplate>(EXPORT_getSamplerParameteriv));
-    Nan::SetTemplate(exports, "getSamplerParameterIiv", Nan::New<v8::FunctionTemplate>(EXPORT_getSamplerParameterIiv));
-    Nan::SetTemplate(exports, "getSamplerParameterfv", Nan::New<v8::FunctionTemplate>(EXPORT_getSamplerParameterfv));
-    Nan::SetTemplate(exports, "getSamplerParameterIuiv", Nan::New<v8::FunctionTemplate>(EXPORT_getSamplerParameterIuiv));
-    Nan::SetTemplate(exports, "queryCounter", Nan::New<v8::FunctionTemplate>(EXPORT_queryCounter));
-    Nan::SetTemplate(exports, "getQueryObjecti64v", Nan::New<v8::FunctionTemplate>(EXPORT_getQueryObjecti64v));
-    Nan::SetTemplate(exports, "getQueryObjectui64v", Nan::New<v8::FunctionTemplate>(EXPORT_getQueryObjectui64v));
-    Nan::SetTemplate(exports, "vertexAttribP1ui", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP1ui));
-    Nan::SetTemplate(exports, "vertexAttribP1uiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP1uiv));
-    Nan::SetTemplate(exports, "vertexAttribP2ui", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP2ui));
-    Nan::SetTemplate(exports, "vertexAttribP2uiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP2uiv));
-    Nan::SetTemplate(exports, "vertexAttribP3ui", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP3ui));
-    Nan::SetTemplate(exports, "vertexAttribP3uiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP3uiv));
-    Nan::SetTemplate(exports, "vertexAttribP4ui", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP4ui));
-    Nan::SetTemplate(exports, "vertexAttribP4uiv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP4uiv));
-    Nan::SetTemplate(exports, "drawArraysIndirect", Nan::New<v8::FunctionTemplate>(EXPORT_drawArraysIndirect));
-    Nan::SetTemplate(exports, "drawElementsIndirect", Nan::New<v8::FunctionTemplate>(EXPORT_drawElementsIndirect));
-    Nan::SetTemplate(exports, "uniform1d", Nan::New<v8::FunctionTemplate>(EXPORT_uniform1d));
-    Nan::SetTemplate(exports, "uniform2d", Nan::New<v8::FunctionTemplate>(EXPORT_uniform2d));
-    Nan::SetTemplate(exports, "uniform3d", Nan::New<v8::FunctionTemplate>(EXPORT_uniform3d));
-    Nan::SetTemplate(exports, "uniform4d", Nan::New<v8::FunctionTemplate>(EXPORT_uniform4d));
-    Nan::SetTemplate(exports, "uniform1dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform1dv));
-    Nan::SetTemplate(exports, "uniform2dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform2dv));
-    Nan::SetTemplate(exports, "uniform3dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform3dv));
-    Nan::SetTemplate(exports, "uniform4dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniform4dv));
-    Nan::SetTemplate(exports, "uniformMatrix2dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2dv));
-    Nan::SetTemplate(exports, "uniformMatrix3dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3dv));
-    Nan::SetTemplate(exports, "uniformMatrix4dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4dv));
-    Nan::SetTemplate(exports, "uniformMatrix2x3dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2x3dv));
-    Nan::SetTemplate(exports, "uniformMatrix2x4dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2x4dv));
-    Nan::SetTemplate(exports, "uniformMatrix3x2dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3x2dv));
-    Nan::SetTemplate(exports, "uniformMatrix3x4dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3x4dv));
-    Nan::SetTemplate(exports, "uniformMatrix4x2dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4x2dv));
-    Nan::SetTemplate(exports, "uniformMatrix4x3dv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4x3dv));
-    Nan::SetTemplate(exports, "getUniformdv", Nan::New<v8::FunctionTemplate>(EXPORT_getUniformdv));
-    Nan::SetTemplate(exports, "getSubroutineUniformLocation", Nan::New<v8::FunctionTemplate>(EXPORT_getSubroutineUniformLocation));
-    Nan::SetTemplate(exports, "getSubroutineIndex", Nan::New<v8::FunctionTemplate>(EXPORT_getSubroutineIndex));
-    Nan::SetTemplate(exports, "getActiveSubroutineUniformiv", Nan::New<v8::FunctionTemplate>(EXPORT_getActiveSubroutineUniformiv));
-    Nan::SetTemplate(exports, "getActiveSubroutineUniformName", Nan::New<v8::FunctionTemplate>(EXPORT_getActiveSubroutineUniformName));
-    Nan::SetTemplate(exports, "getActiveSubroutineName", Nan::New<v8::FunctionTemplate>(EXPORT_getActiveSubroutineName));
-    Nan::SetTemplate(exports, "uniformSubroutinesuiv", Nan::New<v8::FunctionTemplate>(EXPORT_uniformSubroutinesuiv));
-    Nan::SetTemplate(exports, "getUniformSubroutineuiv", Nan::New<v8::FunctionTemplate>(EXPORT_getUniformSubroutineuiv));
-    Nan::SetTemplate(exports, "getProgramStageiv", Nan::New<v8::FunctionTemplate>(EXPORT_getProgramStageiv));
-    Nan::SetTemplate(exports, "patchParameteri", Nan::New<v8::FunctionTemplate>(EXPORT_patchParameteri));
-    Nan::SetTemplate(exports, "patchParameterfv", Nan::New<v8::FunctionTemplate>(EXPORT_patchParameterfv));
-    Nan::SetTemplate(exports, "bindTransformFeedback", Nan::New<v8::FunctionTemplate>(EXPORT_bindTransformFeedback));
-    Nan::SetTemplate(exports, "genTransformFeedbacks", Nan::New<v8::FunctionTemplate>(EXPORT_genTransformFeedbacks));
-    Nan::SetTemplate(exports, "isTransformFeedback", Nan::New<v8::FunctionTemplate>(EXPORT_isTransformFeedback));
-    Nan::SetTemplate(exports, "pauseTransformFeedback", Nan::New<v8::FunctionTemplate>(EXPORT_pauseTransformFeedback));
-    Nan::SetTemplate(exports, "resumeTransformFeedback", Nan::New<v8::FunctionTemplate>(EXPORT_resumeTransformFeedback));
-    Nan::SetTemplate(exports, "drawTransformFeedback", Nan::New<v8::FunctionTemplate>(EXPORT_drawTransformFeedback));
-    Nan::SetTemplate(exports, "drawTransformFeedbackStream", Nan::New<v8::FunctionTemplate>(EXPORT_drawTransformFeedbackStream));
-    Nan::SetTemplate(exports, "beginQueryIndexed", Nan::New<v8::FunctionTemplate>(EXPORT_beginQueryIndexed));
-    Nan::SetTemplate(exports, "endQueryIndexed", Nan::New<v8::FunctionTemplate>(EXPORT_endQueryIndexed));
-    Nan::SetTemplate(exports, "getQueryIndexediv", Nan::New<v8::FunctionTemplate>(EXPORT_getQueryIndexediv));
-    Nan::SetTemplate(exports, "releaseShaderCompiler", Nan::New<v8::FunctionTemplate>(EXPORT_releaseShaderCompiler));
-    Nan::SetTemplate(exports, "shaderBinary", Nan::New<v8::FunctionTemplate>(EXPORT_shaderBinary));
-    Nan::SetTemplate(exports, "getShaderPrecisionFormat", Nan::New<v8::FunctionTemplate>(EXPORT_getShaderPrecisionFormat));
-    Nan::SetTemplate(exports, "depthRangef", Nan::New<v8::FunctionTemplate>(EXPORT_depthRangef));
-    Nan::SetTemplate(exports, "clearDepthf", Nan::New<v8::FunctionTemplate>(EXPORT_clearDepthf));
-    Nan::SetTemplate(exports, "getProgramBinary", Nan::New<v8::FunctionTemplate>(EXPORT_getProgramBinary));
-    Nan::SetTemplate(exports, "programBinary", Nan::New<v8::FunctionTemplate>(EXPORT_programBinary));
-    Nan::SetTemplate(exports, "programParameteri", Nan::New<v8::FunctionTemplate>(EXPORT_programParameteri));
-    Nan::SetTemplate(exports, "useProgramStages", Nan::New<v8::FunctionTemplate>(EXPORT_useProgramStages));
-    Nan::SetTemplate(exports, "activeShaderProgram", Nan::New<v8::FunctionTemplate>(EXPORT_activeShaderProgram));
-    Nan::SetTemplate(exports, "bindProgramPipeline", Nan::New<v8::FunctionTemplate>(EXPORT_bindProgramPipeline));
-    Nan::SetTemplate(exports, "genProgramPipelines", Nan::New<v8::FunctionTemplate>(EXPORT_genProgramPipelines));
-    Nan::SetTemplate(exports, "isProgramPipeline", Nan::New<v8::FunctionTemplate>(EXPORT_isProgramPipeline));
-    Nan::SetTemplate(exports, "getProgramPipelineiv", Nan::New<v8::FunctionTemplate>(EXPORT_getProgramPipelineiv));
-    Nan::SetTemplate(exports, "programUniform1i", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1i));
-    Nan::SetTemplate(exports, "programUniform1iv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1iv));
-    Nan::SetTemplate(exports, "programUniform1f", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1f));
-    Nan::SetTemplate(exports, "programUniform1fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1fv));
-    Nan::SetTemplate(exports, "programUniform1d", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1d));
-    Nan::SetTemplate(exports, "programUniform1dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1dv));
-    Nan::SetTemplate(exports, "programUniform1ui", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1ui));
-    Nan::SetTemplate(exports, "programUniform1uiv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1uiv));
-    Nan::SetTemplate(exports, "programUniform2i", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2i));
-    Nan::SetTemplate(exports, "programUniform2iv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2iv));
-    Nan::SetTemplate(exports, "programUniform2f", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2f));
-    Nan::SetTemplate(exports, "programUniform2fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2fv));
-    Nan::SetTemplate(exports, "programUniform2d", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2d));
-    Nan::SetTemplate(exports, "programUniform2dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2dv));
-    Nan::SetTemplate(exports, "programUniform2ui", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2ui));
-    Nan::SetTemplate(exports, "programUniform2uiv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2uiv));
-    Nan::SetTemplate(exports, "programUniform3i", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3i));
-    Nan::SetTemplate(exports, "programUniform3iv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3iv));
-    Nan::SetTemplate(exports, "programUniform3f", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3f));
-    Nan::SetTemplate(exports, "programUniform3fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3fv));
-    Nan::SetTemplate(exports, "programUniform3d", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3d));
-    Nan::SetTemplate(exports, "programUniform3dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3dv));
-    Nan::SetTemplate(exports, "programUniform3ui", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3ui));
-    Nan::SetTemplate(exports, "programUniform3uiv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3uiv));
-    Nan::SetTemplate(exports, "programUniform4i", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4i));
-    Nan::SetTemplate(exports, "programUniform4iv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4iv));
-    Nan::SetTemplate(exports, "programUniform4f", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4f));
-    Nan::SetTemplate(exports, "programUniform4fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4fv));
-    Nan::SetTemplate(exports, "programUniform4d", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4d));
-    Nan::SetTemplate(exports, "programUniform4dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4dv));
-    Nan::SetTemplate(exports, "programUniform4ui", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4ui));
-    Nan::SetTemplate(exports, "programUniform4uiv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4uiv));
-    Nan::SetTemplate(exports, "programUniformMatrix2fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2fv));
-    Nan::SetTemplate(exports, "programUniformMatrix3fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3fv));
-    Nan::SetTemplate(exports, "programUniformMatrix4fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4fv));
-    Nan::SetTemplate(exports, "programUniformMatrix2dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2dv));
-    Nan::SetTemplate(exports, "programUniformMatrix3dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3dv));
-    Nan::SetTemplate(exports, "programUniformMatrix4dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4dv));
-    Nan::SetTemplate(exports, "programUniformMatrix2x3fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x3fv));
-    Nan::SetTemplate(exports, "programUniformMatrix3x2fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x2fv));
-    Nan::SetTemplate(exports, "programUniformMatrix2x4fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x4fv));
-    Nan::SetTemplate(exports, "programUniformMatrix4x2fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x2fv));
-    Nan::SetTemplate(exports, "programUniformMatrix3x4fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x4fv));
-    Nan::SetTemplate(exports, "programUniformMatrix4x3fv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x3fv));
-    Nan::SetTemplate(exports, "programUniformMatrix2x3dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x3dv));
-    Nan::SetTemplate(exports, "programUniformMatrix3x2dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x2dv));
-    Nan::SetTemplate(exports, "programUniformMatrix2x4dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x4dv));
-    Nan::SetTemplate(exports, "programUniformMatrix4x2dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x2dv));
-    Nan::SetTemplate(exports, "programUniformMatrix3x4dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x4dv));
-    Nan::SetTemplate(exports, "programUniformMatrix4x3dv", Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x3dv));
-    Nan::SetTemplate(exports, "validateProgramPipeline", Nan::New<v8::FunctionTemplate>(EXPORT_validateProgramPipeline));
-    Nan::SetTemplate(exports, "getProgramPipelineInfoLog", Nan::New<v8::FunctionTemplate>(EXPORT_getProgramPipelineInfoLog));
-    Nan::SetTemplate(exports, "vertexAttribL1d", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL1d));
-    Nan::SetTemplate(exports, "vertexAttribL2d", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL2d));
-    Nan::SetTemplate(exports, "vertexAttribL3d", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL3d));
-    Nan::SetTemplate(exports, "vertexAttribL4d", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL4d));
-    Nan::SetTemplate(exports, "vertexAttribL1dv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL1dv));
-    Nan::SetTemplate(exports, "vertexAttribL2dv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL2dv));
-    Nan::SetTemplate(exports, "vertexAttribL3dv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL3dv));
-    Nan::SetTemplate(exports, "vertexAttribL4dv", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL4dv));
-    Nan::SetTemplate(exports, "vertexAttribLPointer", Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribLPointer));
-    Nan::SetTemplate(exports, "getVertexAttribLdv", Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribLdv));
-    Nan::SetTemplate(exports, "viewportArrayv", Nan::New<v8::FunctionTemplate>(EXPORT_viewportArrayv));
-    Nan::SetTemplate(exports, "viewportIndexedf", Nan::New<v8::FunctionTemplate>(EXPORT_viewportIndexedf));
-    Nan::SetTemplate(exports, "viewportIndexedfv", Nan::New<v8::FunctionTemplate>(EXPORT_viewportIndexedfv));
-    Nan::SetTemplate(exports, "scissorArrayv", Nan::New<v8::FunctionTemplate>(EXPORT_scissorArrayv));
-    Nan::SetTemplate(exports, "scissorIndexed", Nan::New<v8::FunctionTemplate>(EXPORT_scissorIndexed));
-    Nan::SetTemplate(exports, "scissorIndexedv", Nan::New<v8::FunctionTemplate>(EXPORT_scissorIndexedv));
-    Nan::SetTemplate(exports, "depthRangeArrayv", Nan::New<v8::FunctionTemplate>(EXPORT_depthRangeArrayv));
-    Nan::SetTemplate(exports, "depthRangeIndexed", Nan::New<v8::FunctionTemplate>(EXPORT_depthRangeIndexed));
-    Nan::SetTemplate(exports, "getFloati_v", Nan::New<v8::FunctionTemplate>(EXPORT_getFloati_v));
-    Nan::SetTemplate(exports, "getDoublei_v", Nan::New<v8::FunctionTemplate>(EXPORT_getDoublei_v));
-    Nan::SetTemplate(exports, "shaderSource", Nan::New<v8::FunctionTemplate>(EXPORT_shaderSource));
+void defineFunctions(v8::Handle<v8::Object> exports) {
+    Nan::Set(exports, Nan::New<v8::String>("cullFace").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_cullFace)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("frontFace").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_frontFace)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("hint").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_hint)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("lineWidth").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_lineWidth)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("pointSize").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_pointSize)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("polygonMode").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_polygonMode)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("scissor").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_scissor)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texParameterf").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texParameterf)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texParameterfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texParameterfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texParameteri").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texParameteri)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texParameteriv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texParameteriv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texImage1D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texImage1D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texImage2D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texImage2D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawBuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawBuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clear").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clear)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clearColor").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clearColor)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clearStencil").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clearStencil)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clearDepth").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clearDepth)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("stencilMask").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_stencilMask)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("colorMask").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_colorMask)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("depthMask").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_depthMask)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("disable").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_disable)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("enable").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_enable)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("finish").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_finish)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("flush").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_flush)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blendFunc").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blendFunc)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("logicOp").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_logicOp)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("stencilFunc").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_stencilFunc)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("stencilOp").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_stencilOp)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("depthFunc").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_depthFunc)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("pixelStoref").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_pixelStoref)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("pixelStorei").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_pixelStorei)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("readBuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_readBuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("readPixels").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_readPixels)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getBooleanv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getBooleanv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getDoublev").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getDoublev)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getError").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getError)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getFloatv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getFloatv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getIntegerv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getIntegerv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getString").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getString)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getTexImage").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getTexImage)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getTexParameterfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getTexParameterfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getTexParameteriv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getTexParameteriv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getTexLevelParameterfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getTexLevelParameterfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getTexLevelParameteriv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getTexLevelParameteriv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isEnabled").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isEnabled)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("depthRange").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_depthRange)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("viewport").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_viewport)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawArrays").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawArrays)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawElements").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawElements)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("polygonOffset").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_polygonOffset)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("copyTexImage1D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_copyTexImage1D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("copyTexImage2D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_copyTexImage2D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("copyTexSubImage1D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_copyTexSubImage1D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("copyTexSubImage2D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_copyTexSubImage2D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texSubImage1D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texSubImage1D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texSubImage2D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texSubImage2D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindTexture").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindTexture)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("genTextures").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_genTextures)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isTexture").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isTexture)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blendColor").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blendColor)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blendEquation").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blendEquation)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawRangeElements").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawRangeElements)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texImage3D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texImage3D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texSubImage3D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texSubImage3D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("copyTexSubImage3D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_copyTexSubImage3D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("activeTexture").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_activeTexture)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("sampleCoverage").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_sampleCoverage)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("compressedTexImage3D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexImage3D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("compressedTexImage2D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexImage2D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("compressedTexImage1D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexImage1D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("compressedTexSubImage3D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexSubImage3D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("compressedTexSubImage2D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexSubImage2D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("compressedTexSubImage1D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_compressedTexSubImage1D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getCompressedTexImage").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getCompressedTexImage)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blendFuncSeparate").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blendFuncSeparate)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("multiDrawArrays").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_multiDrawArrays)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("pointParameterf").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_pointParameterf)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("pointParameterfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_pointParameterfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("pointParameteri").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_pointParameteri)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("pointParameteriv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_pointParameteriv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("genQueries").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_genQueries)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isQuery").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isQuery)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("beginQuery").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_beginQuery)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("endQuery").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_endQuery)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getQueryiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getQueryiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getQueryObjectiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getQueryObjectiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getQueryObjectuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getQueryObjectuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindBuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindBuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("genBuffers").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_genBuffers)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isBuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isBuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bufferData").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bufferData)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bufferSubData").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bufferSubData)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getBufferSubData").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getBufferSubData)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("mapBuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_mapBuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("unmapBuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_unmapBuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getBufferParameteriv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getBufferParameteriv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blendEquationSeparate").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blendEquationSeparate)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawBuffers").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawBuffers)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("stencilOpSeparate").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_stencilOpSeparate)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("stencilFuncSeparate").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_stencilFuncSeparate)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("stencilMaskSeparate").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_stencilMaskSeparate)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("attachShader").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_attachShader)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindAttribLocation").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindAttribLocation)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("compileShader").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_compileShader)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("createProgram").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_createProgram)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("createShader").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_createShader)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("detachShader").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_detachShader)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("disableVertexAttribArray").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_disableVertexAttribArray)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("enableVertexAttribArray").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_enableVertexAttribArray)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getActiveAttrib").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getActiveAttrib)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getActiveUniform").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniform)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getAttachedShaders").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getAttachedShaders)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getAttribLocation").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getAttribLocation)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getProgramiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getProgramiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getProgramInfoLog").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getProgramInfoLog)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getShaderiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getShaderiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getShaderInfoLog").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getShaderInfoLog)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getShaderSource").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getShaderSource)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getUniformLocation").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getUniformLocation)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getUniformfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getUniformfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getUniformiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getUniformiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getVertexAttribdv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribdv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getVertexAttribfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getVertexAttribiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isProgram").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isProgram)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isShader").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isShader)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("linkProgram").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_linkProgram)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("useProgram").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_useProgram)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform1f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform1f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform2f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform2f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform3f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform3f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform4f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform4f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform1i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform1i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform2i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform2i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform3i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform3i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform4i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform4i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform1fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform1fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform2fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform2fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform3fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform3fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform4fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform4fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform1iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform1iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform2iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform2iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform3iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform3iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform4iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform4iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix2fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix3fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix4fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("validateProgram").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_validateProgram)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib1d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib1dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib1f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib1fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib1s").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1s)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib1sv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib1sv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib2d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib2f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib2fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib2s").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2s)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib2sv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib2sv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib3d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib3f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib3fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib3s").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3s)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib3sv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib3sv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4Nbv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nbv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4Niv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Niv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4Nsv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nsv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4Nub").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nub)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4Nubv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nubv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4Nuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4Nusv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4Nusv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4bv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4bv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4s").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4s)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4sv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4sv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4ubv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4ubv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttrib4usv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttrib4usv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribPointer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribPointer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix2x3fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2x3fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix3x2fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3x2fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix2x4fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2x4fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix4x2fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4x2fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix3x4fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3x4fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix4x3fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4x3fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("colorMaski").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_colorMaski)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getBooleani_v").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getBooleani_v)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getIntegeri_v").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getIntegeri_v)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("enablei").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_enablei)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("disablei").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_disablei)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isEnabledi").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isEnabledi)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("beginTransformFeedback").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_beginTransformFeedback)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("endTransformFeedback").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_endTransformFeedback)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindBufferRange").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindBufferRange)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindBufferBase").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindBufferBase)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getTransformFeedbackVarying").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getTransformFeedbackVarying)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clampColor").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clampColor)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("beginConditionalRender").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_beginConditionalRender)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("endConditionalRender").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_endConditionalRender)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribIPointer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribIPointer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getVertexAttribIiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribIiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getVertexAttribIuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribIuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI1i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI1i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI2i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI2i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI3i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI3i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI4i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI1ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI1ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI2ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI2ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI3ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI3ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI4ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI1iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI1iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI2iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI2iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI3iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI3iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI4iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI1uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI1uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI2uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI2uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI3uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI3uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI4uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI4bv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4bv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI4sv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4sv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI4ubv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4ubv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribI4usv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribI4usv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getUniformuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getUniformuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindFragDataLocation").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindFragDataLocation)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getFragDataLocation").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getFragDataLocation)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform1ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform1ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform2ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform2ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform3ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform3ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform4ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform4ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform1uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform1uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform2uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform2uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform3uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform3uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform4uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform4uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texParameterIiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texParameterIiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texParameterIuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texParameterIuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getTexParameterIiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getTexParameterIiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getTexParameterIuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getTexParameterIuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clearBufferiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clearBufferiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clearBufferuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clearBufferuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clearBufferfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clearBufferfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clearBufferfi").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clearBufferfi)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getStringi").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getStringi)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawArraysInstanced").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawArraysInstanced)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawElementsInstanced").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawElementsInstanced)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texBuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texBuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("primitiveRestartIndex").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_primitiveRestartIndex)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getInteger64i_v").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getInteger64i_v)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getBufferParameteri64v").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getBufferParameteri64v)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("framebufferTexture").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTexture)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribDivisor").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribDivisor)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("minSampleShading").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_minSampleShading)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blendEquationi").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blendEquationi)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blendEquationSeparatei").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blendEquationSeparatei)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blendFunci").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blendFunci)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blendFuncSeparatei").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blendFuncSeparatei)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isRenderbuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isRenderbuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindRenderbuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindRenderbuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("genRenderbuffers").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_genRenderbuffers)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("renderbufferStorage").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_renderbufferStorage)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getRenderbufferParameteriv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getRenderbufferParameteriv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isFramebuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isFramebuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindFramebuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindFramebuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("genFramebuffers").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_genFramebuffers)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("checkFramebufferStatus").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_checkFramebufferStatus)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("framebufferTexture1D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTexture1D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("framebufferTexture2D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTexture2D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("framebufferTexture3D").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTexture3D)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("framebufferRenderbuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_framebufferRenderbuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getFramebufferAttachmentParameteriv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getFramebufferAttachmentParameteriv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("generateMipmap").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_generateMipmap)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("blitFramebuffer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_blitFramebuffer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("renderbufferStorageMultisample").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_renderbufferStorageMultisample)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("framebufferTextureLayer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_framebufferTextureLayer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("mapBufferRange").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_mapBufferRange)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("flushMappedBufferRange").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_flushMappedBufferRange)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindVertexArray").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindVertexArray)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("genVertexArrays").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_genVertexArrays)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isVertexArray").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isVertexArray)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getActiveUniformsiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniformsiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getActiveUniformName").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniformName)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getUniformBlockIndex").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getUniformBlockIndex)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getActiveUniformBlockiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniformBlockiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getActiveUniformBlockName").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getActiveUniformBlockName)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformBlockBinding").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformBlockBinding)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("copyBufferSubData").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_copyBufferSubData)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawElementsBaseVertex").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawElementsBaseVertex)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawRangeElementsBaseVertex").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawRangeElementsBaseVertex)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawElementsInstancedBaseVertex").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawElementsInstancedBaseVertex)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("provokingVertex").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_provokingVertex)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texImage2DMultisample").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texImage2DMultisample)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("texImage3DMultisample").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_texImage3DMultisample)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getMultisamplefv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getMultisamplefv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("sampleMaski").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_sampleMaski)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindFragDataLocationIndexed").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindFragDataLocationIndexed)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getFragDataIndex").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getFragDataIndex)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("genSamplers").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_genSamplers)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isSampler").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isSampler)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindSampler").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindSampler)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("samplerParameteri").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameteri)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("samplerParameteriv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameteriv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("samplerParameterf").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameterf)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("samplerParameterfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameterfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("samplerParameterIiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameterIiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("samplerParameterIuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_samplerParameterIuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getSamplerParameteriv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getSamplerParameteriv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getSamplerParameterIiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getSamplerParameterIiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getSamplerParameterfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getSamplerParameterfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getSamplerParameterIuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getSamplerParameterIuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("queryCounter").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_queryCounter)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getQueryObjecti64v").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getQueryObjecti64v)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getQueryObjectui64v").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getQueryObjectui64v)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribP1ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP1ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribP1uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP1uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribP2ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP2ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribP2uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP2uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribP3ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP3ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribP3uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP3uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribP4ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP4ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribP4uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribP4uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawArraysIndirect").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawArraysIndirect)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawElementsIndirect").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawElementsIndirect)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform1d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform1d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform2d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform2d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform3d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform3d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform4d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform4d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform1dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform1dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniform4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniform4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix2x3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2x3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix2x4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix2x4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix3x2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3x2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix3x4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix3x4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix4x2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4x2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformMatrix4x3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformMatrix4x3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getUniformdv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getUniformdv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getSubroutineUniformLocation").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getSubroutineUniformLocation)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getSubroutineIndex").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getSubroutineIndex)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getActiveSubroutineUniformiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getActiveSubroutineUniformiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getActiveSubroutineUniformName").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getActiveSubroutineUniformName)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getActiveSubroutineName").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getActiveSubroutineName)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("uniformSubroutinesuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_uniformSubroutinesuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getUniformSubroutineuiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getUniformSubroutineuiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getProgramStageiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getProgramStageiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("patchParameteri").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_patchParameteri)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("patchParameterfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_patchParameterfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindTransformFeedback").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindTransformFeedback)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("genTransformFeedbacks").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_genTransformFeedbacks)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isTransformFeedback").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isTransformFeedback)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("pauseTransformFeedback").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_pauseTransformFeedback)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("resumeTransformFeedback").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_resumeTransformFeedback)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawTransformFeedback").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawTransformFeedback)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("drawTransformFeedbackStream").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_drawTransformFeedbackStream)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("beginQueryIndexed").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_beginQueryIndexed)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("endQueryIndexed").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_endQueryIndexed)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getQueryIndexediv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getQueryIndexediv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("releaseShaderCompiler").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_releaseShaderCompiler)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("shaderBinary").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_shaderBinary)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getShaderPrecisionFormat").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getShaderPrecisionFormat)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("depthRangef").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_depthRangef)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("clearDepthf").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_clearDepthf)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getProgramBinary").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getProgramBinary)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programBinary").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programBinary)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programParameteri").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programParameteri)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("useProgramStages").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_useProgramStages)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("activeShaderProgram").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_activeShaderProgram)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("bindProgramPipeline").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_bindProgramPipeline)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("genProgramPipelines").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_genProgramPipelines)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("isProgramPipeline").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_isProgramPipeline)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getProgramPipelineiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getProgramPipelineiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform1i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform1iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform1f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform1fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform1d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform1dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform1ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform1uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform1uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform2i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform2iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform2f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform2fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform2d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform2ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform2uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform2uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform3i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform3iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform3f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform3fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform3d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform3ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform3uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform3uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform4i").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4i)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform4iv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4iv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform4f").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4f)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform4fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform4d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform4ui").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4ui)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniform4uiv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniform4uiv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix2fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix3fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix4fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix2x3fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x3fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix3x2fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x2fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix2x4fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x4fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix4x2fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x2fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix3x4fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x4fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix4x3fv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x3fv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix2x3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix3x2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix2x4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix2x4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix4x2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix3x4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix3x4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("programUniformMatrix4x3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_programUniformMatrix4x3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("validateProgramPipeline").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_validateProgramPipeline)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getProgramPipelineInfoLog").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getProgramPipelineInfoLog)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribL1d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL1d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribL2d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL2d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribL3d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL3d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribL4d").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL4d)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribL1dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL1dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribL2dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL2dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribL3dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL3dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribL4dv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribL4dv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("vertexAttribLPointer").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_vertexAttribLPointer)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getVertexAttribLdv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getVertexAttribLdv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("viewportArrayv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_viewportArrayv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("viewportIndexedf").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_viewportIndexedf)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("viewportIndexedfv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_viewportIndexedfv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("scissorArrayv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_scissorArrayv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("scissorIndexed").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_scissorIndexed)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("scissorIndexedv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_scissorIndexedv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("depthRangeArrayv").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_depthRangeArrayv)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("depthRangeIndexed").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_depthRangeIndexed)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getFloati_v").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getFloati_v)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("getDoublei_v").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_getDoublei_v)).ToLocalChecked());
+    Nan::Set(exports, Nan::New<v8::String>("shaderSource").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(EXPORT_shaderSource)).ToLocalChecked());
 }
 
 
 void gl3BindInit(v8::Handle<v8::Object> exports) {
     Nan::HandleScope scope;
-    v8::Handle<v8::ObjectTemplate> GL3 = Nan::New<v8::ObjectTemplate>();
-    GL3->SetInternalFieldCount(1);
+    v8::Handle<v8::Object> GL3 = Nan::New<v8::Object>();
     defineConstants(GL3);
     defineFunctions(GL3);
     defineObjects(GL3);
-    Nan::Set(exports, Nan::New<v8::String>("GL3").ToLocalChecked(), GL3->NewInstance());
+    Nan::Set(exports, Nan::New<v8::String>("GL3").ToLocalChecked(), GL3);
 }

@@ -20,7 +20,7 @@ function RunAllofwApp(info) {
         var networking = new allofwutils.Networking(config, "renderer");
         var nav = new allofwutils.WindowNavigation(window, omni);
 
-        var app = { GL: GL, window: window, omni: omni, config: config, networking: networking };
+        var app = { GL: GL, window: window, navigation: nav, omni: omni, config: config, networking: networking };
         var renderer = new app_module.renderer(app);
 
         // Main rendering code.

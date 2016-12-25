@@ -33,6 +33,9 @@ class ConstPointerType:
     def convert_to_js_variable(self, c, js):
         return []
 
+    def dts_type(self):
+        return "Buffer | string | number | number[]"
+
     def pointer(self):
         raise Exception("Invalid")
 
@@ -67,6 +70,9 @@ class PointerType:
             "if({c}_nonconst) delete [] {c}_nonconst;"
         ]))
 
+    def dts_type(self):
+        return "Buffer | string | number | number[]"
+
     def convert_to_js_variable(self, c, js):
         return ["v8::Handle<v8::Value> %s = Nan::NewBuffer((char*)%s, 0, do_nothing_release_callback, NULL).ToLocalChecked();" % (js, c)]
 
@@ -94,6 +100,9 @@ class Type:
 
     def release_c_variable(self, name):
         return []
+
+    def dts_type(self):
+        return "number"
 
     def pointer(self):
         return PointerType(self.name)
@@ -166,6 +175,9 @@ class UStringType:
             "}"
         ]
 
+    def dts_type(self):
+        return "string"
+
     def pointer(self):
         raise Exception("Invalid")
 
@@ -184,6 +196,9 @@ class CStringType:
 
     def convert_to_js_variable(self, c, js):
         return ["v8::Handle<v8::Value> %s = Nan::New<v8::String>((const char*)%s, strlen((const char*)%s)).ToLocalChecked();" % (js, c, c)]
+
+    def dts_type(self):
+        return "string"
 
     def pointer(self):
         raise Exception("Invalid")
@@ -215,6 +230,9 @@ class ClassTypeOutputArray:
     def convert_to_js_variable(self, c, js):
         return []
 
+    def dts_type(self):
+        return "number[]"
+
 class ClassTypeInputArray:
     def __init__(self, classtype):
         self.classtype = classtype
@@ -238,6 +256,9 @@ class ClassTypeInputArray:
 
     def convert_to_js_variable(self, c, js):
         return []
+
+    def dts_type(self):
+        return "number[]"
 
 class ClassType:
     def __init__(self, name, release_line, construct_line = "%s = 0;"):
@@ -267,7 +288,7 @@ class ClassType:
         c = """
         class NODE_{{classname}} : public Nan::ObjectWrap {
         public:
-            static void Init(v8::Handle<v8::ObjectTemplate> exports);
+            static void Init(v8::Handle<v8::Object> exports);
             GLuint gl_handle;
 
             static v8::Handle<v8::Value> fromGLHandle(GLuint handle) {
@@ -292,7 +313,7 @@ class ClassType:
 
         Nan::Persistent<v8::Function> NODE_{{classname}}::constructor;
 
-        void NODE_{{classname}}::Init(v8::Handle<v8::ObjectTemplate> exports) {
+        void NODE_{{classname}}::Init(v8::Handle<v8::Object> exports) {
             v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
             tpl->SetClassName(Nan::New<v8::String>("{{classname}}").ToLocalChecked());
             tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -307,7 +328,7 @@ class ClassType:
             constructor.Reset(tpl->GetFunction());
 
             // Export constructor.
-            Nan::SetTemplate(exports, "{{classname}}", Nan::GetFunction(tpl).ToLocalChecked());
+            Nan::Set(exports, Nan::New<v8::String>("{{classname}}").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
         }
 
         NAN_METHOD(NODE_{{classname}}::New) {
@@ -364,6 +385,9 @@ class ClassType:
 
     def const_pointer(self):
         return ClassTypeInputArray(self)
+
+    def dts_type(self):
+        return self.name
 
 types["W_String"] = CStringType()
 types["W_UString"] = UStringType()
