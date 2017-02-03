@@ -16,7 +16,7 @@
 #include <SkSurface.h>
 #include <SkPath.h>
 #include <SkMallocPixelRef.h>
-#include <SkForceLinking.h>
+#include <SkImageEncoder.h>
 #include <SkColorFilter.h>
 #include <SkColorMatrixFilter.h>
 #include <vector>
@@ -148,19 +148,19 @@ namespace {
         virtual void setColorMatrix(double matrix[20]) {
             SkScalar m[20];
             for(int i = 0; i < 20; i++) m[i] = matrix[i];
-            paint.setColorFilter(SkColorMatrixFilter::Create(m));
+            paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(m));
         }
 
         virtual void setColorMatrixScaleAlpha(double a) {
             SkColorMatrix matrix;
             matrix.setScale(1, 1, 1, a);
-            paint.setColorFilter(SkColorMatrixFilter::Create(matrix));
+            paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix.fMat));
         }
 
         virtual void setColorMatrixScale(double r, double g, double b, double a) {
             SkColorMatrix matrix;
             matrix.setScale(r, g, b, a);
-            paint.setColorFilter(SkColorMatrixFilter::Create(matrix));
+            paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix.fMat));
         }
 
         virtual void setTransferMode(TransferMode mode) {
@@ -246,12 +246,11 @@ namespace {
                     throw invalid_argument("fontstyle");
                 } break;
             }
-            SkTypeface* typeface = SkTypeface::CreateFromName(name, sty);
+            auto typeface = SkTypeface::MakeFromName(name, SkFontStyle::FromOldStyle(sty));
             if(!typeface) {
-                typeface = SkTypeface::CreateFromName(NULL, sty);
+                typeface = SkTypeface::MakeFromName(NULL, SkFontStyle::FromOldStyle(sty));
             }
             paint.setTypeface(typeface);
-            typeface->unref();
         }
 
         virtual Paint2D* clone() {
@@ -283,7 +282,6 @@ namespace {
         }
 
         ByteStream* stream;
-
     };
 
     class Surface2D_Impl : public Surface2D {
@@ -358,10 +356,8 @@ namespace {
         }
 
         virtual void save(ByteStream* stream) {
-            SkData* data = SkImageEncoder::EncodeData(bitmap, SkImageEncoder::kPNG_Type, SkImageEncoder::kDefaultQuality);
-            if(data) {
-                stream->write(data->bytes(), data->size());
-                data->unref();
+            ByteStreamWrapper wrapper(stream);
+            if(SkEncodeImage(&wrapper, bitmap, SkEncodedImageFormat::kPNG, 80)) {
             } else {
                 cout << bitmap.width() << ", " << bitmap.height() << ", " << bitmap.rowBytes() << endl;
                 cout << "Warning: unable to save." << endl;
@@ -385,7 +381,7 @@ namespace {
             // Seems the NewRaster will call SkMallocPixelRef::NewAllocate, which only accepts kN32_SkColorType,
             // so we need to ensure that kRGBA_8888_SkColorType == kN32_SkColorType.
             SkImageInfo info = SkImageInfo::Make(width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
-            surface = SkSurface::NewRaster(info);
+            surface = SkSurface::MakeRaster(info);
             if(!surface) {
                 throw invalid_argument("cannot create 2D surface.");
             }
@@ -402,9 +398,11 @@ namespace {
         }
 
         virtual const void* pixels() const {
-            SkImageInfo info;
-            size_t row_bytes;
-            return surface->peekPixels(&info, &row_bytes);
+            SkPixmap pixmap;
+            surface->peekPixels(&pixmap);
+            // SkImageInfo info;
+            // size_t row_bytes;
+            return pixmap.addr(0, 0);
         }
 
         virtual void bindTexture(unsigned int unit) {
@@ -416,9 +414,7 @@ namespace {
         }
 
         virtual void uploadTexture() {
-            SkImageInfo info;
-            size_t row_bytes;
-            unsigned char* bmp = (unsigned char*)surface->peekPixels(&info, &row_bytes);
+            unsigned char* bmp = (unsigned char*)pixels();
             if(!bmp) {
                 return;
             }
@@ -444,25 +440,20 @@ namespace {
         }
 
         virtual void save(ByteStream* stream) {
-            SkImage* img = surface->newImageSnapshot();
+            sk_sp<SkImage> img = surface->makeImageSnapshot();
             if(!img) return;
-            SkData* data = img->encode(SkImageEncoder::kPNG_Type, 0);
+            SkData* data = img->encode(SkEncodedImageFormat::kPNG, 0);
             if(!data) {
-                img->unref();
                 return;
             }
             stream->write(data->bytes(), data->size());
             data->unref();
-            img->unref();
         }
 
         virtual ~Surface2D_Surface() {
-            if(surface) {
-                surface->unref();
-            }
         }
 
-        SkSurface* surface;
+        sk_sp<SkSurface> surface;
         GLuint texture;
     };
 
@@ -471,7 +462,7 @@ namespace {
 
         Surface2D_PDF(int width_, int height_) {
             pdf_width = width_; pdf_height = height_;
-            document = SkDocument::CreatePDF(&datastream);
+            document = SkDocument::MakePDF(&datastream);
         }
 
         // Width, height, stride.
@@ -502,16 +493,14 @@ namespace {
         virtual void save(ByteStream* stream) {
             document->endPage();
             document->close();
-            SkData* data = datastream.copyToData();
-            stream->write(data->bytes(), data->size());
-            data->unref();
+            ByteStreamWrapper wrapper(stream);
+            datastream.writeToStream(&wrapper);
         }
 
         virtual ~Surface2D_PDF() {
-            document->unref();
         }
 
-        SkDocument* document;
+        sk_sp<SkDocument> document;
         SkDynamicMemoryWStream datastream;
         int pdf_width, pdf_height;
 
@@ -526,7 +515,6 @@ namespace {
         // Initialize with a canvas pointer, add a reference to it.
         GraphicalContext2D_Impl(SkCanvas* canvas_ptr_)
           : canvas_ptr(canvas_ptr_), canvas(*canvas_ptr) {
-            canvas.ref();
         }
         // Create a new path.
         virtual Path2D* path() {
@@ -655,7 +643,7 @@ namespace {
 
         // Destructor, unref the canvas.
         virtual ~GraphicalContext2D_Impl() {
-            canvas.unref();
+            delete canvas_ptr;
         }
 
         SkCanvas* canvas_ptr;
@@ -666,7 +654,6 @@ namespace {
     class GraphicalBackend_Skia_Impl : public GraphicalBackend {
     public:
         GraphicalBackend_Skia_Impl() {
-            SkForceLinking(false);
             SkGraphics::Init();
         }
         ~GraphicalBackend_Skia_Impl() {
@@ -720,13 +707,11 @@ namespace {
         }
 
         virtual Surface2D* createSurface2DFromImage(const void* data, size_t length) {
-            Surface2D_Bitmap* surface = new Surface2D_Bitmap();
-            if(SkImageDecoder::DecodeMemory(data, length, &surface->bitmap, kRGBA_8888_SkColorType, SkImageDecoder::kDecodePixels_Mode)) {
-                return surface;
-            } else {
-                delete surface;
-                throw invalid_argument("failed to decode image.");
-            }
+
+            auto image = SkImage::MakeFromEncoded(SkData::MakeWithoutCopy(data, length));
+            Surface2D_Bitmap* surface = new Surface2D_Bitmap(image->width(), image->height());
+            image->readPixels(surface->bitmap.info(), surface->bitmap.getPixels(), surface->bitmap.rowBytes(), 0, 0);
+            return surface;
         }
 
         virtual VideoSurface2D* createVideoSurface2DFromStream(ByteStream* stream) {

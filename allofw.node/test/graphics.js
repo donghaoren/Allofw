@@ -22,9 +22,10 @@ render(context);
 var request = require('request');
 request({ url: 'http://www.baidu.com/img/bdlogo.png', encoding: null }, function(error, response, body) {
     var img = new graphics.Surface2D(body);
+    console.log(img.width(), img.height());
     context.drawSurface(img, 100, 0, 1000, 1000, 100, 100, 500, 500, context.paint());
     s.save("body.png");
 });
 
-context = null;
-s = null;
+// context = null;
+// s = null;
