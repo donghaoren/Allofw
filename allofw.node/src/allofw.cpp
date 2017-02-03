@@ -27,14 +27,14 @@ NAN_MODULE_INIT(NODE_init) {
     Nan::Set(target, Nan::New<String>("kFatal").ToLocalChecked(), Nan::New<Uint32>(allofw::Logger::kFatal));
     Nan::Set(target, Nan::New<String>("log").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(NODE_log)).ToLocalChecked());
 
-    NODE_SharedMemory::Init(target);
+    // NODE_SharedMemory::Init(target);
     NODE_OpenGL_Init(target);
 
     NODE_OmniStereo_init(target);
 
-    Local<Object> graphics = Nan::New<Object>();
-    NODE_Graphics_init(graphics);
-    Nan::Set(target, Nan::New<String>("graphics").ToLocalChecked(), graphics);
+    // Local<Object> graphics = Nan::New<Object>();
+    // NODE_Graphics_init(graphics);
+    // Nan::Set(target, Nan::New<String>("graphics").ToLocalChecked(), graphics);
 }
 
 NODE_MODULE(allofw, NODE_init);

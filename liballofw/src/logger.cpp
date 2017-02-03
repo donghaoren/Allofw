@@ -1,5 +1,5 @@
 #include "allofw/logger.h"
-#include <pthread.h>
+//#include <pthread.h>
 #include <thread>
 #include <string>
 #include <deque>
@@ -11,6 +11,91 @@
 
 ALLOFW_NS_BEGIN
 
+#ifdef _WIN32
+struct ScopedLogger::Details {
+};
+
+ScopedLogger::ScopedLogger() {
+}
+void ScopedLogger::setLevelFilter(int minimum_level) {
+}
+void ScopedLogger::pushScope(const char* prefix) {
+}
+void ScopedLogger::popScope() {
+}
+void ScopedLogger::print(int level, const char* string) {
+	loggerOutput(level, "");
+}
+void ScopedLogger::printf(int level, const char* fmt, ...) {
+	char buf[1024];
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(buf, 1024, fmt, args);
+	print(level, buf);
+}
+void ScopedLogger::vprintf(int level, const char* fmt, va_list args) {
+	char buf[1024];
+	vsnprintf(buf, 1024, fmt, args);
+	print(level, buf);
+}
+
+ScopedLogger::~ScopedLogger() {
+}
+
+
+
+class LoggerImplStderr : public ScopedLogger {
+protected:
+	virtual void loggerOutput(int level, const char* s) override {
+		std::fputs(s, stderr);
+		std::fputc('\n', stderr);
+	}
+};
+
+ScopedLogger* globalLogger = new LoggerImplStderr();
+
+class LoggerFactoryStderr : public LoggerFactory {
+public:
+
+	LoggerFactoryStderr() {
+	}
+
+	virtual Logger* getThreadLogger() override {
+		return globalLogger;
+	}
+
+	virtual void setThreadLogger(Logger* logger) override {
+	}
+};
+
+LoggerFactory* default_logger_factory = new LoggerFactoryStderr();
+
+LoggerFactory* LoggerFactory::Default() {
+	return default_logger_factory;
+}
+void LoggerFactory::SetDefault(LoggerFactory* factory) {
+	default_logger_factory = factory;
+}
+
+LoggerScope::LoggerScope(int level, const char* header, const char* prefix, Logger* logger)
+	: logger_(logger), level_(level) {
+	if (header) logger_->print(level, header);
+	logger_->pushScope(prefix);
+}
+
+void LoggerScope::print(const char* string) {
+	logger_->print(level_, string);
+}
+void LoggerScope::printf(const char* fmt, ...) {
+	va_list args;
+	va_start(args, fmt);
+	logger_->vprintf(level_, fmt, args);
+}
+
+LoggerScope::~LoggerScope() {
+	logger_->popScope();
+}
+#else
 struct ScopedLogger::Details {
     std::deque<std::string> prefix_stack;
     int minimum_level;
@@ -173,5 +258,6 @@ void LoggerScope::printf(const char* fmt, ...) {
 LoggerScope::~LoggerScope() {
     logger_->popScope();
 }
+#endif
 
 ALLOFW_NS_END

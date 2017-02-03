@@ -1,6 +1,6 @@
 // Text rendering engine.
 var graphics = require("allofw").graphics;
-
+if(!graphics) graphics = {};
 // Create a text cache of given width and height.
 var TextCache = function(width, height) {
     if(width === undefined) width = 1024;

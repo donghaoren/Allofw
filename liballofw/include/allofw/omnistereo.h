@@ -7,6 +7,9 @@
 #include "math/math.h"
 #include "opengl.h"
 
+#undef near
+#undef far
+
 namespace allofw {
 
     //! OpenGL texture ID.
