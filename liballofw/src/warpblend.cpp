@@ -157,7 +157,7 @@ public:
             vp.blend.size.h = blend_image_height;
             vp.blend.data = new Vector4f[vp.blend.size.w * vp.blend.size.h];
             for(int y = 0; y < vp.blend.size.h; y++) {
-                unsigned char* scanline = &blend_image[y * vp.blend.size.w * 4];
+                unsigned char* scanline = &blend_image[(vp.blend.size.h - 1 - y) * vp.blend.size.w * 4];
                 Vector4f* out = vp.blend.data + y * vp.blend.size.w;
                 for(int x = 0; x < vp.blend.size.w; x++) {
                     float value = scanline[x * 4 + 0] / 255.0;

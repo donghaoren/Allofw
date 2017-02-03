@@ -9,18 +9,26 @@ var Networking = function(config, role) {
         sub.connect(config.broadcasting.renderer.sub);
         sub.subscribe("");
         sub.on("message", function(msg) {
-            var obj = JSON.parse(msg);
-            self.raise.apply(this, [ obj[0] ].concat(obj[1]));
+            try {
+                var obj = JSON.parse(msg);
+                self.raise.apply(this, [ obj[0] ].concat(obj[1]));
+            } catch(e) {
+                console.log(e.stack);
+            }
         });
         console.log("Renderer: Listening on " + config.broadcasting.renderer.sub);
     }
-    if(role == "controller") {
+    if(role == "simulator") {
         var pub = require("zmq").socket("pub");
-        pub.bind(config.broadcasting.controller.pub);
-        console.log("Controller: Braodcasting on " + config.broadcasting.controller.pub);
+        pub.bind(config.broadcasting.simulator.pub);
+        console.log("Controller: Braodcasting on " + config.broadcasting.simulator.pub);
         this.broadcast = function(path) {
-            var obj = [ path, Array.prototype.slice.call(arguments, 1) ];
-            pub.send(JSON.stringify(obj));
+            try {
+                var obj = [ path, Array.prototype.slice.call(arguments, 1) ];
+                pub.send(JSON.stringify(obj));
+            } catch(e) {
+                console.log(e.stack);
+            }
         };
     }
 };
@@ -35,6 +43,12 @@ function HTTPServer(config) {
     var app = express();
     var http = require('http').Server(app);
     var io = require('socket.io')(http);
+
+    app.use(function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
 
     app.use(express.static(config.http.static));
 
@@ -63,6 +77,8 @@ function HTTPServer(config) {
             }
         });
     });
+
+    this.app = app;
 
     this.current_message_queue = [];
     setInterval(function() {

@@ -6,7 +6,7 @@ functions_definitions = []
 function_codes = []
 
 def DefineConstant(name, c_name, value, type = "Uint32"):
-    constant_lines.append("""Nan::SetTemplate(exports, Nan::New<v8::String>("%s").ToLocalChecked(), Nan::New<v8::%s>(%s), v8::ReadOnly);""" % (name, type, c_name))
+    constant_lines.append("""Nan::Set(exports, Nan::New<v8::String>("%s").ToLocalChecked(), Nan::New<v8::%s>(%s));""" % (name, type, c_name))
     if value == None: print name
     if type == "Uint32" and value > 0xffffffff:
         print name
@@ -14,26 +14,26 @@ def DefineConstant(name, c_name, value, type = "Uint32"):
 
 def DefineFunction(name, code):
     c_name = "EXPORT_%s" % name
-    functions_definitions.append("""Nan::SetTemplate(exports, "%s", Nan::New<v8::FunctionTemplate>(%s));""" % (name, c_name))
+    functions_definitions.append("""Nan::Set(exports, Nan::New<v8::String>("%s").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(%s)).ToLocalChecked());""" % (name, c_name))
     function_codes.append("""NAN_METHOD(%s) {\n%s\n}""" % (c_name, code))
 
 def indent(strings, spaces):
     return map(lambda x: spaces + x, strings)
 
 code_define_constants = """
-void defineConstants(v8::Handle<v8::ObjectTemplate> exports) {
+void defineConstants(v8::Handle<v8::Object> exports) {
 %s
 }
 """
 
 code_define_functions = """
-void defineFunctions(v8::Handle<v8::ObjectTemplate> exports) {
+void defineFunctions(v8::Handle<v8::Object> exports) {
 %s
 }
 """
 
 code_define_objects = """
-void defineObjects(v8::Handle<v8::ObjectTemplate> exports) {
+void defineObjects(v8::Handle<v8::Object> exports) {
 %s
 }
 """
@@ -63,12 +63,11 @@ void* glbind_get_buffer_data(v8::Handle<v8::Value> value) {
 code_glbind_init = """
 void gl3BindInit(v8::Handle<v8::Object> exports) {
     Nan::HandleScope scope;
-    v8::Handle<v8::ObjectTemplate> GL3 = Nan::New<v8::ObjectTemplate>();
-    GL3->SetInternalFieldCount(1);
+    v8::Handle<v8::Object> GL3 = Nan::New<v8::Object>();
     defineConstants(GL3);
     defineFunctions(GL3);
     defineObjects(GL3);
-    Nan::Set(exports, Nan::New<v8::String>("GL3").ToLocalChecked(), GL3->NewInstance());
+    Nan::Set(exports, Nan::New<v8::String>("GL3").ToLocalChecked(), GL3);
 }
 """
 

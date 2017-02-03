@@ -1,0 +1,19 @@
+{
+  "name": "allofw.node",
+  "version": "1.0.0",
+  "description": "Node bindings to liballofw, with OpenGL 3 bindings",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "author": "",
+  "license": "ISC",
+  "gypfile": true,
+  "devDependencies": {
+    "nan": "^2.4.0"
+  }
+}

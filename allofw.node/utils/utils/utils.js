@@ -4,7 +4,7 @@
     allofwutils.utils = utils;
 
     import "events.js";
-    import "shaders.js";
+    import "opengl.js";
     import "config.js";
 
 })();
