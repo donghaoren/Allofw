@@ -32,9 +32,9 @@ NAN_MODULE_INIT(NODE_init) {
 
     NODE_OmniStereo_init(target);
 
-    // Local<Object> graphics = Nan::New<Object>();
-    // NODE_Graphics_init(graphics);
-    // Nan::Set(target, Nan::New<String>("graphics").ToLocalChecked(), graphics);
+    Local<Object> graphics = Nan::New<Object>();
+    NODE_Graphics_init(graphics);
+    Nan::Set(target, Nan::New<String>("graphics").ToLocalChecked(), graphics);
 }
 
 NODE_MODULE(allofw, NODE_init);

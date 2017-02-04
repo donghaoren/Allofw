@@ -380,7 +380,7 @@ namespace {
         Surface2D_Surface(int width, int height) {
             // Seems the NewRaster will call SkMallocPixelRef::NewAllocate, which only accepts kN32_SkColorType,
             // so we need to ensure that kRGBA_8888_SkColorType == kN32_SkColorType.
-            SkImageInfo info = SkImageInfo::Make(width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+            SkImageInfo info = SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType);
             surface = SkSurface::MakeRaster(info);
             if(!surface) {
                 throw invalid_argument("cannot create 2D surface.");
@@ -514,7 +514,7 @@ namespace {
         }
         // Initialize with a canvas pointer, add a reference to it.
         GraphicalContext2D_Impl(SkCanvas* canvas_ptr_)
-          : canvas_ptr(canvas_ptr_), canvas(*canvas_ptr) {
+          : canvas_ptr(0), canvas(*canvas_ptr) {
         }
         // Create a new path.
         virtual Path2D* path() {
@@ -643,7 +643,9 @@ namespace {
 
         // Destructor, unref the canvas.
         virtual ~GraphicalContext2D_Impl() {
-            delete canvas_ptr;
+			if(canvas_ptr) {
+				delete canvas_ptr;
+			}
         }
 
         SkCanvas* canvas_ptr;
@@ -662,7 +664,7 @@ namespace {
 
         // Create new 2D surface.
         virtual Surface2D* createSurface2D(int width, int height) {
-            //return new Surface2D_Surface(width, height);
+            // return new Surface2D_Surface(width, height);
             return new Surface2D_Bitmap(width, height);
         }
 
