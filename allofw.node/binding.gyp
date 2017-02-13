@@ -9,8 +9,8 @@
       ],
       "libraries": [
         "glu32.lib", "opengl32.lib",
-        "../../liballofw/build2/lib/Release/allofw.lib",
-        "../../liballofw/build2/lib/Release/allofw-graphics.lib",
+        "../../liballofw/build/lib/Release/allofw.lib",
+        "../../liballofw/build/lib/Release/allofw-graphics.lib",
         "../../liballofw/dependencies/windows-binaries/glew-2.0.0/lib/Release/x64/glew32.lib",
       ],
       "cflags!": [ "-fno-exceptions", "-fno-rtti" ],

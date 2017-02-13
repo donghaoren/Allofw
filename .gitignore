@@ -1,1 +1,4 @@
-standalone/
+node_modules/
+build/
+win32_x64/
+allofw-openvr.node/openvr
