@@ -24,7 +24,7 @@ void ScopedLogger::pushScope(const char* prefix) {
 void ScopedLogger::popScope() {
 }
 void ScopedLogger::print(int level, const char* string) {
-	loggerOutput(level, "");
+	loggerOutput(level, string);
 }
 void ScopedLogger::printf(int level, const char* fmt, ...) {
 	char buf[1024];
