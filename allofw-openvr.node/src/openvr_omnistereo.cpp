@@ -249,19 +249,21 @@ public:
 		Quaternion rotation;
 		Vector3 position;
 
-		position.x = pose_matrix_HMD_.a14;
-		position.y = pose_matrix_HMD_.a24;
-		position.z = pose_matrix_HMD_.a34;
+		position.x = pose_matrix_HMD_noninverse_.a14;
+		position.y = pose_matrix_HMD_noninverse_.a24;
+		position.z = pose_matrix_HMD_noninverse_.a34;
 
-		rotation.w = sqrt(max(0.0, 1.0 + pose_matrix_HMD_.a11 + pose_matrix_HMD_.a22 + pose_matrix_HMD_.a33 )) / 2.0;
-		rotation.x = sqrt(max(0.0, 1.0 + pose_matrix_HMD_.a11 - pose_matrix_HMD_.a22 - pose_matrix_HMD_.a33 )) / 2.0;
-		rotation.y = sqrt(max(0.0, 1.0 - pose_matrix_HMD_.a11 + pose_matrix_HMD_.a22 - pose_matrix_HMD_.a33 )) / 2.0;
-		rotation.z = sqrt(max(0.0, 1.0 - pose_matrix_HMD_.a11 - pose_matrix_HMD_.a22 + pose_matrix_HMD_.a33 )) / 2.0;
-		rotation.x = copysign(rotation.x, pose_matrix_HMD_.a32 - pose_matrix_HMD_.a23);
-		rotation.y = copysign(rotation.y, pose_matrix_HMD_.a13 - pose_matrix_HMD_.a31);
-		rotation.z = copysign(rotation.z, pose_matrix_HMD_.a21 - pose_matrix_HMD_.a12);
-
-		return Pose(position, rotation);
+		rotation.w = std::sqrt(std::max(0.0, 1.0 + pose_matrix_HMD_noninverse_.a11 + pose_matrix_HMD_noninverse_.a22 + pose_matrix_HMD_noninverse_.a33 )) / 2.0;
+		rotation.x = std::sqrt(std::max(0.0, 1.0 + pose_matrix_HMD_noninverse_.a11 - pose_matrix_HMD_noninverse_.a22 - pose_matrix_HMD_noninverse_.a33 )) / 2.0;
+		rotation.y = std::sqrt(std::max(0.0, 1.0 - pose_matrix_HMD_noninverse_.a11 + pose_matrix_HMD_noninverse_.a22 - pose_matrix_HMD_noninverse_.a33 )) / 2.0;
+		rotation.z = std::sqrt(std::max(0.0, 1.0 - pose_matrix_HMD_noninverse_.a11 - pose_matrix_HMD_noninverse_.a22 + pose_matrix_HMD_noninverse_.a33 )) / 2.0;
+		rotation.x = std::copysign(rotation.x, pose_matrix_HMD_noninverse_.a32 - pose_matrix_HMD_noninverse_.a23);
+		rotation.y = std::copysign(rotation.y, pose_matrix_HMD_noninverse_.a13 - pose_matrix_HMD_noninverse_.a31);
+		rotation.z = std::copysign(rotation.z, pose_matrix_HMD_noninverse_.a21 - pose_matrix_HMD_noninverse_.a12);
+		Pose r;
+		r.position = position;
+		r.rotation = rotation;
+		return r;
 	}
 
     // Set the delegate.
@@ -398,7 +400,8 @@ private:
 			if(tracked_device_poses_[nDevice].bPoseIsValid) {
 				switch (vr_system_->GetTrackedDeviceClass(nDevice)) {
 					case vr::TrackedDeviceClass_HMD: {
-						pose_matrix_HMD_ = convertSteamVRMatrixToMatrix4(tracked_device_poses_[nDevice].mDeviceToAbsoluteTracking).inversion();
+						pose_matrix_HMD_noninverse_ = convertSteamVRMatrixToMatrix4(tracked_device_poses_[nDevice].mDeviceToAbsoluteTracking);
+						pose_matrix_HMD_ = pose_matrix_HMD_noninverse_.inversion();
 					} break;
 				}
 			}
@@ -449,19 +452,23 @@ private:
 	uint32_t render_buffer_width_, render_buffer_height_;
 	FrameBufferInfo leftEye_, rightEye_;
 
-	Matrix4f pose_matrix_HMD_;
+	Matrix4f pose_matrix_HMD_, pose_matrix_HMD_noninverse_;
 	Matrix4f projection_left_eye_, projection_right_eye_;
 	Matrix4f pose_left_eye_, pose_right_eye_;
 
 	vr::TrackedDevicePose_t tracked_device_poses_[vr::k_unMaxTrackedDeviceCount];
 };
 
-OmniStereo* CreateOpenVROmniStereo() {
+OpenVROmniStereo* CreateOpenVROmniStereo() {
     return new OpenVROmniStereoImpl();
 }
 
-void DestroyOpenVROmniStereo(OmniStereo* omnistereo) {
+void DestroyOpenVROmniStereo(OpenVROmniStereo* omnistereo) {
     delete dynamic_cast<OpenVROmniStereoImpl*>(omnistereo);
+}
+
+OpenVROmniStereo::~OpenVROmniStereo() {
+
 }
 
 ALLOFW_NS_END

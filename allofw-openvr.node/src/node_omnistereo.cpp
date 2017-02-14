@@ -1,5 +1,4 @@
 #include "node_omnistereo.h"
-#include "openvr_omnistereo.h"
 
 using namespace v8;
 using namespace allofw;

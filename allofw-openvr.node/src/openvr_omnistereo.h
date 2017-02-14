@@ -11,7 +11,7 @@ protected:
     virtual ~OpenVROmniStereo();
 };
 
-OmniStereo* CreateOpenVROmniStereo();
-void DestroyOpenVROmniStereo(OmniStereo* omnistereo);
+OpenVROmniStereo* CreateOpenVROmniStereo();
+void DestroyOpenVROmniStereo(OpenVROmniStereo* omnistereo);
 
 ALLOFW_NS_END
