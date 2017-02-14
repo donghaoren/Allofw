@@ -30,6 +30,7 @@ public:
 
         Nan::SetPrototypeMethod(tpl, "makeContextCurrent", NODE_makeContextCurrent);
         Nan::SetPrototypeMethod(tpl, "swapBuffers", NODE_swapBuffers);
+        Nan::SetPrototypeMethod(tpl, "setSwapInterval", NODE_setSwapInterval);
         Nan::SetPrototypeMethod(tpl, "pollEvents", NODE_pollEvents);
         Nan::SetPrototypeMethod(tpl, "waitEvents", NODE_waitEvents);
         Nan::SetPrototypeMethod(tpl, "getFramebufferSize", NODE_getFramebufferSize);
@@ -139,6 +140,7 @@ private:
 
     static NAN_METHOD(NODE_makeContextCurrent);
     static NAN_METHOD(NODE_swapBuffers);
+	static NAN_METHOD(NODE_setSwapInterval);
     static NAN_METHOD(NODE_pollEvents);
     static NAN_METHOD(NODE_waitEvents);
     static NAN_METHOD(NODE_getFramebufferSize);
@@ -272,6 +274,11 @@ NAN_METHOD(NODE_OpenGLWindow::NODE_swapBuffers) {
     Nan::HandleScope scope;
     NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
     obj->window->swapBuffers();
+}
+NAN_METHOD(NODE_OpenGLWindow::NODE_setSwapInterval) {
+    Nan::HandleScope scope;
+    NODE_OpenGLWindow* obj = node::ObjectWrap::Unwrap<NODE_OpenGLWindow>(info.This());
+    obj->window->setSwapInterval(info[0]->IntegerValue());
 }
 NAN_METHOD(NODE_OpenGLWindow::NODE_pollEvents) {
     Nan::HandleScope scope;

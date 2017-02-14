@@ -58,13 +58,9 @@ Run the following in command line:
 
     cd allofw.node
 
-    npm install nan
-    # node-gyp might be in <NODE_INSTALLATION_PATH>\node_modules\npm\bin\node-gyp-bin\node-gyp
-    node-gyp configure
-
 Build the bindings:
 
-    node-gyp build
+    npm install
 
 You'll get `allofw.node` under `build\Release`.
 
@@ -80,11 +76,9 @@ Run the following in command line:
     # Download OpenVR source
     git clone https://github.com/ValveSoftware/openvr.git
 
-    node-gyp configure
-
 Build the bindings:
 
-    node-gyp build
+    npm install
 
 You'll get `allofw_openvr.node` under `build\Release`.
 

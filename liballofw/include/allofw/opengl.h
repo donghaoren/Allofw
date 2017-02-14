@@ -59,6 +59,9 @@ namespace allofw {
         // Swap buffers.
         virtual void swapBuffers() = 0;
 
+        // Set swap interval.
+        virtual void setSwapInterval(int interval) = 0;
+
         // Process all pending events.
         virtual void pollEvents() = 0;
 

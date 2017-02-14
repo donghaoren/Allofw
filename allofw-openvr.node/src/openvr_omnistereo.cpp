@@ -72,155 +72,6 @@ vec4 omni_render(vec3 v) {
 // END OmniStereo Shader Code.
 )================";
 
-const char* gShader_composite_vertex =
-R"================(#version 330
-uniform vec2 positionScalers = vec2(1, 1);
-
-layout(location = 0) in vec2 position;
-
-out vec2 vp_coordinates;
-
-void main() {
-    vp_coordinates = position;
-    gl_Position = vec4(positionScalers * (position * 2.0 - 1.0), 0.0, 1.0);
-}
-)================";
-
-// General composite part.
-const char* gShader_composite_include =
-R"================(
-uniform sampler2D texWarp;
-uniform sampler2D texBlend;
-uniform sampler2D texBack;
-uniform sampler2D texFront;
-uniform sampler2D texPanorama;
-uniform samplerCube texPanoramaCubemap;
-uniform samplerCube texPanoramaCubemap_p1;
-uniform samplerCube texPanoramaCubemap_p2;
-uniform samplerCube texPanoramaCubemap_p3;
-uniform int drawMask = 0;
-uniform vec4 panoramaRotation = vec4(0, 0, 0, 1);
-
-// These constants must be the same as in the header.
-const int kCompositeMask_Scene                     = 1 << 0;
-const int kCompositeMask_Back                      = 1 << 1;
-const int kCompositeMask_Front                     = 1 << 2;
-const int kCompositeMask_Panorama                  = 1 << 3;
-const int kCompositeMask_Panorama_Equirectangular  = 1 << 4;
-const int kCompositeMask_Panorama_Cubemap          = 1 << 5;
-const int kCompositeMask_Panorama_Cubemap_YUV420P  = 1 << 6;
-
-const float PI = 3.14159265358979323846264;
-
-in vec2 vp_coordinates;
-layout(location = 0) out vec4 fragment_output;
-
-vec3 omni_quat_rotate(vec4 q, vec3 v) {
-    float d = dot(q.xyz, v);
-    vec3 c = cross(q.xyz, v);
-    return q.w * q.w * v + (q.w + q.w) * c + d * q.xyz - cross(c, q.xyz);
-}
-
-vec3 omni_quat_inverse_rotate(vec4 q, vec3 v) {
-    float d = dot(q.xyz, v);
-    vec3 c = cross(q.xyz, v);
-    return q.w * q.w * v - (q.w + q.w) * c + d * q.xyz - cross(c, q.xyz);
-}
-
-vec4 omni_blend_pm(vec4 src, vec4 dest) {
-    return src + dest * (1.0 - src.a);
-}
-
-vec3 warp, blend;
-
-void omni_composite_init() {
-    warp = texture(texWarp, vp_coordinates).xyz;
-    blend = texture(texBlend, vp_coordinates).rgb;
-}
-
-void omni_composite_final(vec4 result) {
-    fragment_output = vec4(result.rgb * blend, 1.0);
-}
-
-vec4 omni_composite_panorama() {
-    if((drawMask & kCompositeMask_Panorama_Equirectangular) != 0) {
-        vec3 panov = omni_quat_rotate(panoramaRotation, warp);
-        float theta = atan(-panov.x, panov.z);
-        float phi = atan(panov.y, length(panov.xz));
-        vec4 panorama_color = texture(texPanorama, vec2((theta / PI + 1.0) / 2, -phi / PI + 0.5));
-        return panorama_color;
-    }
-    if((drawMask & kCompositeMask_Panorama_Cubemap) != 0) {
-        vec3 panov = omni_quat_rotate(panoramaRotation, warp);
-        vec4 panorama_color = texture(texPanoramaCubemap, panov);
-        return panorama_color;
-    }
-    if((drawMask & kCompositeMask_Panorama_Cubemap_YUV420P) != 0) {
-        vec3 panov = omni_quat_rotate(panoramaRotation, warp);
-        float y = texture(texPanoramaCubemap_p1, panov).r;
-        float u = texture(texPanoramaCubemap_p2, panov).r;
-        float v = texture(texPanoramaCubemap_p3, panov).r;
-        vec4 panorama_color = vec4(
-            1.164 * (y - 16.0/255.0)                             + 2.018 * (v - 128.0/255.0),
-            1.164 * (y - 16.0/255.0) - 0.813 * (u - 128.0/255.0) - 0.391 * (v - 128.0/255.0),
-            1.164 * (y - 16.0/255.0) + 1.596 * (u - 128.0/255.0),
-            1.0
-        );
-        return panorama_color;
-    }
-    return vec4(0, 0, 0, 0);
-}
-
-)================";
-// For cubemap mode.
-const char* gShader_composite_cubemap_include =
-R"================(
-uniform samplerCube texCubemap;
-
-vec4 omni_composite_scene() {
-    // Read color from cubemap.
-    vec4 scene_color = texture(texCubemap, warp);
-    return scene_color;
-}
-)================";
-
-// For per projection mode.
-const char* gShader_composite_perprojection_include =
-R"================(
-uniform sampler2D texPerProjection;
-uniform vec4 viewportRotation;
-uniform float tanFovDiv2;
-
-vec4 omni_composite_scene() {
-    // Read color from per projection map.
-    vec3 p_coord = omni_quat_rotate(viewportRotation, warp);
-    p_coord.xy /= -p_coord.z;
-    p_coord.xy /= tanFovDiv2;
-    vec4 scene_color = texture(texPerProjection, p_coord.xy / 2.0 + 0.5);
-    return scene_color;
-}
-)================";
-
-const char* gShader_composite_generic =
-R"================(
-void main() {
-    omni_composite_init();
-
-    vec4 final_color = vec4(0, 0, 0, 0);
-
-    if((drawMask & kCompositeMask_Panorama) != 0) {
-        vec4 color = omni_composite_panorama();
-        final_color = omni_blend_pm(color, final_color);
-    }
-
-    if((drawMask & kCompositeMask_Scene) != 0) {
-        vec4 color = omni_composite_scene();
-        final_color = omni_blend_pm(color, final_color);
-    }
-
-    omni_composite_final(final_color);
-}
-)================";
 
 const Quaternion kVPRotation_Positive_X = Quaternion::Rotation(Vector3(0, 0, 1), PI) * Quaternion::Rotation(Vector3(0, 1, 0), +PI / 2);
 const Quaternion kVPRotation_Negative_X = Quaternion::Rotation(Vector3(0, 0, 1), PI) * Quaternion::Rotation(Vector3(0, 1, 0), -PI / 2);
@@ -274,6 +125,7 @@ public:
 
 		logger.printf("Setup cameras");
 		setupCameras();
+		setupFullscreenQuads();
     }
 
     // Set cubemap resolution, allocate the cubemap.
@@ -331,9 +183,20 @@ public:
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glDisable(GL_MULTISAMPLE);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, leftEye_.frameBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, leftEye_.resolveFrameBuffer);
+		glBlitFramebuffer(0, 0, render_buffer_width_, render_buffer_height_, 0, 0, render_buffer_width_, render_buffer_height_, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, rightEye_.frameBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightEye_.resolveFrameBuffer);
+		glBlitFramebuffer(0, 0, render_buffer_width_, render_buffer_height_, 0, 0, render_buffer_width_, render_buffer_height_, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
 
     virtual void composite(const Rectangle2i& viewport, const CompositeInfo& info) override {
+		renderAuxWindow(viewport);
 		submitFrame();
     }
 
@@ -443,24 +306,71 @@ private:
 	}
 
     void submitFrame() {
-		glDisable(GL_MULTISAMPLE);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, leftEye_.frameBuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, leftEye_.resolveFrameBuffer);
-		glBlitFramebuffer(0, 0, render_buffer_width_, render_buffer_height_, 0, 0, render_buffer_width_, render_buffer_height_, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, rightEye_.frameBuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightEye_.resolveFrameBuffer);
-		glBlitFramebuffer(0, 0, render_buffer_width_, render_buffer_height_, 0, 0, render_buffer_width_, render_buffer_height_, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
 		vr::Texture_t leftEyeTexture = { (void*)(uintptr_t)leftEye_.resolveTexture, vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit(vr::Eye_Left, &leftEyeTexture );
 
 		vr::Texture_t rightEyeTexture = { (void*)(uintptr_t)rightEye_.resolveTexture, vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit(vr::Eye_Right, &rightEyeTexture );
     }
+
+	GLuint quadProgramArray_, quadProgramArrayBuffer_;
+	GLuint quadProgram_;
+
+	void setupFullscreenQuads() {
+		float vertices[] = {
+			0, 0, 0, 1, 1, 0, 1, 1
+		};
+		glGenVertexArrays(1, &quadProgramArray_);
+		glGenBuffers(1, &quadProgramArrayBuffer_);
+
+		glBindBuffer(GL_ARRAY_BUFFER, quadProgramArrayBuffer_);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glBindVertexArray(quadProgramArray_);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8, 0);
+		glBindVertexArray(0);
+
+		quadProgram_ = allofw::glutils::compileShaderProgram(R"================(
+		#version 330
+		layout(location = 0) in vec2 position;
+		out vec2 texCoord;
+		void main() {
+			gl_Position = vec4(position * 2.0 - vec2(1.0, 1.0), 0.0, 1.0);
+			texCoord = position;
+		}
+		)================", R"================(
+		#version 330
+		layout(location = 0) out vec4 frag_color;
+		in vec2 texCoord;
+		uniform sampler2D inputTexture;
+		void main() {
+			frag_color = texture(inputTexture, texCoord);
+		}
+		)================");
+
+		glProgramUniform1d(quadProgram_, glGetUniformLocation(quadProgram_, "inputTexture"), 0);
+	}
+
+	void renderAuxWindow(const Rectangle2i& viewport) {
+		glDisable(GL_DEPTH_TEST);
+		
+		glUseProgram(quadProgram_);
+		glBindVertexArray(quadProgramArray_);
+
+		glBindTexture(GL_TEXTURE_2D, leftEye_.resolveTexture);
+		glViewport(viewport.x, viewport.y, viewport.w / 2, viewport.h);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		glBindTexture(GL_TEXTURE_2D, rightEye_.resolveTexture);
+		glViewport(viewport.x + viewport.w / 2, viewport.y, viewport.w / 2, viewport.h);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindVertexArray(0);
+		glUseProgram(0);
+		glEnable(GL_DEPTH_TEST);
+	}
 
 	void updateHMDPose() {
 		vr::VRCompositor()->WaitGetPoses(tracked_device_poses_, vr::k_unMaxTrackedDeviceCount, NULL, 0);
