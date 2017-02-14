@@ -5190,7 +5190,7 @@ NAN_METHOD(EXPORT_getDoublev) {
 }
 NAN_METHOD(EXPORT_getError) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d3878>
+    // <gltypes.Type instance at 0x1019b30e0>
     GLenum result;
     result = glGetError();
     v8::Handle<v8::Value> result_js = Nan::New<v8::Uint32>(result);
@@ -5248,7 +5248,7 @@ NAN_METHOD(EXPORT_getIntegerv) {
 }
 NAN_METHOD(EXPORT_getString) {
     Nan::HandleScope scope;
-    // <gltypes.UStringType instance at 0x1073d3d40>
+    // <gltypes.UStringType instance at 0x1019b35a8>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     const GLubyte* result;
@@ -5406,7 +5406,7 @@ NAN_METHOD(EXPORT_getTexLevelParameteriv) {
 }
 NAN_METHOD(EXPORT_isEnabled) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLboolean result;
@@ -5676,7 +5676,7 @@ NAN_METHOD(EXPORT_genTextures) {
 }
 NAN_METHOD(EXPORT_isTexture) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -6269,7 +6269,7 @@ NAN_METHOD(EXPORT_genQueries) {
 }
 NAN_METHOD(EXPORT_isQuery) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -6423,7 +6423,7 @@ NAN_METHOD(EXPORT_genBuffers) {
 }
 NAN_METHOD(EXPORT_isBuffer) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -6524,7 +6524,7 @@ NAN_METHOD(EXPORT_getBufferSubData) {
 }
 NAN_METHOD(EXPORT_mapBuffer) {
     Nan::HandleScope scope;
-    // <gltypes.PointerType instance at 0x107505830>
+    // <gltypes.PointerType instance at 0x101ac4998>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLenum arg1;
@@ -6536,7 +6536,7 @@ NAN_METHOD(EXPORT_mapBuffer) {
 }
 NAN_METHOD(EXPORT_unmapBuffer) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLboolean result;
@@ -6693,7 +6693,7 @@ NAN_METHOD(EXPORT_compileShader) {
 }
 NAN_METHOD(EXPORT_createProgram) {
     Nan::HandleScope scope;
-    // <gltypes.ClassType instance at 0x1073d3e60>
+    // <gltypes.ClassType instance at 0x1019b36c8>
     GLuint result;
     result = glCreateProgram();
     v8::Handle<v8::Value> result_js = NODE_Program::fromGLHandle(result);
@@ -6701,7 +6701,7 @@ NAN_METHOD(EXPORT_createProgram) {
 }
 NAN_METHOD(EXPORT_createShader) {
     Nan::HandleScope scope;
-    // <gltypes.ClassType instance at 0x1073d3ea8>
+    // <gltypes.ClassType instance at 0x1019b3710>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLuint result;
@@ -6951,7 +6951,7 @@ NAN_METHOD(EXPORT_getAttachedShaders) {
 }
 NAN_METHOD(EXPORT_getAttribLocation) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d3908>
+    // <gltypes.Type instance at 0x1019b3170>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -7174,7 +7174,7 @@ NAN_METHOD(EXPORT_getShaderSource) {
 }
 NAN_METHOD(EXPORT_getUniformLocation) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d3908>
+    // <gltypes.Type instance at 0x1019b3170>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -7334,7 +7334,7 @@ NAN_METHOD(EXPORT_getVertexAttribiv) {
 }
 NAN_METHOD(EXPORT_isProgram) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -7348,7 +7348,7 @@ NAN_METHOD(EXPORT_isProgram) {
 }
 NAN_METHOD(EXPORT_isShader) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -8849,7 +8849,7 @@ NAN_METHOD(EXPORT_disablei) {
 }
 NAN_METHOD(EXPORT_isEnabledi) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLuint arg1;
@@ -9546,7 +9546,7 @@ NAN_METHOD(EXPORT_bindFragDataLocation) {
 }
 NAN_METHOD(EXPORT_getFragDataLocation) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d3908>
+    // <gltypes.Type instance at 0x1019b3170>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -9926,7 +9926,7 @@ NAN_METHOD(EXPORT_clearBufferfi) {
 }
 NAN_METHOD(EXPORT_getStringi) {
     Nan::HandleScope scope;
-    // <gltypes.UStringType instance at 0x1073d3d40>
+    // <gltypes.UStringType instance at 0x1019b35a8>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLuint arg1;
@@ -10152,7 +10152,7 @@ NAN_METHOD(EXPORT_blendFuncSeparatei) {
 }
 NAN_METHOD(EXPORT_isRenderbuffer) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -10236,7 +10236,7 @@ NAN_METHOD(EXPORT_getRenderbufferParameteriv) {
 }
 NAN_METHOD(EXPORT_isFramebuffer) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -10279,7 +10279,7 @@ NAN_METHOD(EXPORT_genFramebuffers) {
 }
 NAN_METHOD(EXPORT_checkFramebufferStatus) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d3878>
+    // <gltypes.Type instance at 0x1019b30e0>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLenum result;
@@ -10468,7 +10468,7 @@ NAN_METHOD(EXPORT_framebufferTextureLayer) {
 }
 NAN_METHOD(EXPORT_mapBufferRange) {
     Nan::HandleScope scope;
-    // <gltypes.PointerType instance at 0x107505a70>
+    // <gltypes.PointerType instance at 0x101ac4e18>
     GLenum arg0;
     arg0 = info[0]->Uint32Value();
     GLintptr arg1;
@@ -10523,7 +10523,7 @@ NAN_METHOD(EXPORT_genVertexArrays) {
 }
 NAN_METHOD(EXPORT_isVertexArray) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -10637,7 +10637,7 @@ NAN_METHOD(EXPORT_getActiveUniformName) {
 }
 NAN_METHOD(EXPORT_getUniformBlockIndex) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d3a28>
+    // <gltypes.Type instance at 0x1019b3290>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -10998,7 +10998,7 @@ NAN_METHOD(EXPORT_bindFragDataLocationIndexed) {
 }
 NAN_METHOD(EXPORT_getFragDataIndex) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d3908>
+    // <gltypes.Type instance at 0x1019b3170>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -11044,7 +11044,7 @@ NAN_METHOD(EXPORT_genSamplers) {
 }
 NAN_METHOD(EXPORT_isSampler) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -12088,7 +12088,7 @@ NAN_METHOD(EXPORT_getUniformdv) {
 }
 NAN_METHOD(EXPORT_getSubroutineUniformLocation) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d3908>
+    // <gltypes.Type instance at 0x1019b3170>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -12121,7 +12121,7 @@ NAN_METHOD(EXPORT_getSubroutineUniformLocation) {
 }
 NAN_METHOD(EXPORT_getSubroutineIndex) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d3a28>
+    // <gltypes.Type instance at 0x1019b3290>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -12444,7 +12444,7 @@ NAN_METHOD(EXPORT_genTransformFeedbacks) {
 }
 NAN_METHOD(EXPORT_isTransformFeedback) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();
@@ -12829,7 +12829,7 @@ NAN_METHOD(EXPORT_genProgramPipelines) {
 }
 NAN_METHOD(EXPORT_isProgramPipeline) {
     Nan::HandleScope scope;
-    // <gltypes.Type instance at 0x1073d37a0>
+    // <gltypes.Type instance at 0x10199ffc8>
     GLuint arg0;
     if(info[0]->IsNumber()) {
         arg0 = info[0]->IntegerValue();

@@ -113,5 +113,44 @@ with open("glbind.cpp", "wb") as f:
     f.write(code.encode("utf-8"))
 
 code_dts = DTSGenerateCode()
+code_dts = """
+export type GLPointerType = number | number[] | string | ArrayBuffer;
+export class Shader {
+    public id(): number;
+}
+export class Program {
+    public id(): number;
+}
+export class Texture {
+    public id(): number;
+}
+export class Query {
+    public id(): number;
+}
+export class Renderbuffer {
+    public id(): number;
+}
+export class Framebuffer {
+    public id(): number;
+}
+export class VertexArray {
+    constructor();
+}
+export class Buffer {
+    constructor();
+}
+export class Sampler {
+    public id(): number;
+}
+export class TransformFeedback {
+    public id(): number;
+}
+export class ProgramPipeline {
+    public id(): number;
+}
+
+// Specially defined functions.
+export function shaderSource(shader: Shader, source: string[]): void;
+""".strip() + "\n" + code_dts
 with open("glbind.d.ts", "wb") as f:
     f.write(code_dts.encode("utf-8"))

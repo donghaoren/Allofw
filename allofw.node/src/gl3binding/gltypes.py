@@ -34,7 +34,7 @@ class ConstPointerType:
         return []
 
     def dts_type(self):
-        return "Buffer | string | number | number[]"
+        return "GLPointerType"
 
     def pointer(self):
         raise Exception("Invalid")
@@ -71,7 +71,7 @@ class PointerType:
         ]))
 
     def dts_type(self):
-        return "Buffer | string | number | number[]"
+        return "GLPointerType"
 
     def convert_to_js_variable(self, c, js):
         return ["v8::Handle<v8::Value> %s = Nan::NewBuffer((char*)%s, 0, do_nothing_release_callback, NULL).ToLocalChecked();" % (js, c)]
@@ -387,7 +387,7 @@ class ClassType:
         return ClassTypeInputArray(self)
 
     def dts_type(self):
-        return self.name
+        return self.name + " | number"
 
 types["W_String"] = CStringType()
 types["W_UString"] = UStringType()
