@@ -24,6 +24,7 @@ void NODE_OpenVROmniStereo::Init(v8::Handle<v8::Object> exports) {
     Nan::SetPrototypeMethod(tpl, "compositeCustomizeShader", NODE_compositeCustomizeShader);
     Nan::SetPrototypeMethod(tpl, "compositeRestoreShader", NODE_compositeRestoreShader);
     Nan::SetPrototypeMethod(tpl, "onCaptureViewport", NODE_onCaptureViewport);
+    Nan::SetPrototypeMethod(tpl, "getHeadPose", NODE_getHeadPose);
 
     constructor.Reset(tpl->GetFunction());
 
@@ -179,6 +180,21 @@ NAN_METHOD(NODE_OpenVROmniStereo::NODE_onCaptureViewport) {
     NODE_OpenVROmniStereo* self = ObjectWrap::Unwrap<NODE_OpenVROmniStereo>(info.This());
     self->onCaptureViewport_callback.Reset(info[0].As<Function>());
 }
+
+NAN_METHOD(NODE_OpenVROmniStereo::NODE_getHeadPose) {
+    NODE_OpenVROmniStereo* self = ObjectWrap::Unwrap<NODE_OpenVROmniStereo>(info.This());
+    Pose pose = self->omnistereo->getHeadPose();
+    Local<Array> array = Nan::New<Array>(7);
+    array->Set(0, Nan::New<Number>(pose.position.x));
+    array->Set(1, Nan::New<Number>(pose.position.y));
+    array->Set(2, Nan::New<Number>(pose.position.z));
+    array->Set(3, Nan::New<Number>(pose.rotation.x));
+    array->Set(4, Nan::New<Number>(pose.rotation.y));
+    array->Set(5, Nan::New<Number>(pose.rotation.z));
+    array->Set(6, Nan::New<Number>(pose.rotation.w));
+    info.GetReturnValue().Set(array);
+}
+
 
 void NODE_OpenVROmniStereo::onCaptureViewport(const CaptureInfo& info) {
     current_capture_info = &info;

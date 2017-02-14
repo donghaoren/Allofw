@@ -14,6 +14,7 @@
 #include <allofw/utils.h>
 #include <openvr.h>
 #include <string>
+#include <cmath>
 #include <vector>
 
 ALLOFW_NS_BEGIN
@@ -91,7 +92,7 @@ struct FrameBufferInfo {
 
 }
 
-class OpenVROmniStereoImpl : public OmniStereo {
+class OpenVROmniStereoImpl : public OpenVROmniStereo {
 public:
     OpenVROmniStereoImpl() {
         LoggerScope logger(Logger::kInfo, "OpenVROmniStereo::Initialization");
@@ -101,7 +102,7 @@ public:
         vr::EVRInitError error;
 
 		vr_system_ = vr::VR_Init(&error, vr::VRApplication_Scene);
-		
+
 		if(error != vr::VRInitError_None) {
 			throw exception("could not init openvr runtime");
 		}
@@ -166,7 +167,7 @@ public:
 		glBindFramebuffer(GL_FRAMEBUFFER, leftEye_.frameBuffer);
 		glViewport(0, 0, render_buffer_width_, render_buffer_height_);
 
-		
+
 		info.eye_separation = 0.065;
 		info.omnistereo = this;
 		info.pose = pose_;
@@ -243,6 +244,25 @@ public:
 			glProgramUniform4f(program, l, info.pose.rotation.x, info.pose.rotation.y, info.pose.rotation.z, info.pose.rotation.w);
 		}
     }
+
+	virtual Pose getHeadPose() {
+		Quaternion rotation;
+		Vector3 position;
+
+		position.x = pose_matrix_HMD_.a14;
+		position.y = pose_matrix_HMD_.a24;
+		position.z = pose_matrix_HMD_.a34;
+
+		rotation.w = sqrt(max(0.0, 1.0 + pose_matrix_HMD_.a11 + pose_matrix_HMD_.a22 + pose_matrix_HMD_.a33 )) / 2.0;
+		rotation.x = sqrt(max(0.0, 1.0 + pose_matrix_HMD_.a11 - pose_matrix_HMD_.a22 - pose_matrix_HMD_.a33 )) / 2.0;
+		rotation.y = sqrt(max(0.0, 1.0 - pose_matrix_HMD_.a11 + pose_matrix_HMD_.a22 - pose_matrix_HMD_.a33 )) / 2.0;
+		rotation.z = sqrt(max(0.0, 1.0 - pose_matrix_HMD_.a11 - pose_matrix_HMD_.a22 + pose_matrix_HMD_.a33 )) / 2.0;
+		rotation.x = copysign(rotation.x, pose_matrix_HMD_.a32 - pose_matrix_HMD_.a23);
+		rotation.y = copysign(rotation.y, pose_matrix_HMD_.a13 - pose_matrix_HMD_.a31);
+		rotation.z = copysign(rotation.z, pose_matrix_HMD_.a21 - pose_matrix_HMD_.a12);
+
+		return Pose(position, rotation);
+	}
 
     // Set the delegate.
     virtual void setDelegate(Delegate* delegate) override {
@@ -354,7 +374,7 @@ private:
 
 	void renderAuxWindow(const Rectangle2i& viewport) {
 		glDisable(GL_DEPTH_TEST);
-		
+
 		glUseProgram(quadProgram_);
 		glBindVertexArray(quadProgramArray_);
 

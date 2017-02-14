@@ -2,14 +2,14 @@
 #include <v8.h>
 #include <nan.h>
 
-#include <allofw/omnistereo.h>
+#include "openvr_omnistereo.h"
 
 class NODE_OpenVROmniStereo : public Nan::ObjectWrap, public allofw::OmniStereo::Delegate {
 public:
 
     static void Init(v8::Handle<v8::Object> exports);
 
-    allofw::OmniStereo* omnistereo;
+    allofw::OpenVROmniStereo* omnistereo;
     Nan::Persistent<v8::Function> onCaptureViewport_callback;
 
 private:
@@ -43,6 +43,8 @@ private:
     // onCaptureViewport(callback)
     //   callback(info)
     static NAN_METHOD(NODE_onCaptureViewport);
+
+    static NAN_METHOD(NODE_getHeadPose);
 
     static Nan::Persistent<v8::Function> constructor;
 
