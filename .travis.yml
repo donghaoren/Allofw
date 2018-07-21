@@ -1,5 +1,6 @@
+language: c++
 before_install:
-    - sudo apt-get update -q
+    - sudo apt -y update
     - sudo apt -y install ffmpeg cmake libglew-dev 
     - sudo apt -y install libboost-all-dev
 
