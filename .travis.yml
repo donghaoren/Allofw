@@ -1,0 +1,5 @@
+before_install:
+    - apt -y install ffmpeg cmake
+    - apt -y install libboost-all-dev
+
+script: build-travis.sh
