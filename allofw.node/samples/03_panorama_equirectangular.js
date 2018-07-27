@@ -1,5 +1,5 @@
 var allofw = require("allofw");
-var allofwutils = require("allofwutils");
+var allofwutils = require("allofw-utils");
 
 var GL = allofw.GL3;
 

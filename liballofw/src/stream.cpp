@@ -20,8 +20,23 @@ namespace {
     class FileStream : public ByteStream {
     public:
         FileStream(const std::string& path, const std::string& mode) {
-            fp = fopen(path.c_str(), mode.c_str());
-            //if(!fp) throw invalid_argument("couldn't open file");
+            #ifdef _WIN32
+            // For windows, we should not let it write BOM before the file.
+            if(mode == "r") {
+                fp = fopen(path.c_str(), "rb, ccs=utf-8");
+            } else if(mode == "w") {
+                fp = fopen(path.c_str(), "wb, ccs=utf-8");
+            } else if(mode == "a") {
+                fp = fopen(path.c_str(), "wb+, ccs=utf-8");
+            }
+            #endif
+            if(mode == "r") {
+                fp = fopen(path.c_str(), "rb");
+            } else if(mode == "w") {
+                fp = fopen(path.c_str(), "wb");
+            } else if(mode == "a") {
+                fp = fopen(path.c_str(), "wb+");
+            }
             if(mode == "a" || mode == "w") writable = true;
             else writable = false;
         }

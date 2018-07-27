@@ -8,7 +8,12 @@
 #include <vector>
 #include <cmath>
 
+#ifdef _WIN32
+#include <winsock.h>
+#else
 #include <unistd.h>
+#endif
+
 
 ALLOFW_NS_BEGIN
 

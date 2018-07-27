@@ -14,7 +14,7 @@ SET ( Skia_LIBRARY_DIRS "${Skia_SOURCE_DIR}/out/Release" )
 
 # With skia branch: chrome/m50
 SET ( Skia_LIBRARIES
-  "${Skia_LIBRARY_DIRS}/libskia.so"
+  "${Skia_LIBRARY_DIRS}/skia.dll.lib"
 )
 
 # IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

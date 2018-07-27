@@ -9,6 +9,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef _WIN32
+#include <winsock.h>
+#endif
+
 ALLOFW_NS_BEGIN
 
 class ConfigurationImpl : public Configuration {

@@ -14,21 +14,21 @@ namespace allofw {
 
     using std::isnan;
 
-    //! Compute minimum.
-    template<typename number_t>
-    inline number_t min(number_t a, number_t b) { return a < b ? a : b; }
+    ////! Compute minimum.
+    //template<typename number_t>
+    // number_t min(number_t a, number_t b) { return a < b ? a : b; }
 
-    //! Compute maximum.
-    template<typename number_t>
-    inline number_t max(number_t a, number_t b) { return a > b ? a : b; }
+    ////! Compute maximum.
+    //template<typename number_t>
+    // number_t max(number_t a, number_t b) { return a > b ? a : b; }
 
-    //! Compute absolute value.
-    template<typename number_t>
-    inline number_t abs(number_t a) { return a > 0 ? a : -a; }
+    ////! Compute absolute value.
+    //template<typename number_t>
+    // number_t abs(number_t a) { return a > 0 ? a : -a; }
 
-    //! Compute sign of a number.
-    template<typename number_t>
-    inline number_t sign(number_t a) { return a > 0 ? 1 : (a < 0 ? -1 : 0); }
+    ////! Compute sign of a number.
+    //template<typename number_t>
+    // number_t sign(number_t a) { return a > 0 ? 1 : (a < 0 ? -1 : 0); }
 
 }
 

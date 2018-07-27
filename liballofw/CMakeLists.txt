@@ -20,7 +20,21 @@
   SET ( CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}" )
 
   # Show all warnings.
-  SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
+  # SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
+
+  # Windows specific options
+  ADD_DEFINITIONS( -DYAML_CPP_DLL )
+  SET ( GLEW_LIBRARY "../dependencies/windows-binaries/glew-2.0.0/lib/Release/x64/glew32" )
+  SET ( GLEW_INCLUDE_DIR "./dependencies/windows-binaries/glew-2.0.0/include" )
+  SET ( BUILD_SHARED_LIBS YES )
+  SET ( CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES )
+  SET ( FFMPEG_INCLUDE_DIR "./dependencies/windows-binaries/ffmpeg-3.2.2/include" )
+  SET ( FFMPEG_LDFLAGS
+    ../dependencies/windows-binaries/ffmpeg-3.2.2/lib/avutil
+    ../dependencies/windows-binaries/ffmpeg-3.2.2/lib/swscale
+    ../dependencies/windows-binaries/ffmpeg-3.2.2/lib/avcodec
+    ../dependencies/windows-binaries/ffmpeg-3.2.2/lib/avformat
+  )
 
 #----------------------------------------------------------------------------------------------------------------------
 # Main Definitions
@@ -43,14 +57,13 @@
     ADD_DEFINITIONS ( -DALLOFW_PLATFORM_MACOSX )
   ENDIF ( )
 
-  FIND_PACKAGE ( PkgConfig )
+  # FIND_PACKAGE ( PkgConfig )
 
 #----------------------------------------------------------------------------------------------------------------------
 # Dependencies
 
   INCLUDE_DIRECTORIES (
     BEFORE SYSTEM
-      ${Boost_INCLUDE_DIRS}
       ${OPENGL_INCLUDE_DIRS}
       dependencies/yaml-cpp/include
       dependencies/glfw/include
@@ -72,15 +85,21 @@
   FIND_PACKAGE ( Boost REQUIRED )
   FIND_PACKAGE ( OpenGL REQUIRED )
   FIND_PACKAGE ( GLEW REQUIRED )
+  find_Package(Threads)
 
   FILE ( GLOB YAML_CPP_SOURCES "dependencies/yaml-cpp/src/[a-zA-Z]*.cpp")
   ADD_LIBRARY ( yaml-cpp
     ${YAML_CPP_SOURCES}
   )
 
+  INCLUDE_DIRECTORIES (
+    ${GLEW_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
+  )
+
   IF ( ${WITH_SKIA} )
     FIND_PACKAGE ( Skia REQUIRED )
-    PKG_CHECK_MODULES ( FFMPEG REQUIRED libavcodec libavutil libavformat libswscale )
+    # PKG_CHECK_MODULES ( FFMPEG REQUIRED libavcodec libavutil libavformat libswscale )
     INCLUDE_DIRECTORIES (
       ${Skia_INCLUDE_DIRS}
       ${FFMPEG_INCLUDE_DIR}
@@ -118,7 +137,7 @@
       glfw
       lodepng
       yaml-cpp
-      pthread
+      ws2_32
   )
 
   IF ( ${WITH_SKIA} )

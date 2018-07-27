@@ -155,6 +155,10 @@ public:
         glfwSwapBuffers(window);
     }
 
+	virtual void setSwapInterval(int interval) {
+		glfwSwapInterval(interval);
+	}
+
     virtual void pollEvents() {
         glfwPollEvents();
     }
