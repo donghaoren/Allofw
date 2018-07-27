@@ -1,7 +1,16 @@
-language: c++
-before_install:
-    - sudo apt -y update
-    - sudo apt -y install ffmpeg cmake libglew-dev 
-    - sudo apt -y install libboost-all-dev
+os: osx
+osx_image: xcode9.4
 
-script: build-travis.sh
+language: c++
+
+sudo: required
+
+services:
+    - docker
+
+before_install: travis/before-install-osx.sh
+
+script: travis/build-osx.sh
+
+notifications:
+  email: false
