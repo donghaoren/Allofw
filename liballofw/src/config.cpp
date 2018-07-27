@@ -5,6 +5,10 @@
 #include <iostream>
 #include <string.h>
 
+#ifdef __APPLE__
+#include <unistd.h>
+#endif
+
 ALLOFW_NS_BEGIN
 
 class ConfigurationImpl : public Configuration {
