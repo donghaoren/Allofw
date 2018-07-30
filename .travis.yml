@@ -16,3 +16,12 @@ script:
 
 notifications:
   email: false
+
+deploy:
+    provider: releases
+    api_key:
+        secure: "AxfBvjMMUJBotT5M6yuc9eEKH6V10gPzkg5uxPQ2LuNKqGdkjqXC3nj6adcScW97/r0QKYq/d8F77Kt7cmwGdDN1Dfd6SMATfTirUJfCBcWF2S3gFE3+SArp//xkME8p9261XRzgUC7LwUU/9Noh/4xyEMtpOcttUhfye0FVoPJrYuk4FcfCUCh06Z2j9PIT0ieA7MFRYWaQNlgacse56IRD7B/bRf3OOE4UR4J5Us9aW6vXLioSWydfEbPqshjvb4IlDWxhacxeq8j+Avh3rukJiQ1oK3HUefcjSo+H30D3qhg/EYfL8aJ3+tVdDu7FY85GGyaBw/hhMmJd3oDeDG19pxgxVURjPnRf9xi5IjiZietSwoAFxIgzd9V/auHsyM/Mt47erxNTR+IBMBrWXrWJyltIRQb8XG0laY2oEvb/Kz3eQ7uAE4Jiq1r7/oTe8VmwiVQkXHU0g06M0S2VEWHhVEbwnB0Y5OjU2TXXlNNf289dkxkzLbfn5Ma90+yTlElarmLVGpa4sJ525W1rJ2MC6036QLJT99qTGX5k+wFXYTFazZNavII0+7106kuKY5pyQgbPW31w8m9aLfo74uDH64lx5C+PUo9i0JTnR61QBIdMnShjDlylM8yg7X6a+h9dAFTflxbgKGp16OCb4hw+/G4ZtnBtT2uzaTs9iVA="
+    file: standalone/Allofw
+    skip_cleanup: true
+    on:
+        tags: true
