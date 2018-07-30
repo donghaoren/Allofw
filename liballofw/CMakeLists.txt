@@ -22,6 +22,8 @@
   # Show all warnings.
   # SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
 
+
+  IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Win" )
   # Windows specific options
   ADD_DEFINITIONS( -DYAML_CPP_DLL )
   SET ( GLEW_LIBRARY "../dependencies/windows-binaries/glew-2.0.0/lib/Release/x64/glew32" )
@@ -35,6 +37,7 @@
     ../dependencies/windows-binaries/ffmpeg-3.2.2/lib/avcodec
     ../dependencies/windows-binaries/ffmpeg-3.2.2/lib/avformat
   )
+  ENDIF ( )
 
 #----------------------------------------------------------------------------------------------------------------------
 # Main Definitions
@@ -57,7 +60,7 @@
     ADD_DEFINITIONS ( -DALLOFW_PLATFORM_MACOSX )
   ENDIF ( )
 
-  # FIND_PACKAGE ( PkgConfig )
+  FIND_PACKAGE ( PkgConfig )
 
 #----------------------------------------------------------------------------------------------------------------------
 # Dependencies
@@ -85,7 +88,7 @@
   FIND_PACKAGE ( Boost REQUIRED )
   FIND_PACKAGE ( OpenGL REQUIRED )
   FIND_PACKAGE ( GLEW REQUIRED )
-  find_Package(Threads)
+  Find_Package(Threads)
 
   FILE ( GLOB YAML_CPP_SOURCES "dependencies/yaml-cpp/src/[a-zA-Z]*.cpp")
   ADD_LIBRARY ( yaml-cpp
@@ -99,7 +102,7 @@
 
   IF ( ${WITH_SKIA} )
     FIND_PACKAGE ( Skia REQUIRED )
-    # PKG_CHECK_MODULES ( FFMPEG REQUIRED libavcodec libavutil libavformat libswscale )
+    PKG_CHECK_MODULES ( FFMPEG REQUIRED libavcodec libavutil libavformat libswscale )
     INCLUDE_DIRECTORIES (
       ${Skia_INCLUDE_DIRS}
       ${FFMPEG_INCLUDE_DIR}
@@ -137,8 +140,16 @@
       glfw
       lodepng
       yaml-cpp
-      ws2_32
   )
+
+
+  IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Win" )
+  # Windows specific options
+    TARGET_LINK_LIBRARIES ( allofw
+      LINK_PRIVATE
+        ws2_32
+    )
+  ENDIF ( )
 
   IF ( ${WITH_SKIA} )
 

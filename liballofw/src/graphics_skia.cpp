@@ -6,7 +6,6 @@
 
 #include <SkStream.h>
 #include <SkData.h>
-#include <SkDevice.h>
 #include <SkDocument.h>
 #include <SkImage.h>
 #include <SkMatrix.h>
@@ -19,6 +18,9 @@
 #include <SkImageEncoder.h>
 #include <SkColorFilter.h>
 #include <SkColorMatrixFilter.h>
+#include <SkPaint.h>
+#include <SkCanvas.h>
+#include <SkPath.h>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -42,7 +44,7 @@ namespace {
         int g = c.g * 255; if(g < 0) g = 0; if(g > 255) g = 255;
         int b = c.b * 255; if(b < 0) b = 0; if(b > 255) b = 255;
         int a = c.a * 255; if(a < 0) a = 0; if(a > 255) a = 255;
-        return SkColorSetARGBMacro(a, r, g, b);
+        return SkColorSetARGB(a, r, g, b);
     }
 
     SkMatrix convert_matrix(const Matrix3d& mat) {
@@ -228,27 +230,29 @@ namespace {
         }
 
         virtual void setTypeface(const char* name, FontStyle style) {
-            SkTypeface::Style sty;
+            int weight = SkFontStyle::kNormal_Weight;
+            int width = SkFontStyle::kNormal_Width;
+            SkFontStyle::Slant slant = SkFontStyle::kUpright_Slant;
             switch(style) {
                 case FontStyle::NORMAL: {
-                    sty = SkTypeface::kNormal;
                 } break;
                 case FontStyle::ITALIC: {
-                    sty = SkTypeface::kItalic;
+                    slant = SkFontStyle::kItalic_Slant;
                 } break;
                 case FontStyle::BOLD: {
-                    sty = SkTypeface::kBold;
+                    weight = SkFontStyle::kBold_Weight;
                 } break;
                 case FontStyle::BOLDITALIC: {
-                    sty = SkTypeface::kBoldItalic;
+                    slant = SkFontStyle::kItalic_Slant;
+                    weight = SkFontStyle::kBold_Weight;
                 } break;
                 default: {
                     throw invalid_argument("fontstyle");
                 } break;
             }
-            auto typeface = SkTypeface::MakeFromName(name, SkFontStyle::FromOldStyle(sty));
+            auto typeface = SkTypeface::MakeFromName(name, SkFontStyle(weight, width, slant));
             if(!typeface) {
-                typeface = SkTypeface::MakeFromName(NULL, SkFontStyle::FromOldStyle(sty));
+                typeface = SkTypeface::MakeFromName(name, SkFontStyle(weight, width, slant));
             }
             paint.setTypeface(typeface);
         }
@@ -442,12 +446,11 @@ namespace {
         virtual void save(ByteStream* stream) {
             sk_sp<SkImage> img = surface->makeImageSnapshot();
             if(!img) return;
-            SkData* data = img->encode(SkEncodedImageFormat::kPNG, 0);
+            auto data = img->encodeToData(SkEncodedImageFormat::kPNG, 0);
             if(!data) {
                 return;
             }
             stream->write(data->bytes(), data->size());
-            data->unref();
         }
 
         virtual ~Surface2D_Surface() {
