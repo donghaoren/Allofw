@@ -1,4 +1,5 @@
 node_modules/
 build/
+liballofw/install/
 win32_x64/
 allofw-openvr.node/openvr

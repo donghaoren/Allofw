@@ -10,7 +10,9 @@ services:
 
 before_install: travis/before-install-osx.sh
 
-script: travis/build-osx.sh
+script:
+    - travis/build-osx.sh
+    - travis/build-osx-node.sh
 
 notifications:
   email: false

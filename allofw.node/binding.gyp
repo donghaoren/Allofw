@@ -3,15 +3,12 @@
     {
       "target_name": "allofw",
       "include_dirs": [
-        "../liballofw/include",
-        "../liballofw/dependencies/windows-binaries/glew-2.0.0/include",
+        "<!@(pkg-config liballofw --cflags-only-I | sed s/-I//g)",
         "<!(node -e \"require('nan')\")"
       ],
       "libraries": [
-        "glu32.lib", "opengl32.lib",
-        "../../liballofw/build/lib/Release/allofw.lib",
-        "../../liballofw/build/lib/Release/allofw-graphics.lib",
-        "../../liballofw/dependencies/windows-binaries/glew-2.0.0/lib/Release/x64/glew32.lib",
+        "<!@(pkg-config liballofw --libs)",
+        "<!@(pkg-config glew --libs)",
       ],
       "cflags!": [ "-fno-exceptions", "-fno-rtti" ],
       "cflags_cc!": [ "-fno-exceptions", "-fno-rtti" ],
@@ -29,9 +26,10 @@
       ],
       "sources": [
         "src/allofw.cpp",
+        "src/node_graphics.cpp",
+        "src/node_sharedmemory.cpp",
         "src/node_opengl.cpp",
         "src/node_omnistereo.cpp",
-        "src/node_graphics.cpp",
         "src/gl3binding/glbind.cpp"
       ]
     }

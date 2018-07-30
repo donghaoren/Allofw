@@ -10808,7 +10808,7 @@ NAN_METHOD(EXPORT_drawElementsBaseVertex) {
     }
     GLint arg4;
     arg4 = info[4]->Int32Value();
-    glDrawElementsBaseVertex(arg0, arg1, arg2, arg3, arg4);
+    glDrawElementsBaseVertex(arg0, arg1, arg2, (void*)arg3, arg4);
     if(arg3_nonconst) delete [] arg3_nonconst;
     return;
 }
@@ -10843,7 +10843,7 @@ NAN_METHOD(EXPORT_drawRangeElementsBaseVertex) {
     }
     GLint arg6;
     arg6 = info[6]->Int32Value();
-    glDrawRangeElementsBaseVertex(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+    glDrawRangeElementsBaseVertex(arg0, arg1, arg2, arg3, arg4, (void*)arg5, arg6);
     if(arg5_nonconst) delete [] arg5_nonconst;
     return;
 }
